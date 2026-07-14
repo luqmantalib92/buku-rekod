@@ -304,16 +304,14 @@ async function initStore(onReady) {
     }
 
     state.dataRef = state.db.collection("users").doc(user.uid).collection("garage").doc("main");
+    // Reveal as soon as auth resolves so a slow or blocked Firestore fetch
+    // can never leave the loading spinner stuck. Data renders when it lands.
+    revealShell(true, user.email || "Signed in");
     try {
       await loadRemoteData();
     } catch (error) {
-      // Don't leave the loading spinner stuck on a fetch failure — reveal the
-      // app with whatever we have (empty) so the user isn't blocked.
       console.error(error);
     }
-    // Reveal only after data is in, so content paints populated (no flash of
-    // the "add your first vehicle" empty state during the fetch).
-    revealShell(true, user.email || "Signed in");
     onReady();
   });
 }
