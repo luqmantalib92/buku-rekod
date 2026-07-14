@@ -21,9 +21,11 @@
     </div>
     <main class="app-shell" id="appContent" hidden>
       <section class="topbar" aria-label="Reminder settings">
-        <div>
-          <p class="eyebrow app-version"></p>
-          <h1>Service Log</h1>
+        <div class="topbar-title">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="./index.html" class="crumb">Garage</a>
+          </nav>
+          <h1>Reminder settings</h1>
         </div>
         <div class="topbar-actions">
           <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
@@ -38,22 +40,13 @@
             <p class="account-email" id="accountEmail">Local mode</p>
             <p class="account-status" id="accountStatus">Saved on this device</p>
             <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
+            <p class="account-version app-version"></p>
           </div>
         </div>
       </section>
 
-      <div class="detail-head">
-        <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
-      </div>
-
-      <section class="panel" aria-labelledby="remindersHeading">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Notifications</p>
-            <h2 id="remindersHeading">Reminder settings</h2>
-            <p class="panel-subtitle">How many days before a service's due date to start reminding you, per category.</p>
-          </div>
-        </div>
+      <section class="panel" aria-label="Reminder settings">
+        <p class="panel-subtitle panel-intro">How many days before a service's due date to start reminding you, per category.</p>
         <form id="settingsForm">
           <div id="settingsRows" class="settings-grid"></div>
           <div class="edit-actions">

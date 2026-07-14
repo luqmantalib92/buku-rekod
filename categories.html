@@ -21,9 +21,11 @@
     </div>
     <main class="app-shell" id="appContent" hidden>
       <section class="topbar" aria-label="Categories">
-        <div>
-          <p class="eyebrow app-version"></p>
-          <h1>Service Log</h1>
+        <div class="topbar-title">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="./index.html" class="crumb">Garage</a>
+          </nav>
+          <h1>Categories</h1>
         </div>
         <div class="topbar-actions">
           <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
@@ -38,26 +40,20 @@
             <p class="account-email" id="accountEmail">Local mode</p>
             <p class="account-status" id="accountStatus">Saved on this device</p>
             <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
+            <p class="account-version app-version"></p>
           </div>
         </div>
       </section>
 
-      <div class="detail-head">
-        <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
+      <div class="detail-head actions-only">
         <button type="button" id="resetCategories" class="ghost-action danger-action">Reset to defaults</button>
       </div>
 
-      <section class="panel" aria-labelledby="categoriesHeading">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Customize</p>
-            <h2 id="categoriesHeading">Service categories</h2>
-            <p class="panel-subtitle">
-              Rename categories and edit the items inside each. Existing records keep their
-              category; deleting a category shows its past records as "Other".
-            </p>
-          </div>
-        </div>
+      <section class="panel" aria-label="Service categories">
+        <p class="panel-subtitle panel-intro">
+          Rename categories and edit the items inside each. Existing records keep their
+          category; deleting a category shows its past records as "Other".
+        </p>
 
         <form id="categoryForm">
           <div id="categoryEditor" class="category-editor"></div>

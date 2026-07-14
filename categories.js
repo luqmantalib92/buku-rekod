@@ -7,7 +7,6 @@ const editorEls = {
   addCategory: document.querySelector("#addCategory"),
   reset: document.querySelector("#resetCategories"),
   saved: document.querySelector("#categoriesSaved"),
-  back: document.querySelector("#backToGarage"),
   cardTemplate: document.querySelector("#categoryEditorTemplate"),
   itemTemplate: document.querySelector("#categoryItemTemplate")
 };
@@ -108,18 +107,7 @@ editorEls.form.addEventListener("submit", async (event) => {
   setTimeout(() => { editorEls.saved.hidden = true; }, 2000);
 });
 
-editorEls.back.addEventListener("click", async () => {
-  if (dirty) {
-    const ok = await confirmDialog({
-      title: "Discard changes?",
-      message: "You have unsaved category changes. Leaving now will lose them.",
-      confirmLabel: "Discard",
-      danger: true
-    });
-    if (!ok) return;
-  }
-  window.location.href = "./index.html";
-});
+guardBreadcrumbs(() => dirty);
 
 // Guard the browser back button / reload / tab close with unsaved changes.
 window.addEventListener("beforeunload", (event) => {

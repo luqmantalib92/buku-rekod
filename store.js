@@ -525,6 +525,24 @@ function setupAccountMenu() {
 
 setupAccountMenu();
 
+// On pages with unsaved-change guards, intercept breadcrumb clicks so the
+// nice confirm dialog runs before navigating away. `isDirty` is a getter.
+function guardBreadcrumbs(isDirty) {
+  for (const crumb of document.querySelectorAll(".crumb")) {
+    crumb.addEventListener("click", async (event) => {
+      if (!isDirty()) return;
+      event.preventDefault();
+      const ok = await confirmDialog({
+        title: "Discard changes?",
+        message: "You have unsaved changes. Leaving now won't save them.",
+        confirmLabel: "Discard",
+        danger: true
+      });
+      if (ok) window.location.href = crumb.href;
+    });
+  }
+}
+
 // Unique, sorted workshop names across all records — powers the workshop
 // autocomplete suggestions.
 function getWorkshopNames() {

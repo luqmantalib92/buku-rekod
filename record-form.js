@@ -4,9 +4,8 @@
    Always returns to the vehicle's logbook. */
 
 const recordEls = {
-  backButton: document.querySelector("#backButton"),
-  formHeading: document.querySelector("#formHeading"),
-  formVehicleName: document.querySelector("#formVehicleName"),
+  pageTitle: document.querySelector("#pageTitle"),
+  crumbVehicle: document.querySelector("#crumbVehicle"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceDate: document.querySelector("#serviceDate"),
   serviceCategory: document.querySelector("#serviceCategory"),
@@ -110,7 +109,9 @@ function initForm() {
     return;
   }
 
-  recordEls.formVehicleName.textContent = `${vehicle.name || "Vehicle"}${vehicle.plate ? ` · ${vehicle.plate}` : ""}`;
+  // Breadcrumb: Garage › {vehicle}
+  recordEls.crumbVehicle.textContent = vehicle.name || "Vehicle";
+  recordEls.crumbVehicle.href = returnHref;
   populateCategories();
   populateWorkshopSuggestions();
 
@@ -123,7 +124,7 @@ function initForm() {
 
   if (record) {
     document.title = "Edit service record | Service Log";
-    recordEls.formHeading.textContent = "Edit service record";
+    recordEls.pageTitle.textContent = "Edit service record";
     recordEls.submit.textContent = "Save changes";
     recordEls.serviceCategory.value = record.category || "other";
     renderItemChips();
@@ -231,8 +232,8 @@ recordEls.serviceForm.addEventListener("submit", async (event) => {
   leave();
 });
 
-recordEls.backButton.addEventListener("click", tryLeave);
 recordEls.cancel.addEventListener("click", tryLeave);
+guardBreadcrumbs(() => dirty);
 
 window.addEventListener("beforeunload", (event) => {
   if (dirty) {

@@ -56,9 +56,45 @@ button {
 
 .topbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+}
+
+.topbar-title {
+  min-width: 0;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.crumb {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.crumb:hover,
+.crumb:focus-visible {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.crumb-sep {
+  color: var(--muted);
+}
+
+.account-version {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
 }
 
 .topbar-actions {
@@ -471,6 +507,11 @@ dt {
   font-size: 0.9rem;
 }
 
+/* A subtitle used as a panel's intro line (no heading above it). */
+.panel-intro {
+  margin: 0 0 18px;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -739,6 +780,11 @@ dd {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+/* When the row holds only actions (breadcrumb handles "up"), push them right. */
+.detail-head.actions-only {
+  justify-content: flex-end;
 }
 
 .detail-head-actions {

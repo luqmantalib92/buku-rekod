@@ -21,9 +21,8 @@
     </div>
     <main class="app-shell" id="appContent" hidden>
       <section class="topbar" aria-label="Garage overview">
-        <div>
-          <p class="eyebrow app-version"></p>
-          <h1>Service Log</h1>
+        <div class="topbar-title">
+          <h1>Garage</h1>
         </div>
         <div class="topbar-actions">
           <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
@@ -38,17 +37,14 @@
             <p class="account-email" id="accountEmail">Local mode</p>
             <p class="account-status" id="accountStatus">Saved on this device</p>
             <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
+            <p class="account-version app-version"></p>
           </div>
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="garageHeading">
+      <section class="panel" aria-label="Garage">
         <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Your vehicles</p>
-            <h2 id="garageHeading">Garage</h2>
-            <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
-          </div>
+          <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
           <button type="button" id="addVehicle" class="primary-action heading-action" title="Add a new vehicle to your garage">Add vehicle</button>
         </div>
         <div id="vehicleEmpty" class="empty-state" hidden>

@@ -3,8 +3,7 @@
 const remindersEls = {
   settingsForm: document.querySelector("#settingsForm"),
   settingsRows: document.querySelector("#settingsRows"),
-  settingsSaved: document.querySelector("#settingsSaved"),
-  backToGarage: document.querySelector("#backToGarage")
+  settingsSaved: document.querySelector("#settingsSaved")
 };
 
 function renderSettings() {
@@ -40,10 +39,6 @@ remindersEls.settingsForm.addEventListener("submit", async (event) => {
 
   remindersEls.settingsSaved.hidden = false;
   setTimeout(() => { remindersEls.settingsSaved.hidden = true; }, 2000);
-});
-
-remindersEls.backToGarage.addEventListener("click", () => {
-  window.location.href = "./index.html";
 });
 
 window.onPullRefresh = async () => {

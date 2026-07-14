@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.3.0",
+    date: "2026-07-14",
+    notes: [
+      "Each page now shows its own title in the header (e.g. the vehicle's name) instead of the app name.",
+      "Replaced the back button with a breadcrumb trail, so you can see where you are and jump up any level.",
+      "Moved the version number out of the header into the account menu."
+    ]
+  },
+  {
     version: "1.2.1",
     date: "2026-07-14",
     notes: [
@@ -132,10 +141,6 @@ function renderChangelog() {
 
   list.replaceChildren(frag);
 }
-
-document.querySelector("#backToGarage").addEventListener("click", () => {
-  window.location.href = "./index.html";
-});
 
 window.onPullRefresh = async () => {
   await refreshData();
