@@ -123,4 +123,5 @@ function initCategoriesPage() {
   renderEditor();
 }
 
+renderSkeletonCards(editorEls.list, 3);
 bootWithFallback(initCategoriesPage);

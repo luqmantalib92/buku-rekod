@@ -607,6 +607,25 @@ async function withButtonBusy(button, busyLabel, action) {
  * Redirects to the login page when Firebase is configured but no user
  * is signed in. Falls back to local storage if Firebase is unavailable.
  */
+// Fill a list container with placeholder skeleton cards while data loads.
+// The real render later calls replaceChildren(), which clears these.
+function renderSkeletonCards(container, count = 3) {
+  if (!container) return;
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < count; i += 1) {
+    const card = document.createElement("div");
+    card.className = "skeleton-card";
+    card.setAttribute("aria-hidden", "true");
+    for (const cls of ["skeleton-line skeleton-line-lg", "skeleton-line skeleton-line-sm", "skeleton-line"]) {
+      const line = document.createElement("div");
+      line.className = cls;
+      card.append(line);
+    }
+    frag.append(card);
+  }
+  container.replaceChildren(frag);
+}
+
 async function initStore(onReady) {
   if (!hasFirebaseConfig()) {
     loadLocal();

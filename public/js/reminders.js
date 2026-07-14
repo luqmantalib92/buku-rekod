@@ -48,4 +48,5 @@ window.onPullRefresh = async () => {
   renderSettings();
 };
 
+renderSkeletonCards(remindersEls.settingsRows, 4);
 bootWithFallback(renderSettings);

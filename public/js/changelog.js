@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.4.2",
+    date: "2026-07-14",
+    notes: [
+      "Lists now show a skeleton placeholder while data loads (garage, logbook, categories, reminders) so it's clear something's on the way."
+    ]
+  },
+  {
     version: "1.4.1",
     date: "2026-07-14",
     notes: [

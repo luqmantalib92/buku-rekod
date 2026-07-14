@@ -250,4 +250,5 @@ window.onPullRefresh = async () => {
   renderVehicle();
 };
 
+renderSkeletonCards(vehicleEls.recordList, 3);
 bootWithFallback(renderVehicle);

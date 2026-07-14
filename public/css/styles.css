@@ -708,6 +708,38 @@ select:focus {
   gap: 12px;
 }
 
+/* Skeleton loading placeholders (shown while data is being fetched). */
+.skeleton-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(90deg, #ececec 25%, #f6f6f6 37%, #ececec 63%);
+  background-size: 400% 100%;
+  animation: skeleton-shimmer 1.4s ease infinite;
+}
+
+.skeleton-line-lg {
+  height: 20px;
+  width: 60%;
+}
+
+.skeleton-line-sm {
+  width: 40%;
+}
+
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: 0 0; }
+}
+
 .record-card {
   padding: 18px;
 }

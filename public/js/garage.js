@@ -61,4 +61,5 @@ window.onPullRefresh = async () => {
   renderGarage();
 };
 
+renderSkeletonCards(garageEls.vehicleList, 4);
 bootWithFallback(renderGarage);
