@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.4.0",
+    date: "2026-07-14",
+    notes: [
+      "Removed the separate Service reminders panel — each logbook card now shows its own days-left status.",
+      "Cards are highlighted when a service is due soon or overdue.",
+      "New \"Mark serviced\" button on each record: tap it when you've done that service (even early) to clear the reminder; tap again to undo."
+    ]
+  },
+  {
     version: "1.3.3",
     date: "2026-07-14",
     notes: [

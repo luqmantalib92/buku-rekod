@@ -7,8 +7,6 @@ const vehicleEls = {
   deleteVehicle: document.querySelector("#deleteVehicle"),
   addRecord: document.querySelector("#addRecord"),
   emptyAddRecord: document.querySelector("#emptyAddRecord"),
-  reminders: document.querySelector("#reminders"),
-  reminderList: document.querySelector("#reminderList"),
   clearRecords: document.querySelector("#clearRecords"),
   recordList: document.querySelector("#recordList"),
   emptyState: document.querySelector("#emptyState"),
@@ -35,32 +33,11 @@ function openRecordForm(recordId) {
   window.location.href = `./record-form.html?vehicle=${id}${suffix}`;
 }
 
-function renderReminders(vehicle) {
-  const reminders = vehicleReminders(vehicle);
-  vehicleEls.reminders.hidden = reminders.length === 0;
-  vehicleEls.reminderList.replaceChildren();
-
-  for (const reminder of reminders) {
-    const row = document.createElement("div");
-    row.className = `reminder reminder-${reminder.status}`;
-
-    const label = document.createElement("span");
-    label.className = "reminder-label";
-    label.textContent = reminder.label;
-
-    const when = reminder.days < 0
-      ? `${Math.abs(reminder.days)} day(s) overdue`
-      : reminder.days === 0
-        ? "due today"
-        : `in ${reminder.days} day(s)`;
-
-    const meta = document.createElement("span");
-    meta.className = "reminder-meta";
-    meta.textContent = `${formatDate(reminder.nextDate)} · ${when}`;
-
-    row.append(label, meta);
-    vehicleEls.reminderList.append(row);
-  }
+// Human "days left" text for a record's next-service status.
+function dueText(days) {
+  if (days < 0) return `${Math.abs(days)} day(s) overdue`;
+  if (days === 0) return "due today";
+  return `in ${days} day(s)`;
 }
 
 function updateSummary(vehicle) {
@@ -80,11 +57,12 @@ function updateSummary(vehicle) {
 
 function renderRecords(vehicle) {
   vehicleEls.recordList.replaceChildren();
-  // Sort by next-service date, soonest first (so what's due next is on top).
-  // Records without a next date fall to the bottom, newest service first.
+  // Sort so the soonest unresolved next-service is on top. Records that are
+  // already serviced or have no next date fall to the bottom (newest first).
+  const openDate = (r) => (r.nextDate && !r.nextDone ? r.nextDate : "");
   const sorted = [...vehicle.records].sort((a, b) => {
-    const an = a.nextDate || "";
-    const bn = b.nextDate || "";
+    const an = openDate(a);
+    const bn = openDate(b);
     if (an && bn) {
       if (an !== bn) return an.localeCompare(bn);
     } else if (an || bn) {
@@ -109,10 +87,41 @@ function renderRecords(vehicle) {
     notesEl.textContent = record.notes || "";
     notesEl.hidden = !record.notes;
 
+    // Next-service status pill, card highlight, and the mark-serviced toggle.
+    const dueEl = item.querySelector(".record-due");
+    const footEl = item.querySelector(".record-foot");
+    const doneBtn = item.querySelector(".record-done");
+
+    if (record.nextDate) {
+      footEl.hidden = false;
+      dueEl.hidden = false;
+      if (record.nextDone) {
+        dueEl.textContent = "Serviced";
+        dueEl.className = "record-due record-due-done";
+        doneBtn.textContent = "Undo serviced";
+      } else {
+        const status = recordNextStatus(record);
+        dueEl.textContent = dueText(status.days);
+        dueEl.className = `record-due record-due-${status.status}`;
+        if (status.status !== "upcoming") item.classList.add(`is-${status.status}`);
+        doneBtn.textContent = "Mark serviced";
+      }
+      doneBtn.addEventListener("click", () => toggleServiced(record.id));
+    }
+
     item.querySelector(".record-edit").addEventListener("click", () => openRecordForm(record.id));
     item.querySelector(".record-delete").addEventListener("click", () => deleteRecord(record.id));
     vehicleEls.recordList.append(item);
   }
+}
+
+async function toggleServiced(recordId) {
+  const vehicle = getVehicle(currentVehicleId());
+  const record = vehicle && vehicle.records.find((entry) => entry.id === recordId);
+  if (!record) return;
+  record.nextDone = !record.nextDone;
+  await persist();
+  renderVehicle();
 }
 
 function renderVehicle() {
@@ -125,7 +134,6 @@ function renderVehicle() {
 
   document.title = `${vehicle.name || "Vehicle"} | Service Log`;
   updateSummary(vehicle);
-  renderReminders(vehicle);
   renderRecords(vehicle);
 }
 

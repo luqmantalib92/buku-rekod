@@ -305,12 +305,25 @@ function daysUntil(dateStr) {
   return Math.round((target - today) / 86400000);
 }
 
+// Next-service status for a single record: null when there's no next date or
+// it's already been marked serviced. Otherwise { days, status } where status
+// is "overdue" | "due-soon" | "upcoming".
+function recordNextStatus(record) {
+  if (!record || !record.nextDate || record.nextDone) return null;
+  const days = daysUntil(record.nextDate);
+  if (days === null) return null;
+  let status = "upcoming";
+  if (days < 0) status = "overdue";
+  else if (days <= leadDaysFor(record.category || "other")) status = "due-soon";
+  return { days, status };
+}
+
 // One reminder per category, based on the most recent record in that category
 // that carries a next-service date. Overdue first, then soonest.
 function vehicleReminders(vehicle) {
   const latestByCategory = new Map();
   for (const record of vehicle.records) {
-    if (!record.nextDate) continue;
+    if (!record.nextDate || record.nextDone) continue;
     const key = record.category || "other";
     const existing = latestByCategory.get(key);
     if (!existing || (record.date || "") > (existing.date || "")) {

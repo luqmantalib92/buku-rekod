@@ -70,17 +70,6 @@
         </article>
       </section>
 
-      <section id="reminders" class="panel reminders-panel" aria-labelledby="remindersHeading" hidden>
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Upcoming</p>
-            <h2 id="remindersHeading">Service reminders</h2>
-            <p class="panel-subtitle">Based on the next-service dates you set, and your lead time in Reminder settings.</p>
-          </div>
-        </div>
-        <div id="reminderList" class="reminder-list"></div>
-      </section>
-
       <section class="panel history-panel" aria-labelledby="historyHeading">
         <div class="panel-heading">
           <div>
@@ -106,7 +95,10 @@
         <div class="record-topline">
           <div>
             <h3></h3>
-            <span class="record-category"></span>
+            <div class="record-tags">
+              <span class="record-category"></span>
+              <span class="record-due" hidden></span>
+            </div>
             <p class="record-meta"></p>
           </div>
           <div class="record-actions">
@@ -130,6 +122,9 @@
           </div>
         </dl>
         <p class="record-notes"></p>
+        <div class="record-foot" hidden>
+          <button type="button" class="record-done"></button>
+        </div>
       </article>
     </template>
 
