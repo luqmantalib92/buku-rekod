@@ -9,8 +9,8 @@ Phase 1 is a simple personal webapp for recording vehicle service history.
 - View service history newest first.
 - See summary cards for current odometer, last service, and total spend.
 - Works immediately with localStorage.
-- Syncs private user data to Firebase Firestore after you add your Firebase web config in `app.js`.
-- Supports Firebase Authentication with email/password.
+- Uses `login.html` for Firebase Authentication.
+- Syncs private user data to Firebase Firestore after you add your Firebase web config in `firebase-config.js`.
 
 ## Run locally
 
@@ -24,7 +24,7 @@ Then open `http://localhost:5173`.
 
 1. Create a Firebase project.
 2. Add a Web App in Firebase project settings.
-3. Copy the Firebase config object into `app.js`.
+3. Copy the Firebase config object into `firebase-config.js`.
 4. Enable Authentication with the Email/Password provider.
 5. Enable Firestore Database.
 6. Deploy with Firebase Hosting:

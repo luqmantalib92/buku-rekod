@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign in | Vehicle Service Log</title>
+    <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="login-page">
+    <main class="login-shell">
+      <section class="login-panel panel" aria-labelledby="authHeading">
+        <div>
+          <p class="eyebrow">Private garage</p>
+          <h1 id="authHeading">Vehicle Service Log</h1>
+          <p class="login-copy">Sign in to view and update your service records.</p>
+        </div>
+
+        <form id="authForm" class="auth-form">
+          <label>
+            Email
+            <input id="authEmail" name="email" type="email" autocomplete="email" required />
+          </label>
+          <label>
+            Password
+            <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" required />
+          </label>
+          <div class="auth-actions">
+            <button type="submit" class="primary-action">Sign in</button>
+            <button type="button" id="createAccountButton" class="secondary-action">Create account</button>
+          </div>
+          <p id="authMessage" class="auth-message" role="status"></p>
+        </form>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="./firebase-config.js"></script>
+    <script src="./auth.js"></script>
+  </body>
+</html>

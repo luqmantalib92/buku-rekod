@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <main class="app-shell" id="appContent" hidden>
       <section class="topbar" aria-label="Vehicle overview">
         <div>
           <p class="eyebrow">Personal garage</p>
@@ -20,29 +20,6 @@
         </div>
       </section>
 
-      <section class="auth-panel panel" id="authPanel" aria-labelledby="authHeading" hidden>
-        <div>
-          <p class="eyebrow">Private access</p>
-          <h2 id="authHeading">Sign in to your garage</h2>
-        </div>
-        <form id="authForm" class="auth-form">
-          <label>
-            Email
-            <input id="authEmail" name="email" type="email" autocomplete="email" required />
-          </label>
-          <label>
-            Password
-            <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" required />
-          </label>
-          <div class="auth-actions">
-            <button type="submit" class="primary-action">Sign in</button>
-            <button type="button" id="createAccountButton" class="secondary-action">Create account</button>
-          </div>
-          <p id="authMessage" class="auth-message" role="status"></p>
-        </form>
-      </section>
-
-      <div id="appContent" hidden>
       <section class="summary-grid" aria-label="Service summary">
         <article class="summary-card">
           <span>Vehicle</span>
@@ -155,7 +132,6 @@
         </div>
         <div id="recordList" class="record-list" aria-live="polite"></div>
       </section>
-      </div>
     </main>
 
     <template id="recordTemplate">
@@ -189,6 +165,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="./firebase-config.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>

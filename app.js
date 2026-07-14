@@ -1,12 +1,3 @@
-const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
-};
-
 const LOCAL_KEY = "vehicle-service-log:v1";
 
 const state = {
@@ -21,10 +12,6 @@ const state = {
 
 const els = {
   appContent: document.querySelector("#appContent"),
-  authPanel: document.querySelector("#authPanel"),
-  authForm: document.querySelector("#authForm"),
-  authMessage: document.querySelector("#authMessage"),
-  createAccountButton: document.querySelector("#createAccountButton"),
   signOutButton: document.querySelector("#signOutButton"),
   syncStatus: document.querySelector("#syncStatus"),
   vehicleForm: document.querySelector("#vehicleForm"),
@@ -97,7 +84,6 @@ async function initFirestore() {
   if (!hasFirebaseConfig()) {
     loadLocal();
     els.appContent.hidden = false;
-    els.authPanel.hidden = true;
     els.signOutButton.hidden = true;
     render();
     return;
@@ -107,7 +93,7 @@ async function initFirestore() {
   state.auth = firebase.auth();
   state.db = firebase.firestore();
   state.useFirestore = true;
-  els.syncStatus.textContent = "Sign in required";
+  els.syncStatus.textContent = "Checking session";
 
   state.auth.onAuthStateChanged(async (user) => {
     state.user = user;
@@ -116,16 +102,10 @@ async function initFirestore() {
 
     if (!user) {
       state.dataRef = null;
-      els.authPanel.hidden = false;
-      els.appContent.hidden = true;
-      els.signOutButton.hidden = true;
-      els.syncStatus.textContent = "Signed out";
-      els.syncStatus.classList.remove("online");
-      render();
+      window.location.replace("./login.html");
       return;
     }
 
-    els.authPanel.hidden = true;
     els.appContent.hidden = false;
     els.signOutButton.hidden = false;
     els.syncStatus.textContent = user.email || "Signed in";
@@ -267,44 +247,9 @@ els.clearRecords.addEventListener("click", async () => {
   render();
 });
 
-els.authForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const form = new FormData(els.authForm);
-  const email = form.get("email").trim();
-  const password = form.get("password");
-
-  try {
-    els.authMessage.textContent = "Signing in...";
-    await state.auth.signInWithEmailAndPassword(email, password);
-    els.authForm.reset();
-    els.authMessage.textContent = "";
-  } catch (error) {
-    els.authMessage.textContent = error.message;
-  }
-});
-
-els.createAccountButton.addEventListener("click", async () => {
-  const form = new FormData(els.authForm);
-  const email = form.get("email").trim();
-  const password = form.get("password");
-
-  if (!email || !password) {
-    els.authMessage.textContent = "Enter an email and password first.";
-    return;
-  }
-
-  try {
-    els.authMessage.textContent = "Creating account...";
-    await state.auth.createUserWithEmailAndPassword(email, password);
-    els.authForm.reset();
-    els.authMessage.textContent = "";
-  } catch (error) {
-    els.authMessage.textContent = error.message;
-  }
-});
-
 els.signOutButton.addEventListener("click", async () => {
   await state.auth.signOut();
+  window.location.replace("./login.html");
 });
 
 document.querySelector("#serviceDate").valueAsDate = new Date();
@@ -313,5 +258,6 @@ initFirestore().catch((error) => {
   els.syncStatus.textContent = "Local fallback";
   state.useFirestore = false;
   loadLocal();
+  els.appContent.hidden = false;
   render();
 });
