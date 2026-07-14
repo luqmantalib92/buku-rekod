@@ -136,6 +136,11 @@ button {
   background: #edf5f2;
 }
 
+.account-link-active {
+  background: #e6f3ef;
+  color: var(--accent-dark);
+}
+
 .account-link:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;

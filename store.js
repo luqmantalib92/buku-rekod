@@ -273,9 +273,32 @@ function setupAccountMenu() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !menu.hidden) close();
   });
+
+  // Highlight the current page's nav link.
+  const current = (location.pathname.split("/").pop() || "index.html") || "index.html";
+  menu.querySelectorAll(".account-link").forEach((link) => {
+    const target = link.getAttribute("href").replace(/^\.\//, "");
+    if (target === current) {
+      link.classList.add("account-link-active");
+      link.setAttribute("aria-current", "page");
+    }
+  });
 }
 
 setupAccountMenu();
+
+// Unique, sorted workshop names across all records — powers the workshop
+// autocomplete suggestions.
+function getWorkshopNames() {
+  const names = new Set();
+  for (const vehicle of state.vehicles) {
+    for (const record of vehicle.records) {
+      const workshop = (record.workshop || "").trim();
+      if (workshop) names.add(workshop);
+    }
+  }
+  return [...names].sort((a, b) => a.localeCompare(b));
+}
 
 function revealShell(signedIn, label) {
   if (shellEls.appLoading) shellEls.appLoading.hidden = true;

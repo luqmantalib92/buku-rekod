@@ -13,6 +13,7 @@ const vehicleEls = {
   cancelEdit: document.querySelector("#cancelEdit"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceDate: document.querySelector("#serviceDate"),
+  workshopSuggestions: document.querySelector("#workshopSuggestions"),
   serviceCategory: document.querySelector("#serviceCategory"),
   itemChips: document.querySelector("#serviceItemChips"),
   chipsHint: document.querySelector("#chipsHint"),
@@ -156,6 +157,16 @@ function renderRecords(vehicle) {
   }
 }
 
+function populateWorkshopSuggestions() {
+  if (!vehicleEls.workshopSuggestions) return;
+  vehicleEls.workshopSuggestions.replaceChildren();
+  for (const name of getWorkshopNames()) {
+    const option = document.createElement("option");
+    option.value = name;
+    vehicleEls.workshopSuggestions.append(option);
+  }
+}
+
 function renderVehicle() {
   const vehicle = getVehicle(currentVehicleId());
   if (!vehicle) {
@@ -169,6 +180,7 @@ function renderVehicle() {
   updateSummary(vehicle);
   renderReminders(vehicle);
   renderRecords(vehicle);
+  populateWorkshopSuggestions();
 }
 
 async function deleteRecord(recordId) {
