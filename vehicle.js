@@ -1,29 +1,12 @@
-/* Vehicle page: one vehicle's service logbook (add / list / delete records). */
+/* Vehicle page: one vehicle's service logbook (summary + reminders + record
+   list). Adding/editing a record happens on record-form.html; editing the
+   vehicle itself happens on vehicle-form.html. */
 
 const vehicleEls = {
   backToGarage: document.querySelector("#backToGarage"),
   editVehicle: document.querySelector("#editVehicle"),
   deleteVehicle: document.querySelector("#deleteVehicle"),
-  editPanel: document.querySelector("#editPanel"),
-  editVehicleForm: document.querySelector("#editVehicleForm"),
-  editName: document.querySelector("#editName"),
-  editPlate: document.querySelector("#editPlate"),
-  editOdometer: document.querySelector("#editOdometer"),
-  editModel: document.querySelector("#editModel"),
-  editImage: document.querySelector("#editImage"),
-  editImagePreview: document.querySelector("#editImagePreview"),
-  editImageHint: document.querySelector("#editImageHint"),
-  removeEditImage: document.querySelector("#removeEditImage"),
-  cancelEdit: document.querySelector("#cancelEdit"),
-  serviceForm: document.querySelector("#serviceForm"),
-  serviceHeading: document.querySelector("#serviceHeading"),
-  serviceSubmit: document.querySelector("#serviceSubmit"),
-  cancelServiceEdit: document.querySelector("#cancelServiceEdit"),
-  serviceDate: document.querySelector("#serviceDate"),
-  workshopSuggestions: document.querySelector("#workshopSuggestions"),
-  serviceCategory: document.querySelector("#serviceCategory"),
-  itemChips: document.querySelector("#serviceItemChips"),
-  chipsHint: document.querySelector("#chipsHint"),
+  addRecord: document.querySelector("#addRecord"),
   reminders: document.querySelector("#reminders"),
   reminderList: document.querySelector("#reminderList"),
   clearRecords: document.querySelector("#clearRecords"),
@@ -42,55 +25,14 @@ function currentVehicleId() {
   return new URLSearchParams(window.location.search).get("id");
 }
 
-/* ---- Category + item chips ---- */
-
-const selectedItems = new Set();
-
-function populateCategories() {
-  for (const category of getCategories()) {
-    const option = document.createElement("option");
-    option.value = category.key;
-    option.textContent = category.label;
-    vehicleEls.serviceCategory.append(option);
-  }
+function goGarage() {
+  window.location.href = "./index.html";
 }
 
-function renderItemChips() {
-  const category = getCategories().find((entry) => entry.key === vehicleEls.serviceCategory.value);
-  vehicleEls.itemChips.replaceChildren();
-  selectedItems.clear();
-
-  if (!category) {
-    vehicleEls.itemChips.hidden = true;
-    vehicleEls.chipsHint.textContent = "Pick a category to see common items.";
-    vehicleEls.chipsHint.hidden = false;
-    return;
-  }
-
-  if (!category.items.length) {
-    vehicleEls.itemChips.hidden = true;
-    vehicleEls.chipsHint.textContent = "No preset items for this category — use Details below.";
-    vehicleEls.chipsHint.hidden = false;
-    return;
-  }
-
-  vehicleEls.chipsHint.hidden = true;
-  vehicleEls.itemChips.hidden = false;
-  for (const item of category.items) {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip";
-    chip.textContent = item;
-    chip.setAttribute("aria-pressed", "false");
-    chip.addEventListener("click", () => {
-      const on = chip.getAttribute("aria-pressed") === "true";
-      chip.setAttribute("aria-pressed", String(!on));
-      chip.classList.toggle("chip-on", !on);
-      if (on) selectedItems.delete(item);
-      else selectedItems.add(item);
-    });
-    vehicleEls.itemChips.append(chip);
-  }
+function openRecordForm(recordId) {
+  const id = encodeURIComponent(currentVehicleId());
+  const suffix = recordId ? `&record=${encodeURIComponent(recordId)}` : "";
+  window.location.href = `./record-form.html?vehicle=${id}${suffix}`;
 }
 
 function renderReminders(vehicle) {
@@ -119,10 +61,6 @@ function renderReminders(vehicle) {
     row.append(label, meta);
     vehicleEls.reminderList.append(row);
   }
-}
-
-function goGarage() {
-  window.location.href = "./index.html";
 }
 
 function updateSummary(vehicle) {
@@ -163,19 +101,9 @@ function renderRecords(vehicle) {
     notesEl.textContent = record.notes || "";
     notesEl.hidden = !record.notes;
 
-    item.querySelector(".record-edit").addEventListener("click", () => startEditRecord(record.id));
+    item.querySelector(".record-edit").addEventListener("click", () => openRecordForm(record.id));
     item.querySelector(".record-delete").addEventListener("click", () => deleteRecord(record.id));
     vehicleEls.recordList.append(item);
-  }
-}
-
-function populateWorkshopSuggestions() {
-  if (!vehicleEls.workshopSuggestions) return;
-  vehicleEls.workshopSuggestions.replaceChildren();
-  for (const name of getWorkshopNames()) {
-    const option = document.createElement("option");
-    option.value = name;
-    vehicleEls.workshopSuggestions.append(option);
   }
 }
 
@@ -188,11 +116,9 @@ function renderVehicle() {
   }
 
   document.title = `${vehicle.name || "Vehicle"} | Service Log`;
-
   updateSummary(vehicle);
   renderReminders(vehicle);
   renderRecords(vehicle);
-  populateWorkshopSuggestions();
 }
 
 async function deleteRecord(recordId) {
@@ -210,88 +136,11 @@ async function deleteRecord(recordId) {
   renderVehicle();
 }
 
-// null = adding a new record; otherwise editing the record with this id.
-let editingRecordId = null;
+vehicleEls.addRecord.addEventListener("click", () => openRecordForm(null));
 
-function startEditRecord(recordId) {
-  const vehicle = getVehicle(currentVehicleId());
-  const record = vehicle && vehicle.records.find((entry) => entry.id === recordId);
-  if (!record) return;
-
-  editingRecordId = recordId;
-  vehicleEls.serviceCategory.value = record.category || "other";
-  renderItemChips();
-  // The record's items string goes into the details field (chips selection
-  // isn't stored separately), so nothing is lost when editing.
-  vehicleEls.serviceForm.date.value = record.date || "";
-  vehicleEls.serviceForm.odometer.value = record.odometer || "";
-  vehicleEls.serviceForm.workshop.value = record.workshop || "";
-  vehicleEls.serviceForm.cost.value = record.cost || "";
-  vehicleEls.serviceForm.items.value = record.items || "";
-  vehicleEls.serviceForm.nextDate.value = record.nextDate || "";
-  vehicleEls.serviceForm.nextOdometer.value = record.nextOdometer || "";
-
-  vehicleEls.serviceHeading.textContent = "Edit service record";
-  vehicleEls.serviceSubmit.textContent = "Save changes";
-  vehicleEls.cancelServiceEdit.hidden = false;
-  vehicleEls.serviceForm.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-function exitEditMode() {
-  editingRecordId = null;
-  vehicleEls.serviceHeading.textContent = "New service record";
-  vehicleEls.serviceSubmit.textContent = "Add service record";
-  vehicleEls.cancelServiceEdit.hidden = true;
-}
-
-vehicleEls.cancelServiceEdit.addEventListener("click", () => {
-  vehicleEls.serviceForm.reset();
-  vehicleEls.serviceDate.valueAsDate = new Date();
-  renderItemChips();
-  exitEditMode();
+vehicleEls.editVehicle.addEventListener("click", () => {
+  window.location.href = `./vehicle-form.html?id=${encodeURIComponent(currentVehicleId())}`;
 });
-
-vehicleEls.serviceForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const vehicle = getVehicle(currentVehicleId());
-  if (!vehicle) {
-    goGarage();
-    return;
-  }
-
-  const form = new FormData(vehicleEls.serviceForm);
-  const extra = form.get("items").trim();
-  const items = [...selectedItems, ...(extra ? [extra] : [])].join(", ");
-  const fields = {
-    category: form.get("category") || "other",
-    date: form.get("date"),
-    odometer: Number(form.get("odometer")),
-    workshop: form.get("workshop").trim(),
-    cost: Number(form.get("cost") || 0),
-    items,
-    nextDate: form.get("nextDate"),
-    nextOdometer: form.get("nextOdometer") ? Number(form.get("nextOdometer")) : ""
-  };
-
-  if (editingRecordId) {
-    const existing = vehicle.records.find((entry) => entry.id === editingRecordId);
-    if (existing) Object.assign(existing, fields);
-  } else {
-    vehicle.records = [{ id: makeId(), ...fields, createdAt: new Date().toISOString() }, ...vehicle.records];
-  }
-  if (fields.odometer > Number(vehicle.odometer || 0)) {
-    vehicle.odometer = fields.odometer;
-  }
-
-  await withButtonBusy(vehicleEls.serviceSubmit, "Saving…", () => persist());
-  vehicleEls.serviceForm.reset();
-  vehicleEls.serviceDate.valueAsDate = new Date();
-  renderItemChips();
-  exitEditMode();
-  renderVehicle();
-});
-
-vehicleEls.serviceCategory.addEventListener("change", renderItemChips);
 
 vehicleEls.clearRecords.addEventListener("click", async () => {
   const vehicle = getVehicle(currentVehicleId());
@@ -305,97 +154,6 @@ vehicleEls.clearRecords.addEventListener("click", async () => {
   if (!ok) return;
   vehicle.records = [];
   await persist();
-  renderVehicle();
-});
-
-// The photo to save on edit (data URL; "" = no photo).
-let editImageData = "";
-
-const EDIT_IMAGE_HINT_DEFAULT = "JPG or PNG, up to 15 MB. It's auto-compressed before saving.";
-
-function setEditImageHint(message, isError) {
-  vehicleEls.editImageHint.textContent = message;
-  vehicleEls.editImageHint.classList.toggle("image-hint-error", Boolean(isError));
-}
-
-function showEditImage() {
-  if (editImageData) {
-    vehicleEls.editImagePreview.src = editImageData;
-    vehicleEls.editImagePreview.hidden = false;
-    vehicleEls.removeEditImage.hidden = false;
-  } else {
-    vehicleEls.editImagePreview.hidden = true;
-    vehicleEls.removeEditImage.hidden = true;
-  }
-}
-
-function openEdit() {
-  const vehicle = getVehicle(currentVehicleId());
-  if (!vehicle) return;
-  vehicleEls.editName.value = vehicle.name || "";
-  vehicleEls.editPlate.value = vehicle.plate || "";
-  vehicleEls.editOdometer.value = vehicle.odometer || "";
-  vehicleEls.editModel.value = vehicle.model || "";
-  vehicleEls.editImage.value = "";
-  editImageData = vehicle.image || "";
-  showEditImage();
-  setEditImageHint(EDIT_IMAGE_HINT_DEFAULT, false);
-  vehicleEls.editPanel.hidden = false;
-  vehicleEls.editName.focus();
-}
-
-vehicleEls.editImage.addEventListener("change", async () => {
-  const file = vehicleEls.editImage.files[0];
-  if (!file) return;
-  setEditImageHint("Compressing photo…", false);
-  try {
-    const { dataUrl, bytes } = await fileToResizedDataUrl(file);
-    editImageData = dataUrl;
-    showEditImage();
-    setEditImageHint(`Photo ready — ${Math.round(bytes / 1024)} KB after compression.`, false);
-  } catch (error) {
-    vehicleEls.editImage.value = "";
-    setEditImageHint(error.message || "Could not use that image.", true);
-  }
-});
-
-vehicleEls.removeEditImage.addEventListener("click", () => {
-  editImageData = "";
-  vehicleEls.editImage.value = "";
-  showEditImage();
-  setEditImageHint(EDIT_IMAGE_HINT_DEFAULT, false);
-});
-
-function closeEdit() {
-  vehicleEls.editPanel.hidden = true;
-}
-
-vehicleEls.editVehicle.addEventListener("click", () => {
-  if (vehicleEls.editPanel.hidden) openEdit();
-  else closeEdit();
-});
-
-vehicleEls.cancelEdit.addEventListener("click", closeEdit);
-
-vehicleEls.editVehicleForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const vehicle = getVehicle(currentVehicleId());
-  if (!vehicle) {
-    goGarage();
-    return;
-  }
-
-  const form = new FormData(vehicleEls.editVehicleForm);
-  vehicle.name = form.get("name").trim();
-  vehicle.plate = form.get("plate").trim().toUpperCase();
-  const odometer = Number(form.get("odometer"));
-  if (Number.isFinite(odometer)) vehicle.odometer = odometer;
-  vehicle.model = form.get("model").trim();
-  vehicle.image = editImageData;
-
-  const submitButton = vehicleEls.editVehicleForm.querySelector('button[type="submit"]');
-  await withButtonBusy(submitButton, "Saving…", () => persist());
-  closeEdit();
   renderVehicle();
 });
 
@@ -414,39 +172,11 @@ vehicleEls.deleteVehicle.addEventListener("click", async () => {
   goGarage();
 });
 
-vehicleEls.backToGarage.addEventListener("click", async () => {
-  if (editingRecordId) {
-    const ok = await confirmDialog({
-      title: "Discard changes?",
-      message: "You're editing a record. Leaving now won't save your changes.",
-      confirmLabel: "Discard",
-      danger: true
-    });
-    if (!ok) return;
-  }
-  goGarage();
-});
-
-// Guard the browser back button / reload / tab close while mid-edit.
-window.addEventListener("beforeunload", (event) => {
-  if (editingRecordId) {
-    event.preventDefault();
-    event.returnValue = "";
-  }
-});
+vehicleEls.backToGarage.addEventListener("click", goGarage);
 
 window.onPullRefresh = async () => {
   await refreshData();
   renderVehicle();
 };
 
-// Categories are populated after boot so the dropdown reflects the user's
-// saved custom categories (from getCategories()), not just the defaults.
-function initVehiclePage() {
-  populateCategories();
-  renderItemChips();
-  renderVehicle();
-}
-
-vehicleEls.serviceDate.valueAsDate = new Date();
-bootWithFallback(initVehiclePage);
+bootWithFallback(renderVehicle);

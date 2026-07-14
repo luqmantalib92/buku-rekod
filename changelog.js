@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.1.0",
+    date: "2026-07-14",
+    notes: [
+      "Adding and editing now happen on their own screens: the garage and logbook stay clean lists.",
+      "Tap \"Add vehicle\" / \"Add record\" (or Edit) to open a dedicated form, and Back returns you to the list.",
+      "You're asked to confirm before leaving a form with unsaved changes."
+    ]
+  },
+  {
     version: "1.0.9",
     date: "2026-07-14",
     notes: [

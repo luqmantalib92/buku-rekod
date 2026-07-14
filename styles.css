@@ -442,6 +442,24 @@ dt {
   margin-bottom: 18px;
 }
 
+.heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heading-action {
+  min-height: 40px;
+  padding: 0 18px;
+  white-space: nowrap;
+}
+
+.panel-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1116,6 +1134,15 @@ dd {
   .edit-actions .primary-action,
   .edit-actions .ghost-action {
     width: 100%;
+  }
+
+  .heading-actions {
+    width: 100%;
+  }
+
+  .heading-actions .primary-action,
+  .heading-actions .ghost-action {
+    flex: 1;
   }
 
   .panel,

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Garage | Service Log</title>
+    <title>Vehicle details | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -20,7 +20,7 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Garage overview">
+      <section class="topbar" aria-label="Vehicle details">
         <div>
           <p class="eyebrow app-version"></p>
           <h1>Service Log</h1>
@@ -42,48 +42,49 @@
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="garageHeading">
+      <div class="detail-head">
+        <button type="button" id="backButton" class="ghost-action back-action">&larr; Back</button>
+      </div>
+
+      <section class="panel" aria-labelledby="formHeading">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Your vehicles</p>
-            <h2 id="garageHeading">Garage</h2>
+            <p class="eyebrow" id="formEyebrow">Setup</p>
+            <h2 id="formHeading">Add a vehicle</h2>
           </div>
-          <button type="button" id="addVehicle" class="primary-action heading-action">Add vehicle</button>
         </div>
-        <div id="vehicleEmpty" class="empty-state" hidden>
-          Add your first vehicle to start building service logs.
-        </div>
-        <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
+
+        <form id="vehicleForm" class="form-grid">
+          <label>
+            Vehicle name
+            <input id="vehicleName" name="name" autocomplete="off" placeholder="Myvi, Civic, Hilux" required />
+          </label>
+          <label>
+            Plate number
+            <input id="vehiclePlate" name="plate" autocomplete="off" placeholder="ABC 1234" required />
+          </label>
+          <label>
+            Current odometer
+            <input id="vehicleOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
+          </label>
+          <label>
+            Model / year
+            <input id="vehicleModel" name="model" autocomplete="off" placeholder="Optional" />
+          </label>
+          <label class="span-2 image-field">
+            Photo (optional)
+            <input id="vehicleImage" name="image" type="file" accept="image/*" />
+            <p id="vehicleImageHint" class="image-hint field-hint">JPG or PNG, up to 15 MB. It's auto-compressed before saving.</p>
+            <img id="vehicleImagePreview" class="image-preview" alt="Selected vehicle photo" hidden />
+            <button type="button" id="removeImage" class="secondary-line" hidden>Remove photo</button>
+          </label>
+          <div class="span-2 edit-actions">
+            <button type="submit" id="vehicleSubmit" class="primary-action">Add vehicle</button>
+            <button type="button" id="cancelForm" class="ghost-action">Cancel</button>
+          </div>
+        </form>
       </section>
     </main>
-
-    <template id="vehicleCardTemplate">
-      <button type="button" class="vehicle-card">
-        <img class="vehicle-thumb" alt="" hidden />
-        <div class="vehicle-card-main">
-          <div class="vehicle-card-title">
-            <h3 class="vehicle-name"></h3>
-            <span class="vehicle-due" hidden></span>
-          </div>
-          <p class="vehicle-plate"></p>
-        </div>
-        <dl class="vehicle-card-stats">
-          <div>
-            <dt>Odometer</dt>
-            <dd class="vehicle-odometer"></dd>
-          </div>
-          <div>
-            <dt>Logs</dt>
-            <dd class="vehicle-count"></dd>
-          </div>
-          <div>
-            <dt>Last service</dt>
-            <dd class="vehicle-last"></dd>
-          </div>
-        </dl>
-        <span class="vehicle-card-cta" aria-hidden="true">View logs &rarr;</span>
-      </button>
-    </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -91,7 +92,7 @@
     <script src="./version.js"></script>
     <script src="./firebase-config.js"></script>
     <script src="./store.js"></script>
-    <script src="./garage.js"></script>
+    <script src="./vehicle-form.js"></script>
     <script src="./pull-refresh.js"></script>
   </body>
 </html>

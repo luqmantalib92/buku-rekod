@@ -1,51 +1,20 @@
-/* Garage page: list of vehicles + add a vehicle. */
+/* Garage page: the list of vehicles (main screen). Adding a vehicle happens
+   on the separate vehicle-form.html page. */
 
 const garageEls = {
-  vehicleForm: document.querySelector("#vehicleForm"),
+  addVehicle: document.querySelector("#addVehicle"),
   vehicleList: document.querySelector("#vehicleList"),
   vehicleEmpty: document.querySelector("#vehicleEmpty"),
-  vehicleCardTemplate: document.querySelector("#vehicleCardTemplate"),
-  vehicleImage: document.querySelector("#vehicleImage"),
-  vehicleImagePreview: document.querySelector("#vehicleImagePreview"),
-  vehicleImageHint: document.querySelector("#vehicleImageHint")
+  vehicleCardTemplate: document.querySelector("#vehicleCardTemplate")
 };
-
-// Data URL of the photo chosen in the add-vehicle form (empty = none).
-let pendingImage = "";
-
-const IMAGE_HINT_DEFAULT = "JPG or PNG, up to 15 MB. It's auto-compressed before saving.";
-
-function setImageHint(el, message, isError) {
-  el.textContent = message;
-  el.classList.toggle("image-hint-error", Boolean(isError));
-}
-
-garageEls.vehicleImage.addEventListener("change", async () => {
-  const file = garageEls.vehicleImage.files[0];
-  if (!file) {
-    pendingImage = "";
-    garageEls.vehicleImagePreview.hidden = true;
-    setImageHint(garageEls.vehicleImageHint, IMAGE_HINT_DEFAULT, false);
-    return;
-  }
-  setImageHint(garageEls.vehicleImageHint, "Compressing photo…", false);
-  try {
-    const { dataUrl, bytes } = await fileToResizedDataUrl(file);
-    pendingImage = dataUrl;
-    garageEls.vehicleImagePreview.src = dataUrl;
-    garageEls.vehicleImagePreview.hidden = false;
-    setImageHint(garageEls.vehicleImageHint, `Photo ready — ${Math.round(bytes / 1024)} KB after compression.`, false);
-  } catch (error) {
-    pendingImage = "";
-    garageEls.vehicleImage.value = "";
-    garageEls.vehicleImagePreview.hidden = true;
-    setImageHint(garageEls.vehicleImageHint, error.message || "Could not use that image.", true);
-  }
-});
 
 function openVehicle(id) {
   window.location.href = `./vehicle.html?id=${encodeURIComponent(id)}`;
 }
+
+garageEls.addVehicle.addEventListener("click", () => {
+  window.location.href = "./vehicle-form.html";
+});
 
 function renderGarage() {
   garageEls.vehicleList.replaceChildren();
@@ -83,37 +52,9 @@ function renderGarage() {
   }
 }
 
-function onGarageReady() {
-  renderGarage();
-}
-
-garageEls.vehicleForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const form = new FormData(garageEls.vehicleForm);
-  const vehicle = normalizeVehicle({
-    id: makeId(),
-    name: form.get("name").trim(),
-    plate: form.get("plate").trim().toUpperCase(),
-    odometer: Number(form.get("odometer")),
-    model: form.get("model").trim(),
-    image: pendingImage,
-    createdAt: new Date().toISOString(),
-    records: []
-  });
-
-  const submitButton = garageEls.vehicleForm.querySelector('button[type="submit"]');
-  state.vehicles.push(vehicle);
-  await withButtonBusy(submitButton, "Adding…", () => persist());
-  garageEls.vehicleForm.reset();
-  pendingImage = "";
-  garageEls.vehicleImagePreview.hidden = true;
-  setImageHint(garageEls.vehicleImageHint, IMAGE_HINT_DEFAULT, false);
-  renderGarage();
-});
-
 window.onPullRefresh = async () => {
   await refreshData();
-  onGarageReady();
+  renderGarage();
 };
 
-bootWithFallback(onGarageReady);
+bootWithFallback(renderGarage);

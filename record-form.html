@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Garage | Service Log</title>
+    <title>Service record | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -20,7 +20,7 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Garage overview">
+      <section class="topbar" aria-label="Service record">
         <div>
           <p class="eyebrow app-version"></p>
           <h1>Service Log</h1>
@@ -42,48 +42,67 @@
         </div>
       </section>
 
-      <section class="panel" aria-labelledby="garageHeading">
+      <div class="detail-head">
+        <button type="button" id="backButton" class="ghost-action back-action">&larr; Back to logbook</button>
+      </div>
+
+      <section class="panel" aria-labelledby="formHeading">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Your vehicles</p>
-            <h2 id="garageHeading">Garage</h2>
+            <p class="eyebrow">Log book</p>
+            <h2 id="formHeading">New service record</h2>
+            <p class="panel-subtitle" id="formVehicleName"></p>
           </div>
-          <button type="button" id="addVehicle" class="primary-action heading-action">Add vehicle</button>
         </div>
-        <div id="vehicleEmpty" class="empty-state" hidden>
-          Add your first vehicle to start building service logs.
-        </div>
-        <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
+
+        <form id="serviceForm" class="form-grid">
+          <label>
+            Service date
+            <input id="serviceDate" name="date" type="date" required />
+          </label>
+          <label>
+            Odometer reading
+            <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
+          </label>
+          <label>
+            Workshop
+            <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" list="workshopSuggestions" />
+            <datalist id="workshopSuggestions"></datalist>
+          </label>
+          <label>
+            Cost
+            <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
+          </label>
+          <label class="span-2">
+            Service category
+            <select id="serviceCategory" name="category" required>
+              <option value="" disabled selected>Choose a category</option>
+            </select>
+          </label>
+          <div class="field span-2">
+            <span class="field-label">Items serviced</span>
+            <div id="serviceItemChips" class="chips" role="group" aria-label="Items serviced" hidden></div>
+            <p id="chipsHint" class="field-hint">Pick a category to see common items.</p>
+          </div>
+          <label class="span-2">
+            Details / other items
+            <textarea id="serviceItems" name="items" rows="3" placeholder="Anything not covered by the chips above"></textarea>
+          </label>
+          <label>
+            Next service date
+            <input id="nextDate" name="nextDate" type="date" />
+          </label>
+          <label>
+            Next service odometer
+            <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
+          </label>
+          <div class="span-2 edit-actions">
+            <button type="submit" id="serviceSubmit" class="primary-action">Add service record</button>
+            <button type="button" id="cancelForm" class="ghost-action">Cancel</button>
+          </div>
+        </form>
       </section>
     </main>
-
-    <template id="vehicleCardTemplate">
-      <button type="button" class="vehicle-card">
-        <img class="vehicle-thumb" alt="" hidden />
-        <div class="vehicle-card-main">
-          <div class="vehicle-card-title">
-            <h3 class="vehicle-name"></h3>
-            <span class="vehicle-due" hidden></span>
-          </div>
-          <p class="vehicle-plate"></p>
-        </div>
-        <dl class="vehicle-card-stats">
-          <div>
-            <dt>Odometer</dt>
-            <dd class="vehicle-odometer"></dd>
-          </div>
-          <div>
-            <dt>Logs</dt>
-            <dd class="vehicle-count"></dd>
-          </div>
-          <div>
-            <dt>Last service</dt>
-            <dd class="vehicle-last"></dd>
-          </div>
-        </dl>
-        <span class="vehicle-card-cta" aria-hidden="true">View logs &rarr;</span>
-      </button>
-    </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -91,7 +110,7 @@
     <script src="./version.js"></script>
     <script src="./firebase-config.js"></script>
     <script src="./store.js"></script>
-    <script src="./garage.js"></script>
+    <script src="./record-form.js"></script>
     <script src="./pull-refresh.js"></script>
   </body>
 </html>

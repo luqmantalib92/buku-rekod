@@ -50,44 +50,6 @@
         </div>
       </div>
 
-      <section id="editPanel" class="panel edit-panel" aria-labelledby="editHeading" hidden>
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Edit</p>
-            <h2 id="editHeading">Vehicle details</h2>
-          </div>
-        </div>
-        <form id="editVehicleForm" class="form-grid">
-          <label>
-            Vehicle name
-            <input id="editName" name="name" autocomplete="off" required />
-          </label>
-          <label>
-            Plate number
-            <input id="editPlate" name="plate" autocomplete="off" required />
-          </label>
-          <label>
-            Current odometer
-            <input id="editOdometer" name="odometer" type="number" min="0" step="1" required />
-          </label>
-          <label>
-            Model / year
-            <input id="editModel" name="model" autocomplete="off" placeholder="Optional" />
-          </label>
-          <label class="span-2 image-field">
-            Photo
-            <input id="editImage" name="image" type="file" accept="image/*" />
-            <p id="editImageHint" class="image-hint field-hint">JPG or PNG, up to 15 MB. It's auto-compressed before saving.</p>
-            <img id="editImagePreview" class="image-preview" alt="Vehicle photo" hidden />
-            <button type="button" id="removeEditImage" class="secondary-line" hidden>Remove photo</button>
-          </label>
-          <div class="span-2 edit-actions">
-            <button type="submit" class="primary-action">Save changes</button>
-            <button type="button" id="cancelEdit" class="ghost-action">Cancel</button>
-          </div>
-        </form>
-      </section>
-
       <section class="summary-grid" aria-label="Service summary">
         <article class="summary-card">
           <span>Vehicle</span>
@@ -121,77 +83,22 @@
         <div id="reminderList" class="reminder-list"></div>
       </section>
 
-      <div class="content-grid">
-        <section class="panel" aria-labelledby="serviceHeading">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">Log book</p>
-              <h2 id="serviceHeading">New service record</h2>
-            </div>
+      <section class="panel history-panel" aria-labelledby="historyHeading">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Log book</p>
+            <h2 id="historyHeading">Service records</h2>
           </div>
-
-          <form id="serviceForm" class="form-grid">
-            <label>
-              Service date
-              <input id="serviceDate" name="date" type="date" required />
-            </label>
-            <label>
-              Odometer reading
-              <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
-            </label>
-            <label>
-              Workshop
-              <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" list="workshopSuggestions" />
-              <datalist id="workshopSuggestions"></datalist>
-            </label>
-            <label>
-              Cost
-              <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
-            </label>
-            <label class="span-2">
-              Service category
-              <select id="serviceCategory" name="category" required>
-                <option value="" disabled selected>Choose a category</option>
-              </select>
-            </label>
-            <div class="field span-2">
-              <span class="field-label">Items serviced</span>
-              <div id="serviceItemChips" class="chips" role="group" aria-label="Items serviced" hidden></div>
-              <p id="chipsHint" class="field-hint">Pick a category to see common items.</p>
-            </div>
-            <label class="span-2">
-              Details / other items
-              <textarea id="serviceItems" name="items" rows="3" placeholder="Anything not covered by the chips above"></textarea>
-            </label>
-            <label>
-              Next service date
-              <input id="nextDate" name="nextDate" type="date" />
-            </label>
-            <label>
-              Next service odometer
-              <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
-            </label>
-            <div class="span-2 edit-actions">
-              <button type="submit" id="serviceSubmit" class="primary-action">Add service record</button>
-              <button type="button" id="cancelServiceEdit" class="ghost-action" hidden>Cancel</button>
-            </div>
-          </form>
-        </section>
-
-        <section class="panel history-panel" aria-labelledby="historyHeading">
-          <div class="panel-heading">
-            <div>
-              <p class="eyebrow">History</p>
-              <h2 id="historyHeading">Service records</h2>
-            </div>
+          <div class="heading-actions">
+            <button type="button" id="addRecord" class="primary-action heading-action">Add record</button>
             <button type="button" id="clearRecords" class="ghost-action">Clear all</button>
           </div>
-          <div id="emptyState" class="empty-state" hidden>
-            Add your first service record to start building the log.
-          </div>
-          <div id="recordList" class="record-list" aria-live="polite"></div>
-        </section>
-      </div>
+        </div>
+        <div id="emptyState" class="empty-state" hidden>
+          Add your first service record to start building the log.
+        </div>
+        <div id="recordList" class="record-list" aria-live="polite"></div>
+      </section>
     </main>
 
     <template id="recordTemplate">
