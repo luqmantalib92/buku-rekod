@@ -27,13 +27,20 @@
             <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
           </button>
           <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
-            <p class="account-email" id="accountEmail">Local mode</p>
-            <p class="account-status" id="accountStatus">Saved on this device</p>
-            <a href="./settings.html" class="account-link" role="menuitem">Settings</a>
-            <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
+            <div class="account-menu-head">
+              <span class="account-avatar account-menu-avatar" id="accountMenuAvatar" aria-hidden="true">&middot;</span>
+              <div class="account-menu-id">
+                <p class="account-email" id="accountEmail">Local mode</p>
+                <p class="account-status" id="accountStatus">Saved on this device</p>
+              </div>
+            </div>
+            <hr class="account-divider" />
+            <a href="./settings.html" class="account-link" role="menuitem"><span>Settings</span><span class="account-link-chev" aria-hidden="true">&rsaquo;</span></a>
+            <button type="button" id="signOutButton" class="account-link account-link-danger" role="menuitem" hidden>Sign out</button>
+            <hr class="account-divider" />
             <p class="account-version app-version"></p>
           </div>
-        </div>
+          </div>
       </section>
 
       <section class="panel" aria-label="Service record">

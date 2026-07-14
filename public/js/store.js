@@ -403,6 +403,7 @@ const shellEls = {
   accountButton: document.querySelector("#accountButton"),
   accountMenu: document.querySelector("#accountMenu"),
   accountAvatar: document.querySelector("#accountAvatar"),
+  accountMenuAvatar: document.querySelector("#accountMenuAvatar"),
   accountEmail: document.querySelector("#accountEmail"),
   accountStatus: document.querySelector("#accountStatus")
 };
@@ -565,9 +566,9 @@ function revealShell(signedIn, label) {
   if (shellEls.appContent) shellEls.appContent.hidden = false;
   if (shellEls.signOutButton) shellEls.signOutButton.hidden = !signedIn;
 
-  if (shellEls.accountAvatar) {
-    shellEls.accountAvatar.textContent = signedIn && label ? label.trim().charAt(0).toUpperCase() : "·";
-  }
+  const initial = signedIn && label ? label.trim().charAt(0).toUpperCase() : "·";
+  if (shellEls.accountAvatar) shellEls.accountAvatar.textContent = initial;
+  if (shellEls.accountMenuAvatar) shellEls.accountMenuAvatar.textContent = initial;
   if (shellEls.accountEmail) {
     shellEls.accountEmail.textContent = signedIn && label ? label : "Local mode";
   }

@@ -250,52 +250,69 @@ button {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: min(260px, calc(100vw - 32px));
+  width: min(280px, calc(100vw - 32px));
   display: grid;
-  gap: 4px;
-  padding: 14px;
+  gap: 2px;
+  padding: 8px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 14px;
   background: var(--surface);
   box-shadow: var(--shadow);
   z-index: 1000;
 }
 
-.account-email {
-  margin: 0;
-  font-weight: 800;
-  overflow-wrap: anywhere;
+.account-menu-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px 10px;
 }
 
-.account-status {
-  margin: 0 0 8px;
-  color: var(--muted);
-  font-size: 0.85rem;
+.account-menu-avatar {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  font-size: 1rem;
+}
+
+.account-menu-id {
+  min-width: 0;
 }
 
 .account-link {
   display: flex;
   align-items: center;
-  min-height: 40px;
-  padding: 8px 10px;
-  border-radius: 7px;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
   color: var(--ink);
   font-weight: 700;
+  text-align: left;
   text-decoration: none;
+  touch-action: manipulation;
 }
 
 .account-link:hover {
   background: var(--fill);
 }
 
-.account-link-active {
-  background: var(--accent-tint);
-  color: var(--accent-dark);
-}
-
 .account-link:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.account-link-chev {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.account-link-danger {
+  color: #c0392b;
 }
 
 .account-divider {
@@ -304,10 +321,6 @@ button {
   margin: 6px 0;
   border: 0;
   border-top: 1px solid var(--line);
-}
-
-.account-signout {
-  width: 100%;
 }
 
 .eyebrow {

@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.5.2",
+    date: "2026-07-14",
+    notes: [
+      "Tidied the avatar popup: a profile header (avatar + email), then Settings and Sign out as clean rows, with the version in a footer."
+    ]
+  },
+  {
     version: "1.5.1",
     date: "2026-07-14",
     notes: [
