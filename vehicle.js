@@ -282,6 +282,11 @@ vehicleEls.deleteVehicle.addEventListener("click", async () => {
 
 vehicleEls.backToGarage.addEventListener("click", goGarage);
 
+window.onPullRefresh = async () => {
+  await refreshData();
+  renderVehicle();
+};
+
 vehicleEls.serviceDate.valueAsDate = new Date();
 populateCategories();
 renderItemChips();

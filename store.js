@@ -189,6 +189,15 @@ async function loadRemoteData() {
   ingest(snapshot.exists ? snapshot.data() : {});
 }
 
+// Re-pull the latest data (used by pull-to-refresh). The caller re-renders.
+async function refreshData() {
+  if (state.useFirestore && state.dataRef) {
+    await loadRemoteData();
+  } else {
+    loadLocal();
+  }
+}
+
 async function persist() {
   if (state.useFirestore && state.dataRef) {
     await state.dataRef.set({

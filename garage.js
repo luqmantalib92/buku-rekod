@@ -103,4 +103,9 @@ garageEls.vehicleForm.addEventListener("submit", async (event) => {
   renderGarage();
 });
 
+window.onPullRefresh = async () => {
+  await refreshData();
+  onGarageReady();
+};
+
 bootWithFallback(onGarageReady);

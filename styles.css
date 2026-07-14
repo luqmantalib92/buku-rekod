@@ -69,6 +69,45 @@ button {
   letter-spacing: 0.02em;
 }
 
+.pull-refresh {
+  position: fixed;
+  top: calc(8px + env(safe-area-inset-top, 0px));
+  left: 50%;
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translateY(0);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.pull-refresh-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+}
+
+.pull-refresh.ready .pull-refresh-spinner {
+  border-top-color: var(--accent-dark);
+  transform: rotate(180deg);
+}
+
+.pull-refresh.refreshing .pull-refresh-spinner {
+  animation: pull-refresh-spin 0.7s linear infinite;
+}
+
+@keyframes pull-refresh-spin {
+  to { transform: rotate(360deg); }
+}
+
 h1,
 h2,
 h3,
