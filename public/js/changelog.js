@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.3.3",
+    date: "2026-07-14",
+    notes: [
+      "Logbook now sorts by next-service date (soonest first), so what's due next is at the top. Records with no next date sit at the bottom, newest first."
+    ]
+  },
+  {
     version: "1.3.2",
     date: "2026-07-14",
     notes: [

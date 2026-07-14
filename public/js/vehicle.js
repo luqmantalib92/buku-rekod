@@ -80,9 +80,17 @@ function updateSummary(vehicle) {
 
 function renderRecords(vehicle) {
   vehicleEls.recordList.replaceChildren();
+  // Sort by next-service date, soonest first (so what's due next is on top).
+  // Records without a next date fall to the bottom, newest service first.
   const sorted = [...vehicle.records].sort((a, b) => {
-    const byDate = b.date.localeCompare(a.date);
-    return byDate || Number(b.odometer || 0) - Number(a.odometer || 0);
+    const an = a.nextDate || "";
+    const bn = b.nextDate || "";
+    if (an && bn) {
+      if (an !== bn) return an.localeCompare(bn);
+    } else if (an || bn) {
+      return an ? -1 : 1;
+    }
+    return b.date.localeCompare(a.date) || Number(b.odometer || 0) - Number(a.odometer || 0);
   });
 
   vehicleEls.emptyState.hidden = sorted.length > 0;
