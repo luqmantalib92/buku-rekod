@@ -224,6 +224,16 @@ textarea:focus {
   border: 0;
   border-radius: 7px;
   font-weight: 800;
+  touch-action: manipulation;
+}
+
+.primary-action:focus-visible,
+.secondary-action:focus-visible,
+.ghost-action:focus-visible,
+.icon-button:focus-visible,
+.input-affix-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .primary-action {
@@ -247,7 +257,18 @@ textarea:focus {
   background: #edf5f2;
 }
 
+.secondary-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--muted, #6b7280);
+}
+
+.secondary-action:disabled:hover {
+  background: #fff;
+}
+
 .ghost-action {
+  min-height: 44px;
   border: 1px solid var(--line);
   background: #fff;
   color: var(--warn);
@@ -283,6 +304,7 @@ textarea:focus {
 
 .login-page {
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
 }
@@ -371,14 +393,54 @@ dd {
 }
 
 .icon-button {
+  min-height: 44px;
   background: #f7ebe5;
   color: #9a3c18;
-  padding: 8px 10px;
+  padding: 8px 14px;
   font-size: 0.8rem;
 }
 
 .record-notes {
   margin: 14px 0 0;
+}
+
+.input-with-affix {
+  position: relative;
+  display: grid;
+}
+
+.input-with-affix input {
+  padding-right: 74px;
+}
+
+.input-affix-btn {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent-dark);
+  font-size: 0.8rem;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+.input-affix-btn:hover {
+  background: #edf5f2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @media (max-width: 920px) {
