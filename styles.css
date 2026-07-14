@@ -190,6 +190,7 @@ dt {
 label {
   display: grid;
   gap: 7px;
+  min-width: 0;
   color: #31413c;
   font-size: 0.88rem;
   font-weight: 700;
@@ -199,6 +200,8 @@ input,
 textarea,
 select {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   border: 1px solid #cbd5cf;
   border-radius: 7px;
   background: #fbfcfa;
@@ -574,7 +577,8 @@ dd {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 4px 12px;
   border: 1px solid var(--line);
   border-left-width: 4px;
   border-radius: 8px;
@@ -583,6 +587,8 @@ dd {
 }
 
 .reminder-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
   font-weight: 800;
 }
 
@@ -705,8 +711,22 @@ dd {
   .summary-grid,
   .content-grid,
   .form-grid,
+  .settings-grid,
   .record-details {
     grid-template-columns: 1fr;
+  }
+
+  .detail-head,
+  .detail-head-actions,
+  .edit-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .detail-head-actions .ghost-action,
+  .edit-actions .primary-action,
+  .edit-actions .ghost-action {
+    width: 100%;
   }
 
   .panel,
