@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vehicle | Service Log</title>
+    <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" id="appContent" hidden>
+      <section class="topbar" aria-label="Vehicle overview">
+        <div>
+          <p class="eyebrow" id="pagePlate">&nbsp;</p>
+          <h1 id="pageTitle">Vehicle</h1>
+        </div>
+        <div class="topbar-actions">
+          <div class="sync-pill" id="syncStatus">Local mode</div>
+          <button type="button" id="signOutButton" class="ghost-action" hidden>Sign out</button>
+        </div>
+      </section>
+
+      <div class="detail-head">
+        <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
+        <button type="button" id="deleteVehicle" class="ghost-action">Delete vehicle</button>
+      </div>
+
+      <section class="summary-grid" aria-label="Service summary">
+        <article class="summary-card">
+          <span>Vehicle</span>
+          <strong id="summaryVehicle">-</strong>
+          <small id="summaryPlate">-</small>
+        </article>
+        <article class="summary-card">
+          <span>Current odometer</span>
+          <strong id="summaryOdometer">-</strong>
+          <small>Latest saved reading</small>
+        </article>
+        <article class="summary-card">
+          <span>Last service</span>
+          <strong id="summaryLastService">-</strong>
+          <small id="summaryLastServiceMeta">No records yet</small>
+        </article>
+        <article class="summary-card">
+          <span>Total spent</span>
+          <strong id="summaryCost">RM 0.00</strong>
+          <small>Across all records</small>
+        </article>
+      </section>
+
+      <div class="content-grid">
+        <section class="panel" aria-labelledby="serviceHeading">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Log book</p>
+              <h2 id="serviceHeading">New service record</h2>
+            </div>
+          </div>
+
+          <form id="serviceForm" class="form-grid">
+            <label>
+              Service date
+              <input id="serviceDate" name="date" type="date" required />
+            </label>
+            <label>
+              Odometer reading
+              <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
+            </label>
+            <label>
+              Workshop
+              <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" />
+            </label>
+            <label>
+              Cost
+              <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
+            </label>
+            <label class="span-2">
+              What was serviced
+              <textarea id="serviceItems" name="items" rows="4" placeholder="Engine oil, oil filter, tyre rotation" required></textarea>
+            </label>
+            <label>
+              Next service date
+              <input id="nextDate" name="nextDate" type="date" />
+            </label>
+            <label>
+              Next service odometer
+              <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
+            </label>
+            <label class="span-2">
+              Notes
+              <textarea id="serviceNotes" name="notes" rows="3" placeholder="Parts brand, mechanic notes, warranty info"></textarea>
+            </label>
+            <button type="submit" class="primary-action">Add service record</button>
+          </form>
+        </section>
+
+        <section class="panel history-panel" aria-labelledby="historyHeading">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">History</p>
+              <h2 id="historyHeading">Service records</h2>
+            </div>
+            <button type="button" id="clearRecords" class="ghost-action">Clear all</button>
+          </div>
+          <div id="emptyState" class="empty-state">
+            Add your first service record to start building the log.
+          </div>
+          <div id="recordList" class="record-list" aria-live="polite"></div>
+        </section>
+      </div>
+    </main>
+
+    <template id="recordTemplate">
+      <article class="record-card">
+        <div class="record-topline">
+          <div>
+            <h3></h3>
+            <p class="record-meta"></p>
+          </div>
+          <button type="button" class="icon-button" aria-label="Delete service record">Delete</button>
+        </div>
+        <p class="record-items"></p>
+        <dl class="record-details">
+          <div>
+            <dt>Cost</dt>
+            <dd class="record-cost"></dd>
+          </div>
+          <div>
+            <dt>Next date</dt>
+            <dd class="record-next-date"></dd>
+          </div>
+          <div>
+            <dt>Next odometer</dt>
+            <dd class="record-next-odometer"></dd>
+          </div>
+        </dl>
+        <p class="record-notes"></p>
+      </article>
+    </template>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="./firebase-config.js"></script>
+    <script src="./store.js"></script>
+    <script src="./vehicle.js"></script>
+  </body>
+</html>
