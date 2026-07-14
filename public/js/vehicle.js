@@ -159,7 +159,7 @@ function renderRecords(vehicle) {
     label.textContent = RECORD_GROUP_LABELS[key];
     const count = document.createElement("span");
     count.className = "record-group-count";
-    count.textContent = String(items.length);
+    count.textContent = `${items.length} ${items.length === 1 ? "service" : "services"}`;
     header.append(label, count);
     vehicleEls.recordList.append(header);
 

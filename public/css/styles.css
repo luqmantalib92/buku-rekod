@@ -1177,6 +1177,10 @@ dd {
   font-weight: 700;
 }
 
+.record-group-count::before {
+  content: "· ";
+}
+
 .record-group-overdue .record-group-label {
   color: #c0392b;
 }

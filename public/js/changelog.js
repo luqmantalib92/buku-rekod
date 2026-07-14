@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.4.3",
+    date: "2026-07-14",
+    notes: [
+      "Logbook group headers now read clearly, e.g. \"Due soon · 2 services\" instead of just a number."
+    ]
+  },
+  {
     version: "1.4.2",
     date: "2026-07-14",
     notes: [
