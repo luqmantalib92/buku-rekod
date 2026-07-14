@@ -137,6 +137,11 @@ function initForm() {
   } else {
     renderItemChips();
     recordEls.serviceDate.valueAsDate = new Date();
+    // Date is prefilled to today, so start the cursor on the odometer.
+    // Pointer devices only, to avoid popping the mobile keyboard on open.
+    if (window.matchMedia("(pointer: fine)").matches) {
+      recordEls.serviceForm.odometer.focus();
+    }
   }
 }
 

@@ -3,6 +3,16 @@
 
 const CHANGELOG = [
   {
+    version: "1.1.1",
+    date: "2026-07-14",
+    notes: [
+      "Delete, Clear all and Reset now show in red so destructive actions stand out.",
+      "Required fields are marked with an asterisk.",
+      "Empty garage/logbook now show a quick Add button, and forms focus the first field on desktop.",
+      "Toned down the oversized page title for a more balanced header."
+    ]
+  },
+  {
     version: "1.1.0",
     date: "2026-07-14",
     notes: [

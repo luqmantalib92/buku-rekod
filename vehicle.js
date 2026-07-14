@@ -7,6 +7,7 @@ const vehicleEls = {
   editVehicle: document.querySelector("#editVehicle"),
   deleteVehicle: document.querySelector("#deleteVehicle"),
   addRecord: document.querySelector("#addRecord"),
+  emptyAddRecord: document.querySelector("#emptyAddRecord"),
   reminders: document.querySelector("#reminders"),
   reminderList: document.querySelector("#reminderList"),
   clearRecords: document.querySelector("#clearRecords"),
@@ -137,6 +138,7 @@ async function deleteRecord(recordId) {
 }
 
 vehicleEls.addRecord.addEventListener("click", () => openRecordForm(null));
+vehicleEls.emptyAddRecord.addEventListener("click", () => openRecordForm(null));
 
 vehicleEls.editVehicle.addEventListener("click", () => {
   window.location.href = `./vehicle-form.html?id=${encodeURIComponent(currentVehicleId())}`;

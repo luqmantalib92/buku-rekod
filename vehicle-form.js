@@ -81,6 +81,12 @@ function initForm() {
     showImage();
   }
   setImageHint(IMAGE_HINT_DEFAULT, false);
+
+  // Autofocus the first field on pointer devices only, so phones don't pop
+  // the keyboard the moment the page opens.
+  if (window.matchMedia("(pointer: fine)").matches) {
+    formEls.name.focus();
+  }
 }
 
 formEls.vehicleForm.addEventListener("input", () => { dirty = true; });

@@ -46,7 +46,7 @@
         <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
         <div class="detail-head-actions">
           <button type="button" id="editVehicle" class="ghost-action edit-action">Edit details</button>
-          <button type="button" id="deleteVehicle" class="ghost-action">Delete vehicle</button>
+          <button type="button" id="deleteVehicle" class="ghost-action danger-action">Delete vehicle</button>
         </div>
       </div>
 
@@ -91,11 +91,12 @@
           </div>
           <div class="heading-actions">
             <button type="button" id="addRecord" class="primary-action heading-action">Add record</button>
-            <button type="button" id="clearRecords" class="ghost-action">Clear all</button>
+            <button type="button" id="clearRecords" class="ghost-action danger-action">Clear all</button>
           </div>
         </div>
         <div id="emptyState" class="empty-state" hidden>
-          Add your first service record to start building the log.
+          <p>Add your first service record to start building the log.</p>
+          <button type="button" id="emptyAddRecord" class="primary-action">Add record</button>
         </div>
         <div id="recordList" class="record-list" aria-live="polite"></div>
       </section>

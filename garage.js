@@ -3,6 +3,7 @@
 
 const garageEls = {
   addVehicle: document.querySelector("#addVehicle"),
+  emptyAddVehicle: document.querySelector("#emptyAddVehicle"),
   vehicleList: document.querySelector("#vehicleList"),
   vehicleEmpty: document.querySelector("#vehicleEmpty"),
   vehicleCardTemplate: document.querySelector("#vehicleCardTemplate")
@@ -12,9 +13,12 @@ function openVehicle(id) {
   window.location.href = `./vehicle.html?id=${encodeURIComponent(id)}`;
 }
 
-garageEls.addVehicle.addEventListener("click", () => {
+function openVehicleForm() {
   window.location.href = "./vehicle-form.html";
-});
+}
+
+garageEls.addVehicle.addEventListener("click", openVehicleForm);
+garageEls.emptyAddVehicle.addEventListener("click", openVehicleForm);
 
 function renderGarage() {
   garageEls.vehicleList.replaceChildren();

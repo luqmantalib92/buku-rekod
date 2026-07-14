@@ -356,6 +356,12 @@ h1 {
   letter-spacing: 0;
 }
 
+/* The in-app header title sits next to the version tag and avatar, so keep it
+   proportionate rather than hero-sized. (The login page keeps the big h1.) */
+.topbar h1 {
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
+}
+
 h2 {
   margin-bottom: 0;
   font-size: 1.35rem;
@@ -562,8 +568,23 @@ select:focus {
   min-height: 44px;
   border: 1px solid var(--line);
   background: #fff;
-  color: var(--warn);
+  color: var(--ink);
   padding: 9px 12px;
+}
+
+/* Destructive ghost buttons (Delete, Clear all, Reset) read as dangerous. */
+.ghost-action.danger-action {
+  color: #c0392b;
+  border-color: #e6c3bd;
+}
+
+.ghost-action.danger-action:hover {
+  background: #fbeae6;
+}
+
+.req {
+  color: #c0392b;
+  font-weight: 800;
 }
 
 .auth-form {
@@ -610,6 +631,16 @@ select:focus {
   padding: 24px;
   color: var(--muted);
   text-align: center;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.empty-state .primary-action {
+  grid-column: auto;
+  margin-top: 16px;
+  padding: 0 22px;
 }
 
 .record-list {
@@ -684,6 +715,11 @@ dd {
   color: var(--accent-dark);
 }
 
+.record-delete {
+  background: #fbeae6;
+  color: #c0392b;
+}
+
 .record-notes {
   margin: 14px 0 0;
 }
@@ -747,6 +783,10 @@ dd {
 .vehicle-card:hover {
   border-color: rgba(33, 110, 95, 0.45);
   transform: translateY(-2px);
+}
+
+.vehicle-card:active {
+  transform: scale(0.99);
 }
 
 .vehicle-card:focus-visible {
