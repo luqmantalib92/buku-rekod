@@ -1,8 +1,8 @@
 const LOCAL_KEY = "vehicle-service-log:v1";
 
 const state = {
-  vehicle: null,
-  records: [],
+  vehicles: [],
+  currentVehicleId: null,
   user: null,
   auth: null,
   db: null,
@@ -14,7 +14,16 @@ const els = {
   appContent: document.querySelector("#appContent"),
   signOutButton: document.querySelector("#signOutButton"),
   syncStatus: document.querySelector("#syncStatus"),
+  // Garage view
+  garageView: document.querySelector("#garageView"),
   vehicleForm: document.querySelector("#vehicleForm"),
+  vehicleList: document.querySelector("#vehicleList"),
+  vehicleEmpty: document.querySelector("#vehicleEmpty"),
+  vehicleCardTemplate: document.querySelector("#vehicleCardTemplate"),
+  // Vehicle detail view
+  vehicleView: document.querySelector("#vehicleView"),
+  backToGarage: document.querySelector("#backToGarage"),
+  deleteVehicle: document.querySelector("#deleteVehicle"),
   serviceForm: document.querySelector("#serviceForm"),
   clearRecords: document.querySelector("#clearRecords"),
   recordList: document.querySelector("#recordList"),
@@ -59,25 +68,50 @@ function makeId() {
   return crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
 }
 
+function normalizeVehicle(vehicle) {
+  const source = vehicle || {};
+  return {
+    id: source.id || makeId(),
+    name: source.name || "",
+    plate: source.plate || "",
+    odometer: Number(source.odometer || 0),
+    model: source.model || "",
+    createdAt: source.createdAt || new Date().toISOString(),
+    records: Array.isArray(source.records) ? source.records : []
+  };
+}
+
+// Accepts new format ({vehicles: []}) and the old single-vehicle format
+// ({vehicle, records}), migrating the latter into a one-vehicle garage.
+function ingest(data) {
+  const source = data || {};
+  if (Array.isArray(source.vehicles)) {
+    state.vehicles = source.vehicles.map(normalizeVehicle);
+  } else if (source.vehicle || Array.isArray(source.records)) {
+    state.vehicles = [normalizeVehicle({
+      ...(source.vehicle || { name: "My vehicle" }),
+      records: source.records || []
+    })];
+  } else {
+    state.vehicles = [];
+  }
+}
+
 function loadLocal() {
   const raw = localStorage.getItem(LOCAL_KEY);
-  if (!raw) return;
-
+  if (!raw) {
+    state.vehicles = [];
+    return;
+  }
   try {
-    const saved = JSON.parse(raw);
-    state.vehicle = saved.vehicle || null;
-    state.records = Array.isArray(saved.records) ? saved.records : [];
+    ingest(JSON.parse(raw));
   } catch {
-    state.vehicle = null;
-    state.records = [];
+    state.vehicles = [];
   }
 }
 
 function saveLocal() {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify({
-    vehicle: state.vehicle,
-    records: state.records
-  }));
+  localStorage.setItem(LOCAL_KEY, JSON.stringify({ vehicles: state.vehicles }));
 }
 
 async function initFirestore() {
@@ -97,8 +131,7 @@ async function initFirestore() {
 
   state.auth.onAuthStateChanged(async (user) => {
     state.user = user;
-    state.vehicle = null;
-    state.records = [];
+    state.vehicles = [];
 
     if (!user) {
       state.dataRef = null;
@@ -119,17 +152,14 @@ async function initFirestore() {
 async function loadRemoteData() {
   if (!state.dataRef) return;
   const snapshot = await state.dataRef.get();
-  const data = snapshot.exists ? snapshot.data() : {};
-  state.vehicle = data.vehicle || null;
-  state.records = Array.isArray(data.records) ? data.records : [];
+  ingest(snapshot.exists ? snapshot.data() : {});
   render();
 }
 
 async function persist() {
   if (state.useFirestore && state.dataRef) {
     await state.dataRef.set({
-      vehicle: state.vehicle,
-      records: state.records,
+      vehicles: state.vehicles,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } else {
@@ -137,26 +167,97 @@ async function persist() {
   }
 }
 
-function fillVehicleForm() {
-  if (!state.vehicle) return;
-  els.vehicleForm.name.value = state.vehicle.name || "";
-  els.vehicleForm.plate.value = state.vehicle.plate || "";
-  els.vehicleForm.odometer.value = state.vehicle.odometer || "";
-  els.vehicleForm.model.value = state.vehicle.model || "";
+function getVehicle(id) {
+  return state.vehicles.find((vehicle) => vehicle.id === id) || null;
 }
 
-function updateSummary() {
-  const sorted = [...state.records].sort((a, b) => b.date.localeCompare(a.date));
-  const latestRecord = sorted[0];
-  const latestOdometer = Math.max(
-    Number(state.vehicle?.odometer || 0),
-    ...state.records.map((record) => Number(record.odometer || 0))
+function latestOdometer(vehicle) {
+  return Math.max(
+    Number(vehicle.odometer || 0),
+    ...vehicle.records.map((record) => Number(record.odometer || 0)),
+    0
   );
-  const totalCost = state.records.reduce((sum, record) => sum + Number(record.cost || 0), 0);
+}
 
-  els.summaryVehicle.textContent = state.vehicle?.name || "Not added";
-  els.summaryPlate.textContent = state.vehicle?.plate || "Add your first vehicle";
-  els.summaryOdometer.textContent = latestOdometer > 0 ? formatKm(latestOdometer) : "-";
+/* ---- Routing (hash-based) ---- */
+
+function currentRoute() {
+  const match = (location.hash || "").match(/^#\/v\/(.+)$/);
+  return match ? { view: "vehicle", id: decodeURIComponent(match[1]) } : { view: "garage" };
+}
+
+function goGarage() {
+  location.hash = "#/";
+}
+
+function goVehicle(id) {
+  location.hash = `#/v/${encodeURIComponent(id)}`;
+}
+
+function showView(name) {
+  els.garageView.hidden = name !== "garage";
+  els.vehicleView.hidden = name !== "vehicle";
+}
+
+function render() {
+  const route = currentRoute();
+
+  if (route.view === "vehicle") {
+    const vehicle = getVehicle(route.id);
+    if (!vehicle) {
+      goGarage(); // hashchange re-triggers render()
+      return;
+    }
+    state.currentVehicleId = vehicle.id;
+    showView("vehicle");
+    renderVehicleDetail(vehicle);
+  } else {
+    state.currentVehicleId = null;
+    showView("garage");
+    renderGarage();
+  }
+
+  window.scrollTo(0, 0);
+}
+
+/* ---- Garage view ---- */
+
+function renderGarage() {
+  els.vehicleList.replaceChildren();
+  const vehicles = [...state.vehicles].sort((a, b) => a.name.localeCompare(b.name));
+  els.vehicleEmpty.hidden = vehicles.length > 0;
+
+  for (const vehicle of vehicles) {
+    const card = els.vehicleCardTemplate.content.firstElementChild.cloneNode(true);
+    const lastRecord = [...vehicle.records].sort((a, b) => b.date.localeCompare(a.date))[0];
+    const odometer = latestOdometer(vehicle);
+
+    card.querySelector(".vehicle-name").textContent = vehicle.name || "Unnamed vehicle";
+    card.querySelector(".vehicle-plate").textContent = vehicle.plate || "No plate";
+    card.querySelector(".vehicle-odometer").textContent = odometer > 0 ? formatKm(odometer) : "-";
+    card.querySelector(".vehicle-count").textContent = String(vehicle.records.length);
+    card.querySelector(".vehicle-last").textContent = lastRecord ? formatDate(lastRecord.date) : "-";
+    card.setAttribute("aria-label", `${vehicle.name || "Unnamed vehicle"}, view logs`);
+    card.addEventListener("click", () => goVehicle(vehicle.id));
+    els.vehicleList.append(card);
+  }
+}
+
+/* ---- Vehicle detail view ---- */
+
+function renderVehicleDetail(vehicle) {
+  updateSummary(vehicle);
+  renderRecords(vehicle);
+}
+
+function updateSummary(vehicle) {
+  const latestRecord = [...vehicle.records].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const odometer = latestOdometer(vehicle);
+  const totalCost = vehicle.records.reduce((sum, record) => sum + Number(record.cost || 0), 0);
+
+  els.summaryVehicle.textContent = vehicle.name || "Unnamed vehicle";
+  els.summaryPlate.textContent = vehicle.plate || "-";
+  els.summaryOdometer.textContent = odometer > 0 ? formatKm(odometer) : "-";
   els.summaryLastService.textContent = latestRecord ? formatDate(latestRecord.date) : "-";
   els.summaryLastServiceMeta.textContent = latestRecord
     ? `${formatKm(latestRecord.odometer)} at ${latestRecord.workshop || "unspecified workshop"}`
@@ -164,9 +265,9 @@ function updateSummary() {
   els.summaryCost.textContent = formatMoney(totalCost);
 }
 
-function renderRecords() {
+function renderRecords(vehicle) {
   els.recordList.replaceChildren();
-  const sorted = [...state.records].sort((a, b) => {
+  const sorted = [...vehicle.records].sort((a, b) => {
     const byDate = b.date.localeCompare(a.date);
     return byDate || Number(b.odometer || 0) - Number(a.odometer || 0);
   });
@@ -182,38 +283,48 @@ function renderRecords() {
     item.querySelector(".record-next-date").textContent = formatDate(record.nextDate);
     item.querySelector(".record-next-odometer").textContent = record.nextOdometer ? formatKm(record.nextOdometer) : "-";
     item.querySelector(".record-notes").textContent = record.notes || "";
-    item.querySelector(".icon-button").addEventListener("click", () => deleteRecord(record.id));
+    item.querySelector(".icon-button").addEventListener("click", () => deleteRecord(vehicle.id, record.id));
     els.recordList.append(item);
   }
 }
 
-function render() {
-  fillVehicleForm();
-  updateSummary();
-  renderRecords();
+async function deleteRecord(vehicleId, recordId) {
+  const vehicle = getVehicle(vehicleId);
+  if (!vehicle) return;
+  vehicle.records = vehicle.records.filter((record) => record.id !== recordId);
+  await persist();
+  renderVehicleDetail(vehicle);
 }
 
-async function deleteRecord(id) {
-  state.records = state.records.filter((record) => record.id !== id);
-  await persist();
-  render();
-}
+/* ---- Event handlers ---- */
 
 els.vehicleForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = new FormData(els.vehicleForm);
-  state.vehicle = {
+  const vehicle = normalizeVehicle({
+    id: makeId(),
     name: form.get("name").trim(),
     plate: form.get("plate").trim().toUpperCase(),
     odometer: Number(form.get("odometer")),
-    model: form.get("model").trim()
-  };
+    model: form.get("model").trim(),
+    createdAt: new Date().toISOString(),
+    records: []
+  });
+
+  state.vehicles.push(vehicle);
   await persist();
-  render();
+  els.vehicleForm.reset();
+  renderGarage();
 });
 
 els.serviceForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  const vehicle = getVehicle(state.currentVehicleId);
+  if (!vehicle) {
+    goGarage();
+    return;
+  }
+
   const form = new FormData(els.serviceForm);
   const record = {
     id: makeId(),
@@ -228,29 +339,45 @@ els.serviceForm.addEventListener("submit", async (event) => {
     createdAt: new Date().toISOString()
   };
 
-  state.records = [record, ...state.records];
-  if (state.vehicle && record.odometer > Number(state.vehicle.odometer || 0)) {
-    state.vehicle.odometer = record.odometer;
+  vehicle.records = [record, ...vehicle.records];
+  if (record.odometer > Number(vehicle.odometer || 0)) {
+    vehicle.odometer = record.odometer;
   }
 
   await persist();
   els.serviceForm.reset();
   document.querySelector("#serviceDate").valueAsDate = new Date();
-  render();
+  renderVehicleDetail(vehicle);
 });
 
 els.clearRecords.addEventListener("click", async () => {
-  const confirmed = confirm("Clear all service records? Your vehicle details will stay saved.");
+  const vehicle = getVehicle(state.currentVehicleId);
+  if (!vehicle) return;
+  const confirmed = confirm("Clear all service records for this vehicle? The vehicle itself stays saved.");
   if (!confirmed) return;
-  state.records = [];
+  vehicle.records = [];
   await persist();
-  render();
+  renderVehicleDetail(vehicle);
 });
+
+els.deleteVehicle.addEventListener("click", async () => {
+  const vehicle = getVehicle(state.currentVehicleId);
+  if (!vehicle) return;
+  const confirmed = confirm(`Delete "${vehicle.name || "this vehicle"}" and all its logs? This can't be undone.`);
+  if (!confirmed) return;
+  state.vehicles = state.vehicles.filter((item) => item.id !== vehicle.id);
+  await persist();
+  goGarage();
+});
+
+els.backToGarage.addEventListener("click", () => goGarage());
 
 els.signOutButton.addEventListener("click", async () => {
   await state.auth.signOut();
   window.location.replace("./login.html");
 });
+
+window.addEventListener("hashchange", render);
 
 document.querySelector("#serviceDate").valueAsDate = new Date();
 initFirestore().catch((error) => {

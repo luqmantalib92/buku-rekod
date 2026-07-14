@@ -20,35 +20,13 @@
         </div>
       </section>
 
-      <section class="summary-grid" aria-label="Service summary">
-        <article class="summary-card">
-          <span>Vehicle</span>
-          <strong id="summaryVehicle">Not added</strong>
-          <small id="summaryPlate">Add your first vehicle</small>
-        </article>
-        <article class="summary-card">
-          <span>Current odometer</span>
-          <strong id="summaryOdometer">-</strong>
-          <small>Latest saved reading</small>
-        </article>
-        <article class="summary-card">
-          <span>Last service</span>
-          <strong id="summaryLastService">-</strong>
-          <small id="summaryLastServiceMeta">No records yet</small>
-        </article>
-        <article class="summary-card">
-          <span>Total spent</span>
-          <strong id="summaryCost">RM 0.00</strong>
-          <small>Across all records</small>
-        </article>
-      </section>
-
-      <div class="content-grid">
+      <!-- View 1: Garage (list of vehicles) -->
+      <section id="garageView" class="view" aria-label="Garage">
         <section class="panel" aria-labelledby="vehicleHeading">
           <div class="panel-heading">
             <div>
               <p class="eyebrow">Setup</p>
-              <h2 id="vehicleHeading">Vehicle details</h2>
+              <h2 id="vehicleHeading">Add a vehicle</h2>
             </div>
           </div>
 
@@ -69,70 +47,140 @@
               Model / year
               <input id="vehicleModel" name="model" autocomplete="off" placeholder="Optional" />
             </label>
-            <button type="submit" class="primary-action">Save vehicle</button>
+            <button type="submit" class="primary-action">Add vehicle</button>
           </form>
         </section>
 
-        <section class="panel" aria-labelledby="serviceHeading">
+        <section class="panel" aria-labelledby="garageHeading">
           <div class="panel-heading">
             <div>
-              <p class="eyebrow">Log book</p>
-              <h2 id="serviceHeading">New service record</h2>
+              <p class="eyebrow">Your vehicles</p>
+              <h2 id="garageHeading">Garage</h2>
             </div>
           </div>
-
-          <form id="serviceForm" class="form-grid">
-            <label>
-              Service date
-              <input id="serviceDate" name="date" type="date" required />
-            </label>
-            <label>
-              Odometer reading
-              <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
-            </label>
-            <label>
-              Workshop
-              <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" />
-            </label>
-            <label>
-              Cost
-              <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
-            </label>
-            <label class="span-2">
-              What was serviced
-              <textarea id="serviceItems" name="items" rows="4" placeholder="Engine oil, oil filter, tyre rotation" required></textarea>
-            </label>
-            <label>
-              Next service date
-              <input id="nextDate" name="nextDate" type="date" />
-            </label>
-            <label>
-              Next service odometer
-              <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
-            </label>
-            <label class="span-2">
-              Notes
-              <textarea id="serviceNotes" name="notes" rows="3" placeholder="Parts brand, mechanic notes, warranty info"></textarea>
-            </label>
-            <button type="submit" class="primary-action">Add service record</button>
-          </form>
-        </section>
-      </div>
-
-      <section class="panel history-panel" aria-labelledby="historyHeading">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">History</p>
-            <h2 id="historyHeading">Service records</h2>
+          <div id="vehicleEmpty" class="empty-state">
+            Add your first vehicle to start building service logs.
           </div>
-          <button type="button" id="clearRecords" class="ghost-action">Clear all</button>
+          <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <!-- View 2: Vehicle detail (its service logs) -->
+      <section id="vehicleView" class="view" aria-label="Vehicle logs" hidden>
+        <div class="detail-head">
+          <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
+          <button type="button" id="deleteVehicle" class="ghost-action">Delete vehicle</button>
         </div>
-        <div id="emptyState" class="empty-state">
-          Add your first service record to start building the log.
+
+        <section class="summary-grid" aria-label="Service summary">
+          <article class="summary-card">
+            <span>Vehicle</span>
+            <strong id="summaryVehicle">-</strong>
+            <small id="summaryPlate">-</small>
+          </article>
+          <article class="summary-card">
+            <span>Current odometer</span>
+            <strong id="summaryOdometer">-</strong>
+            <small>Latest saved reading</small>
+          </article>
+          <article class="summary-card">
+            <span>Last service</span>
+            <strong id="summaryLastService">-</strong>
+            <small id="summaryLastServiceMeta">No records yet</small>
+          </article>
+          <article class="summary-card">
+            <span>Total spent</span>
+            <strong id="summaryCost">RM 0.00</strong>
+            <small>Across all records</small>
+          </article>
+        </section>
+
+        <div class="content-grid">
+          <section class="panel" aria-labelledby="serviceHeading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">Log book</p>
+                <h2 id="serviceHeading">New service record</h2>
+              </div>
+            </div>
+
+            <form id="serviceForm" class="form-grid">
+              <label>
+                Service date
+                <input id="serviceDate" name="date" type="date" required />
+              </label>
+              <label>
+                Odometer reading
+                <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
+              </label>
+              <label>
+                Workshop
+                <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" />
+              </label>
+              <label>
+                Cost
+                <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
+              </label>
+              <label class="span-2">
+                What was serviced
+                <textarea id="serviceItems" name="items" rows="4" placeholder="Engine oil, oil filter, tyre rotation" required></textarea>
+              </label>
+              <label>
+                Next service date
+                <input id="nextDate" name="nextDate" type="date" />
+              </label>
+              <label>
+                Next service odometer
+                <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
+              </label>
+              <label class="span-2">
+                Notes
+                <textarea id="serviceNotes" name="notes" rows="3" placeholder="Parts brand, mechanic notes, warranty info"></textarea>
+              </label>
+              <button type="submit" class="primary-action">Add service record</button>
+            </form>
+          </section>
+
+          <section class="panel history-panel" aria-labelledby="historyHeading">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">History</p>
+                <h2 id="historyHeading">Service records</h2>
+              </div>
+              <button type="button" id="clearRecords" class="ghost-action">Clear all</button>
+            </div>
+            <div id="emptyState" class="empty-state">
+              Add your first service record to start building the log.
+            </div>
+            <div id="recordList" class="record-list" aria-live="polite"></div>
+          </section>
         </div>
-        <div id="recordList" class="record-list" aria-live="polite"></div>
       </section>
     </main>
+
+    <template id="vehicleCardTemplate">
+      <button type="button" class="vehicle-card">
+        <div class="vehicle-card-main">
+          <h3 class="vehicle-name"></h3>
+          <p class="vehicle-plate"></p>
+        </div>
+        <dl class="vehicle-card-stats">
+          <div>
+            <dt>Odometer</dt>
+            <dd class="vehicle-odometer"></dd>
+          </div>
+          <div>
+            <dt>Logs</dt>
+            <dd class="vehicle-count"></dd>
+          </div>
+          <div>
+            <dt>Last service</dt>
+            <dd class="vehicle-last"></dd>
+          </div>
+        </dl>
+        <span class="vehicle-card-cta" aria-hidden="true">View logs &rarr;</span>
+      </button>
+    </template>
 
     <template id="recordTemplate">
       <article class="record-card">
