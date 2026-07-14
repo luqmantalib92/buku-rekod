@@ -121,6 +121,34 @@ button {
   font-size: 0.85rem;
 }
 
+.account-link {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.account-link:hover {
+  background: #edf5f2;
+}
+
+.account-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.account-divider {
+  width: 100%;
+  height: 0;
+  margin: 6px 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
 .account-signout {
   width: 100%;
 }
@@ -775,17 +803,6 @@ dd {
   align-self: center;
   color: var(--accent-dark);
   font-weight: 800;
-}
-
-.settings-link {
-  margin: 16px 0 0;
-  padding-top: 16px;
-  border-top: 1px solid var(--line);
-  font-weight: 800;
-}
-
-.settings-link a {
-  color: var(--accent-dark);
 }
 
 /* Categories editor */
