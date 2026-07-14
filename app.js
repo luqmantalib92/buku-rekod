@@ -12,11 +12,20 @@ const LOCAL_KEY = "vehicle-service-log:v1";
 const state = {
   vehicle: null,
   records: [],
+  user: null,
+  auth: null,
   db: null,
+  dataRef: null,
   useFirestore: false
 };
 
 const els = {
+  appContent: document.querySelector("#appContent"),
+  authPanel: document.querySelector("#authPanel"),
+  authForm: document.querySelector("#authForm"),
+  authMessage: document.querySelector("#authMessage"),
+  createAccountButton: document.querySelector("#createAccountButton"),
+  signOutButton: document.querySelector("#signOutButton"),
   syncStatus: document.querySelector("#syncStatus"),
   vehicleForm: document.querySelector("#vehicleForm"),
   serviceForm: document.querySelector("#serviceForm"),
@@ -33,7 +42,7 @@ const els = {
 };
 
 function hasFirebaseConfig() {
-  return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && window.firebase);
+  return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && window.firebase?.auth && window.firebase?.firestore);
 }
 
 function formatKm(value) {
@@ -87,17 +96,49 @@ function saveLocal() {
 async function initFirestore() {
   if (!hasFirebaseConfig()) {
     loadLocal();
+    els.appContent.hidden = false;
+    els.authPanel.hidden = true;
+    els.signOutButton.hidden = true;
     render();
     return;
   }
 
   firebase.initializeApp(firebaseConfig);
+  state.auth = firebase.auth();
   state.db = firebase.firestore();
   state.useFirestore = true;
-  els.syncStatus.textContent = "Firestore sync";
-  els.syncStatus.classList.add("online");
+  els.syncStatus.textContent = "Sign in required";
 
-  const snapshot = await state.db.collection("garage").doc("main").get();
+  state.auth.onAuthStateChanged(async (user) => {
+    state.user = user;
+    state.vehicle = null;
+    state.records = [];
+
+    if (!user) {
+      state.dataRef = null;
+      els.authPanel.hidden = false;
+      els.appContent.hidden = true;
+      els.signOutButton.hidden = true;
+      els.syncStatus.textContent = "Signed out";
+      els.syncStatus.classList.remove("online");
+      render();
+      return;
+    }
+
+    els.authPanel.hidden = true;
+    els.appContent.hidden = false;
+    els.signOutButton.hidden = false;
+    els.syncStatus.textContent = user.email || "Signed in";
+    els.syncStatus.classList.add("online");
+    state.dataRef = state.db.collection("users").doc(user.uid).collection("garage").doc("main");
+
+    await loadRemoteData();
+  });
+}
+
+async function loadRemoteData() {
+  if (!state.dataRef) return;
+  const snapshot = await state.dataRef.get();
   const data = snapshot.exists ? snapshot.data() : {};
   state.vehicle = data.vehicle || null;
   state.records = Array.isArray(data.records) ? data.records : [];
@@ -105,8 +146,8 @@ async function initFirestore() {
 }
 
 async function persist() {
-  if (state.useFirestore) {
-    await state.db.collection("garage").doc("main").set({
+  if (state.useFirestore && state.dataRef) {
+    await state.dataRef.set({
       vehicle: state.vehicle,
       records: state.records,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -224,6 +265,46 @@ els.clearRecords.addEventListener("click", async () => {
   state.records = [];
   await persist();
   render();
+});
+
+els.authForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(els.authForm);
+  const email = form.get("email").trim();
+  const password = form.get("password");
+
+  try {
+    els.authMessage.textContent = "Signing in...";
+    await state.auth.signInWithEmailAndPassword(email, password);
+    els.authForm.reset();
+    els.authMessage.textContent = "";
+  } catch (error) {
+    els.authMessage.textContent = error.message;
+  }
+});
+
+els.createAccountButton.addEventListener("click", async () => {
+  const form = new FormData(els.authForm);
+  const email = form.get("email").trim();
+  const password = form.get("password");
+
+  if (!email || !password) {
+    els.authMessage.textContent = "Enter an email and password first.";
+    return;
+  }
+
+  try {
+    els.authMessage.textContent = "Creating account...";
+    await state.auth.createUserWithEmailAndPassword(email, password);
+    els.authForm.reset();
+    els.authMessage.textContent = "";
+  } catch (error) {
+    els.authMessage.textContent = error.message;
+  }
+});
+
+els.signOutButton.addEventListener("click", async () => {
+  await state.auth.signOut();
 });
 
 document.querySelector("#serviceDate").valueAsDate = new Date();
