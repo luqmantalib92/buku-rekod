@@ -26,7 +26,16 @@ function renderGarage() {
     card.querySelector(".vehicle-odometer").textContent = odometer > 0 ? formatKm(odometer) : "-";
     card.querySelector(".vehicle-count").textContent = String(vehicle.records.length);
     card.querySelector(".vehicle-last").textContent = lastRecord ? formatDate(lastRecord.date) : "-";
-    card.setAttribute("aria-label", `${vehicle.name || "Unnamed vehicle"}, view logs`);
+
+    const dueCount = vehicleDueCount(vehicle);
+    const dueEl = card.querySelector(".vehicle-due");
+    if (dueCount > 0) {
+      dueEl.hidden = false;
+      dueEl.textContent = `${dueCount} due`;
+    }
+
+    const dueSuffix = dueCount > 0 ? `, ${dueCount} service(s) due` : "";
+    card.setAttribute("aria-label", `${vehicle.name || "Unnamed vehicle"}, view logs${dueSuffix}`);
     card.addEventListener("click", () => openVehicle(vehicle.id));
     garageEls.vehicleList.append(card);
   }

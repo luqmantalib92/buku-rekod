@@ -87,6 +87,64 @@ function latestOdometer(vehicle) {
   );
 }
 
+/* ---- Service categories (groups) ---- */
+
+const SERVICE_CATEGORIES = [
+  { key: "engine-oil", label: "Engine & oil", items: ["Engine oil", "Oil filter", "Air filter", "Cabin/aircond filter"] },
+  { key: "brakes-fluids", label: "Brakes & fluids", items: ["Brake pads", "Brake fluid", "Coolant", "ATF/gearbox oil"] },
+  { key: "electrical-wear", label: "Electrical & wear", items: ["Battery", "Spark plugs", "Wipers", "Bulbs"] },
+  { key: "tyres-alignment", label: "Tyres & alignment", items: ["Tyre rotation", "Alignment & balancing", "New tyres"] },
+  { key: "other", label: "Other", items: [] }
+];
+
+function categoryLabel(key) {
+  const category = SERVICE_CATEGORIES.find((entry) => entry.key === key);
+  return category ? category.label : "Other";
+}
+
+/* ---- Reminders (in-app) ---- */
+
+const DUE_SOON_DAYS = 30;
+
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(`${dateStr}T00:00:00`);
+  return Math.round((target - today) / 86400000);
+}
+
+// One reminder per category, based on the most recent record in that category
+// that carries a next-service date. Overdue first, then soonest.
+function vehicleReminders(vehicle) {
+  const latestByCategory = new Map();
+  for (const record of vehicle.records) {
+    if (!record.nextDate) continue;
+    const key = record.category || "other";
+    const existing = latestByCategory.get(key);
+    if (!existing || (record.date || "") > (existing.date || "")) {
+      latestByCategory.set(key, record);
+    }
+  }
+
+  const reminders = [];
+  for (const [key, record] of latestByCategory) {
+    const days = daysUntil(record.nextDate);
+    if (days === null) continue;
+    let status = "ok";
+    if (days < 0) status = "overdue";
+    else if (days <= DUE_SOON_DAYS) status = "due-soon";
+    reminders.push({ category: key, label: categoryLabel(key), nextDate: record.nextDate, days, status });
+  }
+
+  reminders.sort((a, b) => a.days - b.days);
+  return reminders;
+}
+
+function vehicleDueCount(vehicle) {
+  return vehicleReminders(vehicle).filter((reminder) => reminder.status !== "ok").length;
+}
+
 function loadLocal() {
   const raw = localStorage.getItem(LOCAL_KEY);
   if (!raw) {

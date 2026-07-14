@@ -7,6 +7,11 @@ const vehicleEls = {
   deleteVehicle: document.querySelector("#deleteVehicle"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceDate: document.querySelector("#serviceDate"),
+  serviceCategory: document.querySelector("#serviceCategory"),
+  itemChips: document.querySelector("#serviceItemChips"),
+  chipsHint: document.querySelector("#chipsHint"),
+  reminders: document.querySelector("#reminders"),
+  reminderList: document.querySelector("#reminderList"),
   clearRecords: document.querySelector("#clearRecords"),
   recordList: document.querySelector("#recordList"),
   emptyState: document.querySelector("#emptyState"),
@@ -21,6 +26,85 @@ const vehicleEls = {
 
 function currentVehicleId() {
   return new URLSearchParams(window.location.search).get("id");
+}
+
+/* ---- Category + item chips ---- */
+
+const selectedItems = new Set();
+
+function populateCategories() {
+  for (const category of SERVICE_CATEGORIES) {
+    const option = document.createElement("option");
+    option.value = category.key;
+    option.textContent = category.label;
+    vehicleEls.serviceCategory.append(option);
+  }
+}
+
+function renderItemChips() {
+  const category = SERVICE_CATEGORIES.find((entry) => entry.key === vehicleEls.serviceCategory.value);
+  vehicleEls.itemChips.replaceChildren();
+  selectedItems.clear();
+
+  if (!category) {
+    vehicleEls.itemChips.hidden = true;
+    vehicleEls.chipsHint.textContent = "Pick a category to see common items.";
+    vehicleEls.chipsHint.hidden = false;
+    return;
+  }
+
+  if (!category.items.length) {
+    vehicleEls.itemChips.hidden = true;
+    vehicleEls.chipsHint.textContent = "No preset items for this category — use Details below.";
+    vehicleEls.chipsHint.hidden = false;
+    return;
+  }
+
+  vehicleEls.chipsHint.hidden = true;
+  vehicleEls.itemChips.hidden = false;
+  for (const item of category.items) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.textContent = item;
+    chip.setAttribute("aria-pressed", "false");
+    chip.addEventListener("click", () => {
+      const on = chip.getAttribute("aria-pressed") === "true";
+      chip.setAttribute("aria-pressed", String(!on));
+      chip.classList.toggle("chip-on", !on);
+      if (on) selectedItems.delete(item);
+      else selectedItems.add(item);
+    });
+    vehicleEls.itemChips.append(chip);
+  }
+}
+
+function renderReminders(vehicle) {
+  const reminders = vehicleReminders(vehicle);
+  vehicleEls.reminders.hidden = reminders.length === 0;
+  vehicleEls.reminderList.replaceChildren();
+
+  for (const reminder of reminders) {
+    const row = document.createElement("div");
+    row.className = `reminder reminder-${reminder.status}`;
+
+    const label = document.createElement("span");
+    label.className = "reminder-label";
+    label.textContent = reminder.label;
+
+    const when = reminder.days < 0
+      ? `${Math.abs(reminder.days)} day(s) overdue`
+      : reminder.days === 0
+        ? "due today"
+        : `in ${reminder.days} day(s)`;
+
+    const meta = document.createElement("span");
+    meta.className = "reminder-meta";
+    meta.textContent = `${formatDate(reminder.nextDate)} · ${when}`;
+
+    row.append(label, meta);
+    vehicleEls.reminderList.append(row);
+  }
 }
 
 function goGarage() {
@@ -54,6 +138,7 @@ function renderRecords(vehicle) {
   for (const record of sorted) {
     const item = vehicleEls.recordTemplate.content.firstElementChild.cloneNode(true);
     item.querySelector("h3").textContent = formatDate(record.date);
+    item.querySelector(".record-category").textContent = categoryLabel(record.category);
     item.querySelector(".record-meta").textContent = `${formatKm(record.odometer)} · ${record.workshop || "No workshop saved"}`;
     item.querySelector(".record-items").textContent = record.items;
     item.querySelector(".record-cost").textContent = formatMoney(record.cost);
@@ -78,6 +163,7 @@ function renderVehicle() {
   if (vehicleEls.pagePlate) vehicleEls.pagePlate.textContent = vehicle.plate || "No plate";
 
   updateSummary(vehicle);
+  renderReminders(vehicle);
   renderRecords(vehicle);
 }
 
@@ -98,13 +184,16 @@ vehicleEls.serviceForm.addEventListener("submit", async (event) => {
   }
 
   const form = new FormData(vehicleEls.serviceForm);
+  const extra = form.get("items").trim();
+  const items = [...selectedItems, ...(extra ? [extra] : [])].join(", ");
   const record = {
     id: makeId(),
+    category: form.get("category") || "other",
     date: form.get("date"),
     odometer: Number(form.get("odometer")),
     workshop: form.get("workshop").trim(),
     cost: Number(form.get("cost") || 0),
-    items: form.get("items").trim(),
+    items,
     nextDate: form.get("nextDate"),
     nextOdometer: form.get("nextOdometer") ? Number(form.get("nextOdometer")) : "",
     notes: form.get("notes").trim(),
@@ -119,8 +208,11 @@ vehicleEls.serviceForm.addEventListener("submit", async (event) => {
   await persist();
   vehicleEls.serviceForm.reset();
   vehicleEls.serviceDate.valueAsDate = new Date();
+  renderItemChips();
   renderVehicle();
 });
+
+vehicleEls.serviceCategory.addEventListener("change", renderItemChips);
 
 vehicleEls.clearRecords.addEventListener("click", async () => {
   const vehicle = getVehicle(currentVehicleId());
@@ -145,4 +237,6 @@ vehicleEls.deleteVehicle.addEventListener("click", async () => {
 vehicleEls.backToGarage.addEventListener("click", goGarage);
 
 vehicleEls.serviceDate.valueAsDate = new Date();
+populateCategories();
+renderItemChips();
 bootWithFallback(renderVehicle);

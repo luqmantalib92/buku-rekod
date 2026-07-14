@@ -48,6 +48,16 @@
         </article>
       </section>
 
+      <section id="reminders" class="panel reminders-panel" aria-labelledby="remindersHeading" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Upcoming</p>
+            <h2 id="remindersHeading">Service reminders</h2>
+          </div>
+        </div>
+        <div id="reminderList" class="reminder-list"></div>
+      </section>
+
       <div class="content-grid">
         <section class="panel" aria-labelledby="serviceHeading">
           <div class="panel-heading">
@@ -75,8 +85,19 @@
               <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
             </label>
             <label class="span-2">
-              What was serviced
-              <textarea id="serviceItems" name="items" rows="4" placeholder="Engine oil, oil filter, tyre rotation" required></textarea>
+              Service category
+              <select id="serviceCategory" name="category" required>
+                <option value="" disabled selected>Choose a category</option>
+              </select>
+            </label>
+            <div class="field span-2">
+              <span class="field-label">Items serviced</span>
+              <div id="serviceItemChips" class="chips" role="group" aria-label="Items serviced" hidden></div>
+              <p id="chipsHint" class="field-hint">Pick a category to see common items.</p>
+            </div>
+            <label class="span-2">
+              Details / other items
+              <textarea id="serviceItems" name="items" rows="3" placeholder="Anything not covered by the chips above"></textarea>
             </label>
             <label>
               Next service date
@@ -115,6 +136,7 @@
         <div class="record-topline">
           <div>
             <h3></h3>
+            <span class="record-category"></span>
             <p class="record-meta"></p>
           </div>
           <button type="button" class="icon-button" aria-label="Delete service record">Delete</button>
