@@ -25,9 +25,16 @@
           <img src="./assets/icon-192.png" alt="Service Log" class="brand-icon" />
         </a>
         <div class="topbar-actions">
-          <a href="./settings.html" id="accountButton" class="account-button" aria-label="Settings" title="Settings">
+          <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account">
             <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
-          </a>
+          </button>
+          <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
+            <p class="account-email" id="accountEmail">Local mode</p>
+            <p class="account-status" id="accountStatus">Saved on this device</p>
+            <a href="./settings.html" class="account-link" role="menuitem">Settings</a>
+            <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
+            <p class="account-version app-version"></p>
+          </div>
         </div>
       </section>
 

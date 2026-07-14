@@ -401,6 +401,7 @@ const shellEls = {
   appLoading: document.querySelector("#appLoading"),
   signOutButton: document.querySelector("#signOutButton"),
   accountButton: document.querySelector("#accountButton"),
+  accountMenu: document.querySelector("#accountMenu"),
   accountAvatar: document.querySelector("#accountAvatar"),
   accountEmail: document.querySelector("#accountEmail"),
   accountStatus: document.querySelector("#accountStatus")
@@ -498,6 +499,33 @@ async function signOut() {
 if (shellEls.signOutButton) {
   shellEls.signOutButton.addEventListener("click", signOut);
 }
+
+// Top-right avatar popover: shows email, a Settings link, Sign out and the
+// version. Toggles on click; closes on outside click or Escape.
+function setupAccountMenu() {
+  const { accountButton: button, accountMenu: menu } = shellEls;
+  if (!button || !menu) return;
+
+  const close = () => { menu.hidden = true; button.setAttribute("aria-expanded", "false"); };
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (menu.hidden) {
+      menu.hidden = false;
+      button.setAttribute("aria-expanded", "true");
+    } else {
+      close();
+    }
+  });
+  document.addEventListener("click", (event) => {
+    if (!menu.hidden && !menu.contains(event.target) && !button.contains(event.target)) close();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) close();
+  });
+}
+
+setupAccountMenu();
 
 // Wire the circular back button (#backButton) to navigate up a level. If
 // `isDirty` is supplied and returns true, confirm before leaving. `href` may

@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.5.1",
+    date: "2026-07-14",
+    notes: [
+      "Tapping the avatar now opens a quick popup with your email, a Settings link, Sign out and the version — Settings is still there for the full details."
+    ]
+  },
+  {
     version: "1.5.0",
     date: "2026-07-14",
     notes: [
