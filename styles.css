@@ -15,6 +15,13 @@
   box-sizing: border-box;
 }
 
+/* Keep the hidden attribute authoritative — class rules that set `display`
+   (e.g. .app-shell, .app-loading, .chips) would otherwise override it and
+   leave "hidden" elements visible. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   min-width: 320px;
