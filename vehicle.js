@@ -1,8 +1,6 @@
 /* Vehicle page: one vehicle's service logbook (add / list / delete records). */
 
 const vehicleEls = {
-  pageTitle: document.querySelector("#pageTitle"),
-  pagePlate: document.querySelector("#pagePlate"),
   backToGarage: document.querySelector("#backToGarage"),
   editVehicle: document.querySelector("#editVehicle"),
   deleteVehicle: document.querySelector("#deleteVehicle"),
@@ -167,8 +165,6 @@ function renderVehicle() {
   }
 
   document.title = `${vehicle.name || "Vehicle"} | Service Log`;
-  if (vehicleEls.pageTitle) vehicleEls.pageTitle.textContent = vehicle.name || "Unnamed vehicle";
-  if (vehicleEls.pagePlate) vehicleEls.pagePlate.textContent = vehicle.plate || "No plate";
 
   updateSummary(vehicle);
   renderReminders(vehicle);
