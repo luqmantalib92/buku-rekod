@@ -25,26 +25,19 @@
           <img src="./assets/icon-192.png" alt="Service Log" class="brand-icon" />
         </a>
         <div class="topbar-actions">
-          <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
+          <a href="./settings.html" id="accountButton" class="account-button" aria-label="Settings" title="Settings">
             <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
-          </button>
-          <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
-            <a href="./index.html" class="account-link" role="menuitem">Garage</a>
-            <a href="./categories.html" class="account-link" role="menuitem">Manage categories</a>
-            <a href="./reminders.html" class="account-link" role="menuitem">Reminder settings</a>
-            <a href="./changelog.html" class="account-link" role="menuitem">What's new</a>
-            <hr class="account-divider" />
-            <p class="account-email" id="accountEmail">Local mode</p>
-            <p class="account-status" id="accountStatus">Saved on this device</p>
-            <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
-            <p class="account-version app-version"></p>
-          </div>
+          </a>
         </div>
       </section>
 
       <section class="panel" aria-label="Garage">
         <div class="panel-heading">
-          <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
+          <div>
+            <p class="eyebrow">Your vehicles</p>
+            <h2>Garage</h2>
+            <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
+          </div>
           <button type="button" id="addVehicle" class="primary-action heading-action" title="Add a new vehicle to your garage">Add vehicle</button>
         </div>
         <div id="vehicleEmpty" class="empty-state" hidden>

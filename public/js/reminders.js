@@ -41,7 +41,7 @@ remindersEls.settingsForm.addEventListener("submit", async (event) => {
   setTimeout(() => { remindersEls.settingsSaved.hidden = true; }, 2000);
 });
 
-setupBackButton("./index.html");
+setupBackButton("./settings.html");
 
 window.onPullRefresh = async () => {
   await refreshData();

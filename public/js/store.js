@@ -401,7 +401,6 @@ const shellEls = {
   appLoading: document.querySelector("#appLoading"),
   signOutButton: document.querySelector("#signOutButton"),
   accountButton: document.querySelector("#accountButton"),
-  accountMenu: document.querySelector("#accountMenu"),
   accountAvatar: document.querySelector("#accountAvatar"),
   accountEmail: document.querySelector("#accountEmail"),
   accountStatus: document.querySelector("#accountStatus")
@@ -499,44 +498,6 @@ async function signOut() {
 if (shellEls.signOutButton) {
   shellEls.signOutButton.addEventListener("click", signOut);
 }
-
-// Account menu: a top-right avatar button that opens a popover with the
-// user's email, sync status, and Sign out — keeps them out of the header.
-function setupAccountMenu() {
-  const { accountButton: button, accountMenu: menu } = shellEls;
-  if (!button || !menu) return;
-
-  // The avatar opens the nav + account menu, so make that discoverable.
-  button.title = "Menu & account";
-  button.setAttribute("aria-label", "Open menu and account");
-
-  const close = () => { menu.hidden = true; button.setAttribute("aria-expanded", "false"); };
-  const open = () => { menu.hidden = false; button.setAttribute("aria-expanded", "true"); };
-
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (menu.hidden) open();
-    else close();
-  });
-  document.addEventListener("click", (event) => {
-    if (!menu.hidden && !menu.contains(event.target) && !button.contains(event.target)) close();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !menu.hidden) close();
-  });
-
-  // Highlight the current page's nav link.
-  const current = (location.pathname.split("/").pop() || "index.html") || "index.html";
-  menu.querySelectorAll(".account-link").forEach((link) => {
-    const target = link.getAttribute("href").replace(/^\.\//, "");
-    if (target === current) {
-      link.classList.add("account-link-active");
-      link.setAttribute("aria-current", "page");
-    }
-  });
-}
-
-setupAccountMenu();
 
 // Wire the circular back button (#backButton) to navigate up a level. If
 // `isDirty` is supplied and returns true, confirm before leaving. `href` may

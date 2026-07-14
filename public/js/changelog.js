@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.5.0",
+    date: "2026-07-14",
+    notes: [
+      "New Settings page gathering your profile (email + sign out), Manage categories, Reminder settings and What's new.",
+      "The top-right avatar now opens Settings in one tap instead of a crowded menu.",
+      "Added section titles above the intro text on the garage, add/edit vehicle and add/edit record pages."
+    ]
+  },
+  {
     version: "1.4.3",
     date: "2026-07-14",
     notes: [
@@ -195,7 +204,7 @@ function renderChangelog() {
   list.replaceChildren(frag);
 }
 
-setupBackButton("./index.html");
+setupBackButton("./settings.html");
 
 window.onPullRefresh = async () => {
   await refreshData();

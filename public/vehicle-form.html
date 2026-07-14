@@ -23,25 +23,20 @@
       <section class="topbar" aria-label="Vehicle details">
         <button type="button" id="backButton" class="icon-back" aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
         <div class="topbar-actions">
-          <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
+          <a href="./settings.html" id="accountButton" class="account-button" aria-label="Settings" title="Settings">
             <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
-          </button>
-          <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
-            <a href="./index.html" class="account-link" role="menuitem">Garage</a>
-            <a href="./categories.html" class="account-link" role="menuitem">Manage categories</a>
-            <a href="./reminders.html" class="account-link" role="menuitem">Reminder settings</a>
-            <a href="./changelog.html" class="account-link" role="menuitem">What's new</a>
-            <hr class="account-divider" />
-            <p class="account-email" id="accountEmail">Local mode</p>
-            <p class="account-status" id="accountStatus">Saved on this device</p>
-            <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
-            <p class="account-version app-version"></p>
-          </div>
+          </a>
         </div>
       </section>
 
       <section class="panel" aria-label="Vehicle details">
-        <p class="panel-subtitle panel-intro" id="formSubtitle">Enter the basics to add it to your garage — you can add a photo and edit anything later.</p>
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow" id="formEyebrow">Setup</p>
+            <h2 id="formHeading">Add a vehicle</h2>
+            <p class="panel-subtitle" id="formSubtitle">Enter the basics to add it to your garage — you can add a photo and edit anything later.</p>
+          </div>
+        </div>
 
         <form id="vehicleForm" class="form-grid">
           <label>

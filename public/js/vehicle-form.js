@@ -3,6 +3,8 @@
    - vehicle-form.html?id=<id>    → edit that vehicle (returns to its logbook) */
 
 const formEls = {
+  formEyebrow: document.querySelector("#formEyebrow"),
+  formHeading: document.querySelector("#formHeading"),
   formSubtitle: document.querySelector("#formSubtitle"),
   vehicleForm: document.querySelector("#vehicleForm"),
   name: document.querySelector("#vehicleName"),
@@ -68,6 +70,8 @@ function initForm() {
       return;
     }
     document.title = `Edit ${vehicle.name || "vehicle"} | Service Log`;
+    formEls.formEyebrow.textContent = "Edit";
+    formEls.formHeading.textContent = "Edit vehicle";
     formEls.formSubtitle.textContent = "Update this vehicle's details. Changes save to its logbook.";
     formEls.submit.textContent = "Save changes";
     formEls.name.value = vehicle.name || "";

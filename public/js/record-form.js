@@ -4,6 +4,8 @@
    Always returns to the vehicle's logbook. */
 
 const recordEls = {
+  formHeading: document.querySelector("#formHeading"),
+  formSubtitle: document.querySelector("#formSubtitle"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceDate: document.querySelector("#serviceDate"),
   serviceCategory: document.querySelector("#serviceCategory"),
@@ -107,6 +109,7 @@ function initForm() {
     return;
   }
 
+  recordEls.formSubtitle.textContent = `Log a service for ${vehicle.name || "this vehicle"}.`;
   populateCategories();
   populateWorkshopSuggestions();
 
@@ -119,6 +122,8 @@ function initForm() {
 
   if (record) {
     document.title = "Edit service record | Service Log";
+    recordEls.formHeading.textContent = "Edit service record";
+    recordEls.formSubtitle.textContent = `Update this service record for ${vehicle.name || "this vehicle"}.`;
     recordEls.submit.textContent = "Save changes";
     recordEls.serviceCategory.value = record.category || "other";
     renderItemChips();
