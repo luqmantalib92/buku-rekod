@@ -162,11 +162,10 @@
               Next service odometer
               <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
             </label>
-            <label class="span-2">
-              Notes
-              <textarea id="serviceNotes" name="notes" rows="3" placeholder="Parts brand, mechanic notes, warranty info"></textarea>
-            </label>
-            <button type="submit" class="primary-action">Add service record</button>
+            <div class="span-2 edit-actions">
+              <button type="submit" id="serviceSubmit" class="primary-action">Add service record</button>
+              <button type="button" id="cancelServiceEdit" class="ghost-action" hidden>Cancel</button>
+            </div>
           </form>
         </section>
 
@@ -194,7 +193,10 @@
             <span class="record-category"></span>
             <p class="record-meta"></p>
           </div>
-          <button type="button" class="icon-button" aria-label="Delete service record">Delete</button>
+          <div class="record-actions">
+            <button type="button" class="icon-button record-edit" aria-label="Edit service record">Edit</button>
+            <button type="button" class="icon-button record-delete" aria-label="Delete service record">Delete</button>
+          </div>
         </div>
         <p class="record-items"></p>
         <dl class="record-details">

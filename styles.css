@@ -540,6 +540,17 @@ dd {
   font-size: 0.8rem;
 }
 
+.record-actions {
+  display: flex;
+  gap: 8px;
+  flex: none;
+}
+
+.record-edit {
+  background: #e6f3ef;
+  color: var(--accent-dark);
+}
+
 .record-notes {
   margin: 14px 0 0;
 }

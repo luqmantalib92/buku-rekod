@@ -12,6 +12,9 @@ const vehicleEls = {
   editModel: document.querySelector("#editModel"),
   cancelEdit: document.querySelector("#cancelEdit"),
   serviceForm: document.querySelector("#serviceForm"),
+  serviceHeading: document.querySelector("#serviceHeading"),
+  serviceSubmit: document.querySelector("#serviceSubmit"),
+  cancelServiceEdit: document.querySelector("#cancelServiceEdit"),
   serviceDate: document.querySelector("#serviceDate"),
   workshopSuggestions: document.querySelector("#workshopSuggestions"),
   serviceCategory: document.querySelector("#serviceCategory"),
@@ -151,8 +154,13 @@ function renderRecords(vehicle) {
     item.querySelector(".record-cost").textContent = formatMoney(record.cost);
     item.querySelector(".record-next-date").textContent = formatDate(record.nextDate);
     item.querySelector(".record-next-odometer").textContent = record.nextOdometer ? formatKm(record.nextOdometer) : "-";
-    item.querySelector(".record-notes").textContent = record.notes || "";
-    item.querySelector(".icon-button").addEventListener("click", () => deleteRecord(record.id));
+
+    const notesEl = item.querySelector(".record-notes");
+    notesEl.textContent = record.notes || "";
+    notesEl.hidden = !record.notes;
+
+    item.querySelector(".record-edit").addEventListener("click", () => startEditRecord(record.id));
+    item.querySelector(".record-delete").addEventListener("click", () => deleteRecord(record.id));
     vehicleEls.recordList.append(item);
   }
 }
@@ -191,6 +199,47 @@ async function deleteRecord(recordId) {
   renderVehicle();
 }
 
+// null = adding a new record; otherwise editing the record with this id.
+let editingRecordId = null;
+
+function startEditRecord(recordId) {
+  const vehicle = getVehicle(currentVehicleId());
+  const record = vehicle && vehicle.records.find((entry) => entry.id === recordId);
+  if (!record) return;
+
+  editingRecordId = recordId;
+  vehicleEls.serviceCategory.value = record.category || "other";
+  renderItemChips();
+  // The record's items string goes into the details field (chips selection
+  // isn't stored separately), so nothing is lost when editing.
+  vehicleEls.serviceForm.date.value = record.date || "";
+  vehicleEls.serviceForm.odometer.value = record.odometer || "";
+  vehicleEls.serviceForm.workshop.value = record.workshop || "";
+  vehicleEls.serviceForm.cost.value = record.cost || "";
+  vehicleEls.serviceForm.items.value = record.items || "";
+  vehicleEls.serviceForm.nextDate.value = record.nextDate || "";
+  vehicleEls.serviceForm.nextOdometer.value = record.nextOdometer || "";
+
+  vehicleEls.serviceHeading.textContent = "Edit service record";
+  vehicleEls.serviceSubmit.textContent = "Save changes";
+  vehicleEls.cancelServiceEdit.hidden = false;
+  vehicleEls.serviceForm.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function exitEditMode() {
+  editingRecordId = null;
+  vehicleEls.serviceHeading.textContent = "New service record";
+  vehicleEls.serviceSubmit.textContent = "Add service record";
+  vehicleEls.cancelServiceEdit.hidden = true;
+}
+
+vehicleEls.cancelServiceEdit.addEventListener("click", () => {
+  vehicleEls.serviceForm.reset();
+  vehicleEls.serviceDate.valueAsDate = new Date();
+  renderItemChips();
+  exitEditMode();
+});
+
 vehicleEls.serviceForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const vehicle = getVehicle(currentVehicleId());
@@ -202,8 +251,7 @@ vehicleEls.serviceForm.addEventListener("submit", async (event) => {
   const form = new FormData(vehicleEls.serviceForm);
   const extra = form.get("items").trim();
   const items = [...selectedItems, ...(extra ? [extra] : [])].join(", ");
-  const record = {
-    id: makeId(),
+  const fields = {
     category: form.get("category") || "other",
     date: form.get("date"),
     odometer: Number(form.get("odometer")),
@@ -211,21 +259,24 @@ vehicleEls.serviceForm.addEventListener("submit", async (event) => {
     cost: Number(form.get("cost") || 0),
     items,
     nextDate: form.get("nextDate"),
-    nextOdometer: form.get("nextOdometer") ? Number(form.get("nextOdometer")) : "",
-    notes: form.get("notes").trim(),
-    createdAt: new Date().toISOString()
+    nextOdometer: form.get("nextOdometer") ? Number(form.get("nextOdometer")) : ""
   };
 
-  vehicle.records = [record, ...vehicle.records];
-  if (record.odometer > Number(vehicle.odometer || 0)) {
-    vehicle.odometer = record.odometer;
+  if (editingRecordId) {
+    const existing = vehicle.records.find((entry) => entry.id === editingRecordId);
+    if (existing) Object.assign(existing, fields);
+  } else {
+    vehicle.records = [{ id: makeId(), ...fields, createdAt: new Date().toISOString() }, ...vehicle.records];
+  }
+  if (fields.odometer > Number(vehicle.odometer || 0)) {
+    vehicle.odometer = fields.odometer;
   }
 
-  const submitButton = vehicleEls.serviceForm.querySelector('button[type="submit"]');
-  await withButtonBusy(submitButton, "Saving…", () => persist());
+  await withButtonBusy(vehicleEls.serviceSubmit, "Saving…", () => persist());
   vehicleEls.serviceForm.reset();
   vehicleEls.serviceDate.valueAsDate = new Date();
   renderItemChips();
+  exitEditMode();
   renderVehicle();
 });
 
