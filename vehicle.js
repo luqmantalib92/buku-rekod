@@ -12,6 +12,7 @@ const vehicleEls = {
   editModel: document.querySelector("#editModel"),
   editImage: document.querySelector("#editImage"),
   editImagePreview: document.querySelector("#editImagePreview"),
+  editImageHint: document.querySelector("#editImageHint"),
   removeEditImage: document.querySelector("#removeEditImage"),
   cancelEdit: document.querySelector("#cancelEdit"),
   serviceForm: document.querySelector("#serviceForm"),
@@ -310,6 +311,13 @@ vehicleEls.clearRecords.addEventListener("click", async () => {
 // The photo to save on edit (data URL; "" = no photo).
 let editImageData = "";
 
+const EDIT_IMAGE_HINT_DEFAULT = "JPG or PNG, up to 15 MB. It's auto-compressed before saving.";
+
+function setEditImageHint(message, isError) {
+  vehicleEls.editImageHint.textContent = message;
+  vehicleEls.editImageHint.classList.toggle("image-hint-error", Boolean(isError));
+}
+
 function showEditImage() {
   if (editImageData) {
     vehicleEls.editImagePreview.src = editImageData;
@@ -331,6 +339,7 @@ function openEdit() {
   vehicleEls.editImage.value = "";
   editImageData = vehicle.image || "";
   showEditImage();
+  setEditImageHint(EDIT_IMAGE_HINT_DEFAULT, false);
   vehicleEls.editPanel.hidden = false;
   vehicleEls.editName.focus();
 }
@@ -338,11 +347,15 @@ function openEdit() {
 vehicleEls.editImage.addEventListener("change", async () => {
   const file = vehicleEls.editImage.files[0];
   if (!file) return;
+  setEditImageHint("Compressing photo…", false);
   try {
-    editImageData = await fileToResizedDataUrl(file);
+    const { dataUrl, bytes } = await fileToResizedDataUrl(file);
+    editImageData = dataUrl;
     showEditImage();
+    setEditImageHint(`Photo ready — ${Math.round(bytes / 1024)} KB after compression.`, false);
   } catch (error) {
-    console.error(error);
+    vehicleEls.editImage.value = "";
+    setEditImageHint(error.message || "Could not use that image.", true);
   }
 });
 
@@ -350,6 +363,7 @@ vehicleEls.removeEditImage.addEventListener("click", () => {
   editImageData = "";
   vehicleEls.editImage.value = "";
   showEditImage();
+  setEditImageHint(EDIT_IMAGE_HINT_DEFAULT, false);
 });
 
 function closeEdit() {

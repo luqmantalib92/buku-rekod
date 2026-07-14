@@ -62,28 +62,72 @@ function normalizeVehicle(vehicle) {
   };
 }
 
-// Resize + JPEG-compress an image File into a small data URL so vehicle
-// photos can live inline in Firestore/localStorage (no paid Storage).
-function fileToResizedDataUrl(file, maxSize = 400, quality = 0.7) {
+// Approx decoded byte size of a data URL (base64 payload is ~4/3 of bytes).
+function dataUrlBytes(dataUrl) {
+  const comma = dataUrl.indexOf(",");
+  return Math.ceil((dataUrl.length - comma - 1) * 3 / 4);
+}
+
+const IMAGE_MAX_INPUT_BYTES = 15 * 1024 * 1024; // reject huge originals (15 MB)
+const IMAGE_TARGET_BYTES = 80 * 1024;           // compress down to ~80 KB
+const IMAGE_START_SIZE = 640;                   // starting max dimension (px)
+const IMAGE_MIN_SIZE = 240;                     // don't degrade below this
+
+// Gatekeeper: validate an uploaded image, then resize + JPEG-compress it,
+// stepping quality/dimensions down until it fits IMAGE_TARGET_BYTES, so photos
+// live inline in Firestore/localStorage (no paid Storage) without blowing the
+// 1 MB doc budget. Resolves { dataUrl, bytes }; rejects with a user message.
+function fileToResizedDataUrl(file) {
   return new Promise((resolve, reject) => {
     if (!file || !file.type || !file.type.startsWith("image/")) {
-      reject(new Error("Please choose an image file."));
+      reject(new Error("That's not an image. Please choose a photo (JPG, PNG, HEIC…)."));
       return;
     }
+    if (file.size > IMAGE_MAX_INPUT_BYTES) {
+      reject(new Error(`That image is ${Math.round(file.size / (1024 * 1024))} MB — please choose one under 15 MB.`));
+      return;
+    }
+
     const reader = new FileReader();
-    reader.onerror = () => reject(reader.error || new Error("Could not read file"));
+    reader.onerror = () => reject(new Error("Could not read that file."));
     reader.onload = () => {
       const img = new Image();
-      img.onerror = () => reject(new Error("Could not load image"));
+      img.onerror = () => reject(new Error("That image looks corrupted or unsupported."));
       img.onload = () => {
-        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-        const w = Math.max(1, Math.round(img.width * scale));
-        const h = Math.max(1, Math.round(img.height * scale));
-        const canvas = document.createElement("canvas");
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-        resolve(canvas.toDataURL("image/jpeg", quality));
+        if (!img.width || !img.height) {
+          reject(new Error("That image has no dimensions."));
+          return;
+        }
+
+        const encode = (maxSize, quality) => {
+          const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+          const w = Math.max(1, Math.round(img.width * scale));
+          const h = Math.max(1, Math.round(img.height * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+          return canvas.toDataURL("image/jpeg", quality);
+        };
+
+        let maxSize = IMAGE_START_SIZE;
+        let quality = 0.8;
+        let dataUrl = encode(maxSize, quality);
+
+        // Step down quality first, then dimensions, until under target.
+        for (let guard = 0; guard < 16 && dataUrlBytes(dataUrl) > IMAGE_TARGET_BYTES; guard += 1) {
+          if (quality > 0.45) {
+            quality -= 0.1;
+          } else if (maxSize > IMAGE_MIN_SIZE) {
+            maxSize = Math.max(IMAGE_MIN_SIZE, Math.round(maxSize * 0.8));
+            quality = 0.7;
+          } else {
+            break; // as small as we'll go
+          }
+          dataUrl = encode(maxSize, quality);
+        }
+
+        resolve({ dataUrl, bytes: dataUrlBytes(dataUrl) });
       };
       img.src = reader.result;
     };

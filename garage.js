@@ -9,27 +9,40 @@ const garageEls = {
   settingsRows: document.querySelector("#settingsRows"),
   settingsSaved: document.querySelector("#settingsSaved"),
   vehicleImage: document.querySelector("#vehicleImage"),
-  vehicleImagePreview: document.querySelector("#vehicleImagePreview")
+  vehicleImagePreview: document.querySelector("#vehicleImagePreview"),
+  vehicleImageHint: document.querySelector("#vehicleImageHint")
 };
 
 // Data URL of the photo chosen in the add-vehicle form (empty = none).
 let pendingImage = "";
+
+const IMAGE_HINT_DEFAULT = "JPG or PNG, up to 15 MB. It's auto-compressed before saving.";
+
+function setImageHint(el, message, isError) {
+  el.textContent = message;
+  el.classList.toggle("image-hint-error", Boolean(isError));
+}
 
 garageEls.vehicleImage.addEventListener("change", async () => {
   const file = garageEls.vehicleImage.files[0];
   if (!file) {
     pendingImage = "";
     garageEls.vehicleImagePreview.hidden = true;
+    setImageHint(garageEls.vehicleImageHint, IMAGE_HINT_DEFAULT, false);
     return;
   }
+  setImageHint(garageEls.vehicleImageHint, "Compressing photo…", false);
   try {
-    pendingImage = await fileToResizedDataUrl(file);
-    garageEls.vehicleImagePreview.src = pendingImage;
+    const { dataUrl, bytes } = await fileToResizedDataUrl(file);
+    pendingImage = dataUrl;
+    garageEls.vehicleImagePreview.src = dataUrl;
     garageEls.vehicleImagePreview.hidden = false;
+    setImageHint(garageEls.vehicleImageHint, `Photo ready — ${Math.round(bytes / 1024)} KB after compression.`, false);
   } catch (error) {
-    console.error(error);
     pendingImage = "";
+    garageEls.vehicleImage.value = "";
     garageEls.vehicleImagePreview.hidden = true;
+    setImageHint(garageEls.vehicleImageHint, error.message || "Could not use that image.", true);
   }
 });
 
@@ -134,6 +147,7 @@ garageEls.vehicleForm.addEventListener("submit", async (event) => {
   garageEls.vehicleForm.reset();
   pendingImage = "";
   garageEls.vehicleImagePreview.hidden = true;
+  setImageHint(garageEls.vehicleImageHint, IMAGE_HINT_DEFAULT, false);
   renderGarage();
 });
 

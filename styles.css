@@ -695,6 +695,15 @@ dd {
   border-radius: 8px;
 }
 
+.image-hint {
+  margin: 4px 0 0;
+}
+
+.image-hint-error {
+  color: #c0392b;
+  font-weight: 500;
+}
+
 .vehicle-name {
   margin: 0;
   font-size: 1.15rem;
