@@ -217,6 +217,82 @@ function normalizeSettings(settings) {
   return { leadDays };
 }
 
+/* ---- Next-service suggestions ----
+   Approximate maintenance intervals for common items: `months` = calendar
+   time, `km` = distance. These are sensible generic defaults, not specific to
+   any make/model — the user can always edit the suggested values. */
+const SERVICE_INTERVALS = {
+  "engine oil": { months: 6, km: 10000 },
+  "oil filter": { months: 6, km: 10000 },
+  "air filter": { months: 12, km: 20000 },
+  "cabin/aircond filter": { months: 12, km: 15000 },
+  "brake pads": { months: 24, km: 40000 },
+  "brake fluid": { months: 24, km: 40000 },
+  "coolant": { months: 24, km: 40000 },
+  "atf/gearbox oil": { months: 48, km: 40000 },
+  "battery": { months: 36, km: 60000 },
+  "spark plugs": { months: 36, km: 40000 },
+  "wipers": { months: 12, km: 0 },
+  "tyre rotation": { months: 6, km: 10000 },
+  "alignment & balancing": { months: 12, km: 20000 },
+  "new front tyre": { months: 36, km: 40000 },
+  "new back tyre": { months: 36, km: 40000 },
+  "new tyres": { months: 36, km: 40000 }
+};
+
+// Fallback interval per default category, used when no item matched above.
+const CATEGORY_INTERVALS = {
+  "engine-oil": { months: 6, km: 10000 },
+  "brakes-fluids": { months: 24, km: 40000 },
+  "electrical-wear": { months: 36, km: 40000 },
+  "tyres-alignment": { months: 12, km: 20000 }
+};
+
+// Add whole months to a YYYY-MM-DD string, clamping day overflow (e.g. Jan 31
+// + 1 month → Feb 28/29). Returns "" if the input is empty/invalid.
+function addMonthsToDate(dateStr, months) {
+  if (!dateStr) return "";
+  const d = new Date(`${dateStr}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return "";
+  const day = d.getDate();
+  d.setMonth(d.getMonth() + months);
+  if (d.getDate() < day) d.setDate(0);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
+// Suggest the next service date + odometer from what's being logged. Picks the
+// soonest interval among matched items (whichever part is due first wins).
+// Returns { nextDate, nextOdometer, note } or null if nothing matched.
+function suggestNextService({ categoryKey, items, date, odometer }) {
+  const candidates = [];
+  for (const item of items || []) {
+    const key = String(item).trim().toLowerCase();
+    if (SERVICE_INTERVALS[key]) candidates.push({ label: item, ...SERVICE_INTERVALS[key] });
+  }
+  if (!candidates.length && CATEGORY_INTERVALS[categoryKey]) {
+    candidates.push({ label: categoryLabel(categoryKey), ...CATEGORY_INTERVALS[categoryKey] });
+  }
+  if (!candidates.length) return null;
+
+  const byMonths = candidates.filter((c) => c.months > 0).sort((a, b) => a.months - b.months)[0];
+  const byKm = candidates.filter((c) => c.km > 0).sort((a, b) => a.km - b.km)[0];
+
+  const nextDate = byMonths && date ? addMonthsToDate(date, byMonths.months) : "";
+  const odo = Number(odometer);
+  const nextOdometer = byKm && Number.isFinite(odo) && odo > 0 ? odo + byKm.km : "";
+
+  const bits = [];
+  if (byMonths) bits.push(`~${byMonths.months} months`);
+  if (byKm) bits.push(`${byKm.km.toLocaleString()} km`);
+  const driver = (byMonths || byKm).label.toLowerCase();
+  const note = `Based on ${driver}: about every ${bits.join(" / ")}. Adjust if your car differs.`;
+
+  return { nextDate, nextOdometer, note };
+}
+
 /* ---- Reminders (in-app) ---- */
 
 const DUE_SOON_DAYS = 30;

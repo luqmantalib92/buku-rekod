@@ -3,6 +3,14 @@
 
 const CHANGELOG = [
   {
+    version: "1.2.0",
+    date: "2026-07-14",
+    notes: [
+      "Fresh Airbnb-inspired look: coral accent, cleaner white cards, rounder corners and softer shadows.",
+      "New \"Suggest next service\" button on the record form estimates the next date and odometer from the items you serviced (editable)."
+    ]
+  },
+  {
     version: "1.1.2",
     date: "2026-07-14",
     notes: [

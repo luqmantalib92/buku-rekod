@@ -9,7 +9,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <link rel="icon" href="./icon-192.png" />
-    <meta name="theme-color" content="#216e5f" />
+    <meta name="theme-color" content="#ff385c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -90,6 +90,10 @@
             Details / other items
             <textarea id="serviceItems" name="items" rows="3" placeholder="Anything not covered by the chips above"></textarea>
           </label>
+          <div class="span-2 suggest-row">
+            <button type="button" id="suggestNext" class="secondary-line" title="Estimate the next service from the items you picked">Suggest next service</button>
+            <p id="suggestNote" class="field-hint" role="status" hidden></p>
+          </div>
           <label>
             Next service date
             <input id="nextDate" name="nextDate" type="date" />

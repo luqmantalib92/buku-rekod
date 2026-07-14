@@ -1,14 +1,17 @@
 :root {
   color-scheme: light;
-  --bg: #f6f7f3;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --ink: #17211f;
-  --muted: #69736f;
-  --line: #dce2dd;
-  --accent: #216e5f;
-  --accent-dark: #164d43;
+  --ink: #222222;
+  --muted: #717171;
+  --line: #dddddd;
+  --fill: #f7f7f7;
+  --accent: #ff385c;
+  --accent-dark: #e00b41;
+  --accent-tint: #ffe8ec;
   --warn: #a75f18;
-  --shadow: 0 18px 45px rgba(23, 33, 31, 0.08);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lift: 0 10px 28px rgba(0, 0, 0, 0.14);
 }
 
 * {
@@ -27,7 +30,9 @@ body {
   min-width: 320px;
   background: var(--bg);
   color: var(--ink);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  font-family: Inter, "Circular", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 button,
@@ -133,11 +138,11 @@ button {
 }
 
 .account-link:hover {
-  background: #edf5f2;
+  background: var(--fill);
 }
 
 .account-link-active {
-  background: #e6f3ef;
+  background: var(--accent-tint);
   color: var(--accent-dark);
 }
 
@@ -299,15 +304,15 @@ button {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(23, 33, 31, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .modal {
   width: min(400px, 100%);
   display: grid;
   gap: 10px;
-  padding: 22px;
-  border-radius: 12px;
+  padding: 24px;
+  border-radius: 14px;
   background: var(--surface);
   box-shadow: var(--shadow);
 }
@@ -386,7 +391,7 @@ h3 {
 .panel,
 .record-card {
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 12px;
   background: var(--surface);
 }
 
@@ -476,7 +481,7 @@ label {
   display: grid;
   gap: 7px;
   min-width: 0;
-  color: #31413c;
+  color: var(--ink);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -487,11 +492,11 @@ select {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  border: 1px solid #cbd5cf;
-  border-radius: 7px;
-  background: #fbfcfa;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
   color: var(--ink);
-  padding: 11px 12px;
+  padding: 12px 13px;
   outline: none;
   transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
 }
@@ -529,7 +534,7 @@ textarea:focus,
 select:focus {
   border-color: var(--accent);
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(33, 110, 95, 0.14);
+  box-shadow: 0 0 0 3px rgba(255, 56, 92, 0.15);
 }
 
 .span-2,
@@ -541,7 +546,7 @@ select:focus {
 .ghost-action,
 .icon-button {
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   font-weight: 800;
   touch-action: manipulation;
 }
@@ -626,8 +631,8 @@ select:focus {
 }
 
 .empty-state {
-  border: 1px dashed #c5cec8;
-  border-radius: 8px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
   padding: 24px;
   color: var(--muted);
   text-align: center;
@@ -680,7 +685,7 @@ select:focus {
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 10px;
-  background: #fbfcfa;
+  background: var(--fill);
 }
 
 dt {
@@ -711,8 +716,8 @@ dd {
 }
 
 .record-edit {
-  background: #e6f3ef;
-  color: var(--accent-dark);
+  background: var(--fill);
+  color: var(--ink);
 }
 
 .record-delete {
@@ -743,11 +748,11 @@ dd {
 }
 
 .back-action {
-  color: var(--accent-dark);
+  color: var(--ink);
 }
 
 .edit-action {
-  color: var(--accent-dark);
+  color: var(--ink);
 }
 
 .edit-actions {
@@ -773,7 +778,7 @@ dd {
   width: 100%;
   text-align: left;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--surface);
   padding: 18px;
   box-shadow: var(--shadow);
@@ -781,7 +786,8 @@ dd {
 }
 
 .vehicle-card:hover {
-  border-color: rgba(33, 110, 95, 0.45);
+  border-color: #b0b0b0;
+  box-shadow: var(--shadow-lift);
   transform: translateY(-2px);
 }
 
@@ -798,8 +804,8 @@ dd {
   width: 100%;
   height: 150px;
   object-fit: cover;
-  border-radius: 8px;
-  background: #eef2f0;
+  border-radius: 12px;
+  background: var(--fill);
 }
 
 .image-field input[type="file"] {
@@ -891,7 +897,7 @@ dd {
 }
 
 .field-label {
-  color: #31413c;
+  color: var(--ink);
   font-size: 0.88rem;
   font-weight: 700;
 }
@@ -900,6 +906,19 @@ dd {
   margin: 0;
   color: var(--muted);
   font-size: 0.85rem;
+}
+
+.suggest-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+}
+
+.suggest-row .field-hint {
+  margin: 0;
+  flex: 1;
+  min-width: 180px;
 }
 
 .chips {
@@ -921,7 +940,7 @@ dd {
 }
 
 .chip:hover {
-  background: #edf5f2;
+  background: var(--fill);
 }
 
 .chip-on {
@@ -941,7 +960,7 @@ dd {
   margin: 4px 0 0;
   padding: 2px 10px;
   border-radius: 999px;
-  background: #e6f3ef;
+  background: var(--accent-tint);
   color: var(--accent-dark);
   font-size: 0.7rem;
   font-weight: 800;
@@ -965,7 +984,7 @@ dd {
   border-left-width: 4px;
   border-radius: 8px;
   padding: 12px 14px;
-  background: #fbfcfa;
+  background: var(--fill);
 }
 
 .reminder-label {
@@ -1037,7 +1056,7 @@ dd {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
-  background: #fbfcfa;
+  background: var(--fill);
   display: grid;
   gap: 12px;
 }
@@ -1080,7 +1099,7 @@ dd {
 }
 
 .secondary-line:hover {
-  background: #edf5f2;
+  background: var(--fill);
 }
 
 .secondary-line:focus-visible {
@@ -1119,7 +1138,7 @@ dd {
 }
 
 .input-affix-btn:hover {
-  background: #edf5f2;
+  background: var(--fill);
 }
 
 @media (prefers-reduced-motion: reduce) {

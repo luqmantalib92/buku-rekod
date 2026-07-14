@@ -13,6 +13,8 @@ const recordEls = {
   itemChips: document.querySelector("#serviceItemChips"),
   chipsHint: document.querySelector("#chipsHint"),
   workshopSuggestions: document.querySelector("#workshopSuggestions"),
+  suggestNext: document.querySelector("#suggestNext"),
+  suggestNote: document.querySelector("#suggestNote"),
   submit: document.querySelector("#serviceSubmit"),
   cancel: document.querySelector("#cancelForm")
 };
@@ -148,6 +150,47 @@ function initForm() {
 recordEls.serviceCategory.addEventListener("change", () => {
   renderItemChips();
   dirty = true;
+});
+
+function showSuggestNote(message) {
+  recordEls.suggestNote.textContent = message;
+  recordEls.suggestNote.hidden = !message;
+}
+
+recordEls.suggestNext.addEventListener("click", () => {
+  const form = recordEls.serviceForm;
+  const extra = form.items.value.trim();
+  const items = [...selectedItems, ...(extra ? [extra] : [])];
+  const suggestion = suggestNextService({
+    categoryKey: recordEls.serviceCategory.value,
+    items,
+    date: form.date.value,
+    odometer: form.odometer.value
+  });
+
+  if (!suggestion) {
+    showSuggestNote("Pick a category or tick some items first.");
+    return;
+  }
+
+  const filled = [];
+  if (suggestion.nextDate) {
+    form.nextDate.value = suggestion.nextDate;
+    filled.push("date");
+  }
+  if (suggestion.nextOdometer) {
+    form.nextOdometer.value = suggestion.nextOdometer;
+    filled.push("odometer");
+  }
+
+  if (!filled.length) {
+    showSuggestNote("Enter the service date and odometer above first.");
+    return;
+  }
+
+  dirty = true;
+  const missing = filled.includes("date") ? "" : " (add a service date for the next-date too)";
+  showSuggestNote(`${suggestion.note}${missing}`);
 });
 
 recordEls.serviceForm.addEventListener("input", () => { dirty = true; });
