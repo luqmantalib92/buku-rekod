@@ -69,6 +69,18 @@
         </div>
         <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
       </section>
+
+      <details class="panel settings-panel">
+        <summary>Reminder settings</summary>
+        <p class="field-hint">Days before a service's due date to start reminding you, per category.</p>
+        <form id="settingsForm">
+          <div id="settingsRows" class="settings-grid"></div>
+          <div class="edit-actions">
+            <button type="submit" class="primary-action">Save settings</button>
+            <span id="settingsSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
+          </div>
+        </form>
+      </details>
     </main>
 
     <template id="vehicleCardTemplate">

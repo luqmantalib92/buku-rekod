@@ -4,7 +4,10 @@ const garageEls = {
   vehicleForm: document.querySelector("#vehicleForm"),
   vehicleList: document.querySelector("#vehicleList"),
   vehicleEmpty: document.querySelector("#vehicleEmpty"),
-  vehicleCardTemplate: document.querySelector("#vehicleCardTemplate")
+  vehicleCardTemplate: document.querySelector("#vehicleCardTemplate"),
+  settingsForm: document.querySelector("#settingsForm"),
+  settingsRows: document.querySelector("#settingsRows"),
+  settingsSaved: document.querySelector("#settingsSaved")
 };
 
 function openVehicle(id) {
@@ -41,6 +44,46 @@ function renderGarage() {
   }
 }
 
+function renderSettings() {
+  garageEls.settingsRows.replaceChildren();
+  for (const category of SERVICE_CATEGORIES) {
+    const label = document.createElement("label");
+    label.className = "settings-row";
+    label.textContent = category.label;
+
+    const input = document.createElement("input");
+    input.type = "number";
+    input.min = "0";
+    input.step = "1";
+    input.name = category.key;
+    input.value = leadDaysFor(category.key);
+
+    label.append(input);
+    garageEls.settingsRows.append(label);
+  }
+}
+
+garageEls.settingsForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = new FormData(garageEls.settingsForm);
+  const leadDays = {};
+  for (const category of SERVICE_CATEGORIES) {
+    const value = Number(form.get(category.key));
+    if (Number.isFinite(value) && value >= 0) leadDays[category.key] = value;
+  }
+  state.settings = { leadDays };
+  await persist();
+  renderGarage();
+
+  garageEls.settingsSaved.hidden = false;
+  setTimeout(() => { garageEls.settingsSaved.hidden = true; }, 2000);
+});
+
+function onGarageReady() {
+  renderGarage();
+  renderSettings();
+}
+
 garageEls.vehicleForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = new FormData(garageEls.vehicleForm);
@@ -60,4 +103,4 @@ garageEls.vehicleForm.addEventListener("submit", async (event) => {
   renderGarage();
 });
 
-bootWithFallback(renderGarage);
+bootWithFallback(onGarageReady);

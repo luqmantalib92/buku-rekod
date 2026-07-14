@@ -4,6 +4,7 @@ const LOCAL_KEY = "vehicle-service-log:v1";
 
 const state = {
   vehicles: [],
+  settings: { leadDays: {} },
   user: null,
   auth: null,
   db: null,
@@ -73,6 +74,7 @@ function ingest(data) {
   } else {
     state.vehicles = [];
   }
+  state.settings = normalizeSettings(source.settings);
 }
 
 function getVehicle(id) {
@@ -90,16 +92,35 @@ function latestOdometer(vehicle) {
 /* ---- Service categories (groups) ---- */
 
 const SERVICE_CATEGORIES = [
-  { key: "engine-oil", label: "Engine & oil", items: ["Engine oil", "Oil filter", "Air filter", "Cabin/aircond filter"] },
-  { key: "brakes-fluids", label: "Brakes & fluids", items: ["Brake pads", "Brake fluid", "Coolant", "ATF/gearbox oil"] },
-  { key: "electrical-wear", label: "Electrical & wear", items: ["Battery", "Spark plugs", "Wipers", "Bulbs"] },
-  { key: "tyres-alignment", label: "Tyres & alignment", items: ["Tyre rotation", "Alignment & balancing", "New tyres"] },
-  { key: "other", label: "Other", items: [] }
+  { key: "engine-oil", label: "Engine & oil", lead: 30, items: ["Engine oil", "Oil filter", "Air filter", "Cabin/aircond filter"] },
+  { key: "brakes-fluids", label: "Brakes & fluids", lead: 30, items: ["Brake pads", "Brake fluid", "Coolant", "ATF/gearbox oil"] },
+  { key: "electrical-wear", label: "Electrical & wear", lead: 30, items: ["Battery", "Spark plugs", "Wipers", "Bulbs"] },
+  { key: "tyres-alignment", label: "Tyres & alignment", lead: 30, items: ["Tyre rotation", "Alignment & balancing", "New tyres"] },
+  { key: "other", label: "Other", lead: 30, items: [] }
 ];
 
 function categoryLabel(key) {
   const category = SERVICE_CATEGORIES.find((entry) => entry.key === key);
   return category ? category.label : "Other";
+}
+
+// Days before a due date to start warning, per category: user override wins,
+// then the category default, then the global fallback.
+function leadDaysFor(key) {
+  const override = Number(state.settings?.leadDays?.[key]);
+  if (Number.isFinite(override) && override >= 0) return override;
+  const category = SERVICE_CATEGORIES.find((entry) => entry.key === key);
+  return category && Number.isFinite(category.lead) ? category.lead : DUE_SOON_DAYS;
+}
+
+function normalizeSettings(settings) {
+  const leadDays = {};
+  const source = (settings && settings.leadDays) || {};
+  for (const category of SERVICE_CATEGORIES) {
+    const value = Number(source[category.key]);
+    if (Number.isFinite(value) && value >= 0) leadDays[category.key] = value;
+  }
+  return { leadDays };
 }
 
 /* ---- Reminders (in-app) ---- */
@@ -133,7 +154,7 @@ function vehicleReminders(vehicle) {
     if (days === null) continue;
     let status = "ok";
     if (days < 0) status = "overdue";
-    else if (days <= DUE_SOON_DAYS) status = "due-soon";
+    else if (days <= leadDaysFor(key)) status = "due-soon";
     reminders.push({ category: key, label: categoryLabel(key), nextDate: record.nextDate, days, status });
   }
 
@@ -159,7 +180,7 @@ function loadLocal() {
 }
 
 function saveLocal() {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify({ vehicles: state.vehicles }));
+  localStorage.setItem(LOCAL_KEY, JSON.stringify({ vehicles: state.vehicles, settings: state.settings }));
 }
 
 async function loadRemoteData() {
@@ -172,6 +193,7 @@ async function persist() {
   if (state.useFirestore && state.dataRef) {
     await state.dataRef.set({
       vehicles: state.vehicles,
+      settings: state.settings,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } else {
