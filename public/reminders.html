@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Garage | Service Log</title>
+    <title>Reminders | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link rel="icon" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <link rel="icon" href="./assets/icon-192.png" />
     <meta name="theme-color" content="#ff385c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -20,9 +20,12 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Garage overview">
+      <section class="topbar" aria-label="Reminder settings">
         <div class="topbar-title">
-          <h1>Garage</h1>
+          <nav class="crumbs" aria-label="Breadcrumb">
+            <a href="./index.html" class="crumb">Garage</a>
+          </nav>
+          <h1>Reminder settings</h1>
         </div>
         <div class="topbar-actions">
           <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
@@ -42,54 +45,25 @@
         </div>
       </section>
 
-      <section class="panel" aria-label="Garage">
-        <div class="panel-heading">
-          <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
-          <button type="button" id="addVehicle" class="primary-action heading-action" title="Add a new vehicle to your garage">Add vehicle</button>
-        </div>
-        <div id="vehicleEmpty" class="empty-state" hidden>
-          <p>Add your first vehicle to start building service logs.</p>
-          <button type="button" id="emptyAddVehicle" class="primary-action">Add vehicle</button>
-        </div>
-        <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
+      <section class="panel" aria-label="Reminder settings">
+        <p class="panel-subtitle panel-intro">How many days before a service's due date to start reminding you, per category.</p>
+        <form id="settingsForm">
+          <div id="settingsRows" class="settings-grid"></div>
+          <div class="edit-actions">
+            <button type="submit" class="primary-action">Save settings</button>
+            <span id="settingsSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
+          </div>
+        </form>
       </section>
     </main>
-
-    <template id="vehicleCardTemplate">
-      <button type="button" class="vehicle-card">
-        <img class="vehicle-thumb" alt="" hidden />
-        <div class="vehicle-card-main">
-          <div class="vehicle-card-title">
-            <h3 class="vehicle-name"></h3>
-            <span class="vehicle-due" hidden></span>
-          </div>
-          <p class="vehicle-plate"></p>
-        </div>
-        <dl class="vehicle-card-stats">
-          <div>
-            <dt>Odometer</dt>
-            <dd class="vehicle-odometer"></dd>
-          </div>
-          <div>
-            <dt>Logs</dt>
-            <dd class="vehicle-count"></dd>
-          </div>
-          <div>
-            <dt>Last service</dt>
-            <dd class="vehicle-last"></dd>
-          </div>
-        </dl>
-        <span class="vehicle-card-cta" aria-hidden="true">View logs &rarr;</span>
-      </button>
-    </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-    <script src="./version.js"></script>
-    <script src="./firebase-config.js"></script>
-    <script src="./store.js"></script>
-    <script src="./garage.js"></script>
-    <script src="./pull-refresh.js"></script>
+    <script src="./js/version.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/store.js"></script>
+    <script src="./js/reminders.js"></script>
+    <script src="./js/pull-refresh.js"></script>
   </body>
 </html>

@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Categories | Service Log</title>
+    <title>Garage | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link rel="icon" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <link rel="icon" href="./assets/icon-192.png" />
     <meta name="theme-color" content="#ff385c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -20,12 +20,9 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Categories">
+      <section class="topbar" aria-label="Garage overview">
         <div class="topbar-title">
-          <nav class="crumbs" aria-label="Breadcrumb">
-            <a href="./index.html" class="crumb">Garage</a>
-          </nav>
-          <h1>Categories</h1>
+          <h1>Garage</h1>
         </div>
         <div class="topbar-actions">
           <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
@@ -45,55 +42,54 @@
         </div>
       </section>
 
-      <div class="detail-head actions-only">
-        <button type="button" id="resetCategories" class="ghost-action danger-action">Reset to defaults</button>
-      </div>
-
-      <section class="panel" aria-label="Service categories">
-        <p class="panel-subtitle panel-intro">
-          Rename categories and edit the items inside each. Existing records keep their
-          category; deleting a category shows its past records as "Other".
-        </p>
-
-        <form id="categoryForm">
-          <div id="categoryEditor" class="category-editor"></div>
-          <button type="button" id="addCategory" class="secondary-line">+ Add category</button>
-          <div class="edit-actions">
-            <button type="submit" class="primary-action">Save categories</button>
-            <span id="categoriesSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
-          </div>
-        </form>
+      <section class="panel" aria-label="Garage">
+        <div class="panel-heading">
+          <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
+          <button type="button" id="addVehicle" class="primary-action heading-action" title="Add a new vehicle to your garage">Add vehicle</button>
+        </div>
+        <div id="vehicleEmpty" class="empty-state" hidden>
+          <p>Add your first vehicle to start building service logs.</p>
+          <button type="button" id="emptyAddVehicle" class="primary-action">Add vehicle</button>
+        </div>
+        <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
       </section>
     </main>
 
-    <template id="categoryEditorTemplate">
-      <div class="category-edit-card">
-        <div class="category-edit-head">
-          <label class="category-name-label">
-            Category name
-            <input class="category-name" type="text" autocomplete="off" />
-          </label>
-          <button type="button" class="ghost-action danger-action category-remove">Remove</button>
+    <template id="vehicleCardTemplate">
+      <button type="button" class="vehicle-card">
+        <img class="vehicle-thumb" alt="" hidden />
+        <div class="vehicle-card-main">
+          <div class="vehicle-card-title">
+            <h3 class="vehicle-name"></h3>
+            <span class="vehicle-due" hidden></span>
+          </div>
+          <p class="vehicle-plate"></p>
         </div>
-        <div class="category-items"></div>
-        <button type="button" class="secondary-line category-add-item">+ Add item</button>
-      </div>
-    </template>
-
-    <template id="categoryItemTemplate">
-      <div class="category-item-row">
-        <input class="category-item-input" type="text" autocomplete="off" placeholder="Item name" />
-        <button type="button" class="icon-button category-item-remove" aria-label="Remove item">Remove</button>
-      </div>
+        <dl class="vehicle-card-stats">
+          <div>
+            <dt>Odometer</dt>
+            <dd class="vehicle-odometer"></dd>
+          </div>
+          <div>
+            <dt>Logs</dt>
+            <dd class="vehicle-count"></dd>
+          </div>
+          <div>
+            <dt>Last service</dt>
+            <dd class="vehicle-last"></dd>
+          </div>
+        </dl>
+        <span class="vehicle-card-cta" aria-hidden="true">View logs &rarr;</span>
+      </button>
     </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-    <script src="./version.js"></script>
-    <script src="./firebase-config.js"></script>
-    <script src="./store.js"></script>
-    <script src="./categories.js"></script>
-    <script src="./pull-refresh.js"></script>
+    <script src="./js/version.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/store.js"></script>
+    <script src="./js/garage.js"></script>
+    <script src="./js/pull-refresh.js"></script>
   </body>
 </html>

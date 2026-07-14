@@ -4,4 +4,4 @@
 # Local Firebase web config (copy from firebase-config.example.js).
 # The web apiKey is a public client identifier, but keep it out of the
 # repo to avoid secret-scanner noise. It still ships in the deployed JS.
-firebase-config.js
+public/js/firebase-config.js

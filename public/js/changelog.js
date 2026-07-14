@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.3.1",
+    date: "2026-07-14",
+    notes: [
+      "Reorganized the project into a tidy public/ folder (css/, js/, assets/). No change to how the app looks or works."
+    ]
+  },
+  {
     version: "1.3.0",
     date: "2026-07-14",
     notes: [

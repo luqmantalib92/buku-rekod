@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reminders | Service Log</title>
+    <title>Categories | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <link rel="icon" href="./icon-192.png" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <link rel="icon" href="./assets/icon-192.png" />
     <meta name="theme-color" content="#ff385c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -20,12 +20,12 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Reminder settings">
+      <section class="topbar" aria-label="Categories">
         <div class="topbar-title">
           <nav class="crumbs" aria-label="Breadcrumb">
             <a href="./index.html" class="crumb">Garage</a>
           </nav>
-          <h1>Reminder settings</h1>
+          <h1>Categories</h1>
         </div>
         <div class="topbar-actions">
           <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
@@ -45,25 +45,55 @@
         </div>
       </section>
 
-      <section class="panel" aria-label="Reminder settings">
-        <p class="panel-subtitle panel-intro">How many days before a service's due date to start reminding you, per category.</p>
-        <form id="settingsForm">
-          <div id="settingsRows" class="settings-grid"></div>
+      <div class="detail-head actions-only">
+        <button type="button" id="resetCategories" class="ghost-action danger-action">Reset to defaults</button>
+      </div>
+
+      <section class="panel" aria-label="Service categories">
+        <p class="panel-subtitle panel-intro">
+          Rename categories and edit the items inside each. Existing records keep their
+          category; deleting a category shows its past records as "Other".
+        </p>
+
+        <form id="categoryForm">
+          <div id="categoryEditor" class="category-editor"></div>
+          <button type="button" id="addCategory" class="secondary-line">+ Add category</button>
           <div class="edit-actions">
-            <button type="submit" class="primary-action">Save settings</button>
-            <span id="settingsSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
+            <button type="submit" class="primary-action">Save categories</button>
+            <span id="categoriesSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
           </div>
         </form>
       </section>
     </main>
 
+    <template id="categoryEditorTemplate">
+      <div class="category-edit-card">
+        <div class="category-edit-head">
+          <label class="category-name-label">
+            Category name
+            <input class="category-name" type="text" autocomplete="off" />
+          </label>
+          <button type="button" class="ghost-action danger-action category-remove">Remove</button>
+        </div>
+        <div class="category-items"></div>
+        <button type="button" class="secondary-line category-add-item">+ Add item</button>
+      </div>
+    </template>
+
+    <template id="categoryItemTemplate">
+      <div class="category-item-row">
+        <input class="category-item-input" type="text" autocomplete="off" placeholder="Item name" />
+        <button type="button" class="icon-button category-item-remove" aria-label="Remove item">Remove</button>
+      </div>
+    </template>
+
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-    <script src="./version.js"></script>
-    <script src="./firebase-config.js"></script>
-    <script src="./store.js"></script>
-    <script src="./reminders.js"></script>
-    <script src="./pull-refresh.js"></script>
+    <script src="./js/version.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/store.js"></script>
+    <script src="./js/categories.js"></script>
+    <script src="./js/pull-refresh.js"></script>
   </body>
 </html>
