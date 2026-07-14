@@ -1,0 +1,102 @@
+/* What's new: version history shown on changelog.html.
+   Add a new entry to the TOP each time APP_VERSION is bumped. */
+
+const CHANGELOG = [
+  {
+    version: "1.0.9",
+    date: "2026-07-14",
+    notes: [
+      "Added this What's new page — tap the version number any time to see what changed."
+    ]
+  },
+  {
+    version: "1.0.8",
+    date: "2026-07-14",
+    notes: [
+      "Reminder settings moved to its own page, reachable from the account menu."
+    ]
+  },
+  {
+    version: "1.0.7",
+    date: "2026-07-14",
+    notes: [
+      "Vehicle photos are now checked (type and size) and auto-compressed before saving.",
+      "Clear inline feedback when a photo is rejected or after it's compressed."
+    ]
+  },
+  {
+    version: "1.0.6",
+    date: "2026-07-14",
+    notes: [
+      "Add a photo to each vehicle, shown on its garage card.",
+      "Friendlier confirmation dialogs before deleting, signing out, or leaving with unsaved changes."
+    ]
+  },
+  {
+    version: "1.0.0",
+    notes: [
+      "Initial release: multi-vehicle garage, service log book, categorized records, and per-category reminders."
+    ]
+  }
+];
+
+function renderChangelog() {
+  const list = document.querySelector("#changelogList");
+  if (!list) return;
+
+  const current = typeof APP_VERSION === "string" ? APP_VERSION : "";
+  const frag = document.createDocumentFragment();
+
+  for (const entry of CHANGELOG) {
+    const card = document.createElement("article");
+    card.className = "changelog-entry";
+
+    const head = document.createElement("div");
+    head.className = "changelog-head";
+
+    const version = document.createElement("h2");
+    version.className = "changelog-version";
+    version.textContent = `v${entry.version}`;
+    head.append(version);
+
+    if (entry.version === current) {
+      const badge = document.createElement("span");
+      badge.className = "changelog-current";
+      badge.textContent = "Current";
+      head.append(badge);
+    }
+
+    if (entry.date) {
+      const date = document.createElement("span");
+      date.className = "changelog-date";
+      date.textContent = entry.date;
+      head.append(date);
+    }
+
+    card.append(head);
+
+    const notes = document.createElement("ul");
+    notes.className = "changelog-notes";
+    for (const note of entry.notes) {
+      const li = document.createElement("li");
+      li.textContent = note;
+      notes.append(li);
+    }
+    card.append(notes);
+
+    frag.append(card);
+  }
+
+  list.replaceChildren(frag);
+}
+
+document.querySelector("#backToGarage").addEventListener("click", () => {
+  window.location.href = "./index.html";
+});
+
+window.onPullRefresh = async () => {
+  await refreshData();
+  renderChangelog();
+};
+
+bootWithFallback(renderChangelog);

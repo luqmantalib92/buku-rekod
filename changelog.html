@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reminders | Service Log</title>
+    <title>What's new | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -20,7 +20,7 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Reminder settings">
+      <section class="topbar" aria-label="What's new">
         <div>
           <p class="eyebrow app-version"></p>
           <h1>Service Log</h1>
@@ -46,21 +46,14 @@
         <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
       </div>
 
-      <section class="panel" aria-labelledby="remindersHeading">
+      <section class="panel" aria-labelledby="changelogHeading">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Notifications</p>
-            <h2 id="remindersHeading">Reminder settings</h2>
+            <p class="eyebrow">Updates</p>
+            <h2 id="changelogHeading">What's new</h2>
           </div>
         </div>
-        <p class="field-hint">Days before a service's due date to start reminding you, per category.</p>
-        <form id="settingsForm">
-          <div id="settingsRows" class="settings-grid"></div>
-          <div class="edit-actions">
-            <button type="submit" class="primary-action">Save settings</button>
-            <span id="settingsSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
-          </div>
-        </form>
+        <div id="changelogList" class="changelog-list"></div>
       </section>
     </main>
 
@@ -70,7 +63,7 @@
     <script src="./version.js"></script>
     <script src="./firebase-config.js"></script>
     <script src="./store.js"></script>
-    <script src="./reminders.js"></script>
+    <script src="./changelog.js"></script>
     <script src="./pull-refresh.js"></script>
   </body>
 </html>
