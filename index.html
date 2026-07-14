@@ -32,6 +32,7 @@
           <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
             <a href="./index.html" class="account-link" role="menuitem">Garage</a>
             <a href="./categories.html" class="account-link" role="menuitem">Manage categories</a>
+            <a href="./reminders.html" class="account-link" role="menuitem">Reminder settings</a>
             <hr class="account-divider" />
             <p class="account-email" id="accountEmail">Local mode</p>
             <p class="account-status" id="accountStatus">Saved on this device</p>
@@ -87,18 +88,6 @@
         </div>
         <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
       </section>
-
-      <details class="panel settings-panel">
-        <summary>Reminder settings</summary>
-        <p class="field-hint">Days before a service's due date to start reminding you, per category.</p>
-        <form id="settingsForm">
-          <div id="settingsRows" class="settings-grid"></div>
-          <div class="edit-actions">
-            <button type="submit" class="primary-action">Save settings</button>
-            <span id="settingsSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
-          </div>
-        </form>
-      </details>
     </main>
 
     <template id="vehicleCardTemplate">

@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Categories | Service Log</title>
+    <title>Reminders | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -20,7 +20,7 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Categories">
+      <section class="topbar" aria-label="Reminder settings">
         <div>
           <p class="eyebrow app-version"></p>
           <h1>Service Log</h1>
@@ -43,52 +43,25 @@
 
       <div class="detail-head">
         <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
-        <button type="button" id="resetCategories" class="ghost-action">Reset to defaults</button>
       </div>
 
-      <section class="panel" aria-labelledby="categoriesHeading">
+      <section class="panel" aria-labelledby="remindersHeading">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Customize</p>
-            <h2 id="categoriesHeading">Service categories</h2>
+            <p class="eyebrow">Notifications</p>
+            <h2 id="remindersHeading">Reminder settings</h2>
           </div>
         </div>
-        <p class="field-hint">
-          Rename categories and edit the items inside each. Existing records keep their
-          category; deleting a category shows its past records as "Other".
-        </p>
-
-        <form id="categoryForm">
-          <div id="categoryEditor" class="category-editor"></div>
-          <button type="button" id="addCategory" class="secondary-line">+ Add category</button>
+        <p class="field-hint">Days before a service's due date to start reminding you, per category.</p>
+        <form id="settingsForm">
+          <div id="settingsRows" class="settings-grid"></div>
           <div class="edit-actions">
-            <button type="submit" class="primary-action">Save categories</button>
-            <span id="categoriesSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
+            <button type="submit" class="primary-action">Save settings</button>
+            <span id="settingsSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
           </div>
         </form>
       </section>
     </main>
-
-    <template id="categoryEditorTemplate">
-      <div class="category-edit-card">
-        <div class="category-edit-head">
-          <label class="category-name-label">
-            Category name
-            <input class="category-name" type="text" autocomplete="off" />
-          </label>
-          <button type="button" class="ghost-action category-remove">Remove</button>
-        </div>
-        <div class="category-items"></div>
-        <button type="button" class="secondary-line category-add-item">+ Add item</button>
-      </div>
-    </template>
-
-    <template id="categoryItemTemplate">
-      <div class="category-item-row">
-        <input class="category-item-input" type="text" autocomplete="off" placeholder="Item name" />
-        <button type="button" class="icon-button category-item-remove" aria-label="Remove item">Remove</button>
-      </div>
-    </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
@@ -96,7 +69,7 @@
     <script src="./version.js"></script>
     <script src="./firebase-config.js"></script>
     <script src="./store.js"></script>
-    <script src="./categories.js"></script>
+    <script src="./reminders.js"></script>
     <script src="./pull-refresh.js"></script>
   </body>
 </html>
