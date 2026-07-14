@@ -3,6 +3,14 @@
 
 const CHANGELOG = [
   {
+    version: "1.4.1",
+    date: "2026-07-14",
+    notes: [
+      "Logbook is now grouped into Overdue, Due soon, Upcoming and History sections, each with a count.",
+      "Each record's actions (Mark serviced, Edit, Delete) are now tidied into a single ⋮ menu at the top-right of the card."
+    ]
+  },
+  {
     version: "1.4.0",
     date: "2026-07-14",
     notes: [

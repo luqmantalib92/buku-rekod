@@ -55,63 +55,117 @@ function updateSummary(vehicle) {
   vehicleEls.summaryCost.textContent = formatMoney(totalCost);
 }
 
+function closeAllRecordMenus() {
+  for (const menu of vehicleEls.recordList.querySelectorAll(".record-menu")) {
+    menu.hidden = true;
+  }
+  for (const btn of vehicleEls.recordList.querySelectorAll(".record-menu-btn")) {
+    btn.setAttribute("aria-expanded", "false");
+  }
+}
+
+// Close any open card menu on an outside click or Escape (registered once).
+document.addEventListener("click", closeAllRecordMenus);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeAllRecordMenus();
+});
+
+function buildRecordCard(record) {
+  const item = vehicleEls.recordTemplate.content.firstElementChild.cloneNode(true);
+  item.querySelector("h3").textContent = formatDate(record.date);
+  item.querySelector(".record-category").textContent = categoryLabel(record.category);
+  item.querySelector(".record-meta").textContent = `${formatKm(record.odometer)} · ${record.workshop || "No workshop saved"}`;
+  item.querySelector(".record-items").textContent = record.items;
+  item.querySelector(".record-cost").textContent = formatMoney(record.cost);
+  item.querySelector(".record-next-date").textContent = formatDate(record.nextDate);
+  item.querySelector(".record-next-odometer").textContent = record.nextOdometer ? formatKm(record.nextOdometer) : "-";
+
+  const notesEl = item.querySelector(".record-notes");
+  notesEl.textContent = record.notes || "";
+  notesEl.hidden = !record.notes;
+
+  // Status pill + card highlight + the mark-serviced menu item.
+  const dueEl = item.querySelector(".record-due");
+  const doneBtn = item.querySelector(".record-done");
+  if (record.nextDate) {
+    dueEl.hidden = false;
+    doneBtn.hidden = false;
+    if (record.nextDone) {
+      dueEl.textContent = "Serviced";
+      dueEl.className = "record-due record-due-done";
+      doneBtn.textContent = "Undo serviced";
+    } else {
+      const status = recordNextStatus(record);
+      dueEl.textContent = dueText(status.days);
+      dueEl.className = `record-due record-due-${status.status}`;
+      if (status.status !== "upcoming") item.classList.add(`is-${status.status}`);
+      doneBtn.textContent = "Mark serviced";
+    }
+    doneBtn.addEventListener("click", () => toggleServiced(record.id));
+  }
+
+  // Kebab menu (Mark serviced / Edit / Delete).
+  const menuBtn = item.querySelector(".record-menu-btn");
+  const menu = item.querySelector(".record-menu");
+  menuBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const willOpen = menu.hidden;
+    closeAllRecordMenus();
+    if (willOpen) {
+      menu.hidden = false;
+      menuBtn.setAttribute("aria-expanded", "true");
+    }
+  });
+  item.querySelector(".record-edit").addEventListener("click", () => openRecordForm(record.id));
+  item.querySelector(".record-delete").addEventListener("click", () => deleteRecord(record.id));
+  return item;
+}
+
+const RECORD_GROUP_ORDER = ["overdue", "due-soon", "upcoming", "history"];
+const RECORD_GROUP_LABELS = {
+  overdue: "Overdue",
+  "due-soon": "Due soon",
+  upcoming: "Upcoming",
+  history: "History"
+};
+
 function renderRecords(vehicle) {
   vehicleEls.recordList.replaceChildren();
-  // Sort so the soonest unresolved next-service is on top. Records that are
-  // already serviced or have no next date fall to the bottom (newest first).
-  const openDate = (r) => (r.nextDate && !r.nextDone ? r.nextDate : "");
-  const sorted = [...vehicle.records].sort((a, b) => {
-    const an = openDate(a);
-    const bn = openDate(b);
-    if (an && bn) {
-      if (an !== bn) return an.localeCompare(bn);
-    } else if (an || bn) {
-      return an ? -1 : 1;
+
+  // Bucket records by next-service status; history = no active reminder.
+  const groups = { overdue: [], "due-soon": [], upcoming: [], history: [] };
+  for (const record of vehicle.records) {
+    const status = recordNextStatus(record);
+    (status ? groups[status.status] : groups.history).push(record);
+  }
+
+  const byNextDate = (a, b) => (a.nextDate || "").localeCompare(b.nextDate || "");
+  const byServiceDesc = (a, b) => b.date.localeCompare(a.date) || Number(b.odometer || 0) - Number(a.odometer || 0);
+  groups.overdue.sort(byNextDate);
+  groups["due-soon"].sort(byNextDate);
+  groups.upcoming.sort(byNextDate);
+  groups.history.sort(byServiceDesc);
+
+  vehicleEls.emptyState.hidden = vehicle.records.length > 0;
+
+  for (const key of RECORD_GROUP_ORDER) {
+    const items = groups[key];
+    if (!items.length) continue;
+
+    const header = document.createElement("div");
+    header.className = `record-group record-group-${key}`;
+    const label = document.createElement("span");
+    label.className = "record-group-label";
+    label.textContent = RECORD_GROUP_LABELS[key];
+    const count = document.createElement("span");
+    count.className = "record-group-count";
+    count.textContent = String(items.length);
+    header.append(label, count);
+    vehicleEls.recordList.append(header);
+
+    for (const record of items) {
+      vehicleEls.recordList.append(buildRecordCard(record));
     }
-    return b.date.localeCompare(a.date) || Number(b.odometer || 0) - Number(a.odometer || 0);
-  });
-
-  vehicleEls.emptyState.hidden = sorted.length > 0;
-
-  for (const record of sorted) {
-    const item = vehicleEls.recordTemplate.content.firstElementChild.cloneNode(true);
-    item.querySelector("h3").textContent = formatDate(record.date);
-    item.querySelector(".record-category").textContent = categoryLabel(record.category);
-    item.querySelector(".record-meta").textContent = `${formatKm(record.odometer)} · ${record.workshop || "No workshop saved"}`;
-    item.querySelector(".record-items").textContent = record.items;
-    item.querySelector(".record-cost").textContent = formatMoney(record.cost);
-    item.querySelector(".record-next-date").textContent = formatDate(record.nextDate);
-    item.querySelector(".record-next-odometer").textContent = record.nextOdometer ? formatKm(record.nextOdometer) : "-";
-
-    const notesEl = item.querySelector(".record-notes");
-    notesEl.textContent = record.notes || "";
-    notesEl.hidden = !record.notes;
-
-    // Next-service status pill, card highlight, and the mark-serviced toggle.
-    const dueEl = item.querySelector(".record-due");
-    const footEl = item.querySelector(".record-foot");
-    const doneBtn = item.querySelector(".record-done");
-
-    if (record.nextDate) {
-      footEl.hidden = false;
-      dueEl.hidden = false;
-      if (record.nextDone) {
-        dueEl.textContent = "Serviced";
-        dueEl.className = "record-due record-due-done";
-        doneBtn.textContent = "Undo serviced";
-      } else {
-        const status = recordNextStatus(record);
-        dueEl.textContent = dueText(status.days);
-        dueEl.className = `record-due record-due-${status.status}`;
-        if (status.status !== "upcoming") item.classList.add(`is-${status.status}`);
-        doneBtn.textContent = "Mark serviced";
-      }
-      doneBtn.addEventListener("click", () => toggleServiced(record.id));
-    }
-
-    item.querySelector(".record-edit").addEventListener("click", () => openRecordForm(record.id));
-    item.querySelector(".record-delete").addEventListener("click", () => deleteRecord(record.id));
-    vehicleEls.recordList.append(item);
   }
 }
 

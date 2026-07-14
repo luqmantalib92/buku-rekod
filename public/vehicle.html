@@ -102,8 +102,14 @@
             <p class="record-meta"></p>
           </div>
           <div class="record-actions">
-            <button type="button" class="icon-button record-edit" aria-label="Edit service record">Edit</button>
-            <button type="button" class="icon-button record-delete" aria-label="Delete service record">Delete</button>
+            <button type="button" class="record-menu-btn" aria-label="Record actions" aria-haspopup="true" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="12" cy="19" r="1.9" /></svg>
+            </button>
+            <div class="record-menu" role="menu" hidden>
+              <button type="button" class="record-done" role="menuitem" hidden></button>
+              <button type="button" class="record-edit" role="menuitem">Edit</button>
+              <button type="button" class="record-delete" role="menuitem">Delete</button>
+            </div>
           </div>
         </div>
         <p class="record-items"></p>
@@ -122,9 +128,6 @@
           </div>
         </dl>
         <p class="record-notes"></p>
-        <div class="record-foot" hidden>
-          <button type="button" class="record-done"></button>
-        </div>
       </article>
     </template>
 

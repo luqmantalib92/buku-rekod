@@ -765,18 +765,80 @@ dd {
 }
 
 .record-actions {
-  display: flex;
-  gap: 8px;
+  position: relative;
   flex: none;
 }
 
-.record-edit {
+.record-menu-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  touch-action: manipulation;
+}
+
+.record-menu-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+.record-menu-btn:hover {
   background: var(--fill);
   color: var(--ink);
 }
 
-.record-delete {
-  background: #fbeae6;
+.record-menu-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.record-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 170px;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.record-menu button {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 700;
+  text-align: left;
+  touch-action: manipulation;
+}
+
+.record-menu button:hover {
+  background: var(--fill);
+}
+
+.record-menu button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.record-menu .record-done {
+  color: #1f7a54;
+}
+
+.record-menu .record-delete {
   color: #c0392b;
 }
 
@@ -1062,30 +1124,33 @@ dd {
   background: #fff6f4;
 }
 
-.record-foot {
-  margin-top: 14px;
+/* Grouped logbook section headers. */
+.record-group {
   display: flex;
-  justify-content: flex-end;
-}
-
-.record-done {
-  min-height: 40px;
-  padding: 8px 16px;
-  border: 1px solid #bfe0cf;
-  border-radius: 8px;
-  background: #fff;
-  color: #1f7a54;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.78rem;
   font-weight: 800;
-  touch-action: manipulation;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
 }
 
-.record-done:hover {
-  background: #e3f3ec;
+.record-group:first-child {
+  margin-top: 0;
 }
 
-.record-done:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+.record-group-count {
+  font-weight: 700;
+}
+
+.record-group-overdue .record-group-label {
+  color: #c0392b;
+}
+
+.record-group-due-soon .record-group-label {
+  color: var(--warn);
 }
 
 /* Reminders */

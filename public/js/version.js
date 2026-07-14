@@ -1,6 +1,6 @@
 /* Single source of truth for the app version. Bump this on release; it is
    injected into any element with the .app-version class across all pages. */
-const APP_VERSION = "1.4.0";
+const APP_VERSION = "1.4.1";
 
 // Render the version as a link to the What's new page so tapping it shows
 // what changed. (Falls back to plain text if the anchor can't be created.)
