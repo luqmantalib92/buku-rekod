@@ -26,8 +26,14 @@
           <h1>Service Log</h1>
         </div>
         <div class="topbar-actions">
-          <div class="sync-pill" id="syncStatus">Local mode</div>
-          <button type="button" id="signOutButton" class="ghost-action" hidden>Sign out</button>
+          <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account and sign out">
+            <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
+          </button>
+          <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
+            <p class="account-email" id="accountEmail">Local mode</p>
+            <p class="account-status" id="accountStatus">Saved on this device</p>
+            <button type="button" id="signOutButton" class="ghost-action account-signout" role="menuitem" hidden>Sign out</button>
+          </div>
         </div>
       </section>
 

@@ -237,7 +237,11 @@ const shellEls = {
   appContent: document.querySelector("#appContent"),
   appLoading: document.querySelector("#appLoading"),
   signOutButton: document.querySelector("#signOutButton"),
-  syncStatus: document.querySelector("#syncStatus")
+  accountButton: document.querySelector("#accountButton"),
+  accountMenu: document.querySelector("#accountMenu"),
+  accountAvatar: document.querySelector("#accountAvatar"),
+  accountEmail: document.querySelector("#accountEmail"),
+  accountStatus: document.querySelector("#accountStatus")
 };
 
 async function signOut() {
@@ -249,13 +253,43 @@ if (shellEls.signOutButton) {
   shellEls.signOutButton.addEventListener("click", signOut);
 }
 
+// Account menu: a top-right avatar button that opens a popover with the
+// user's email, sync status, and Sign out — keeps them out of the header.
+function setupAccountMenu() {
+  const { accountButton: button, accountMenu: menu } = shellEls;
+  if (!button || !menu) return;
+
+  const close = () => { menu.hidden = true; button.setAttribute("aria-expanded", "false"); };
+  const open = () => { menu.hidden = false; button.setAttribute("aria-expanded", "true"); };
+
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (menu.hidden) open();
+    else close();
+  });
+  document.addEventListener("click", (event) => {
+    if (!menu.hidden && !menu.contains(event.target) && !button.contains(event.target)) close();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !menu.hidden) close();
+  });
+}
+
+setupAccountMenu();
+
 function revealShell(signedIn, label) {
   if (shellEls.appLoading) shellEls.appLoading.hidden = true;
   if (shellEls.appContent) shellEls.appContent.hidden = false;
   if (shellEls.signOutButton) shellEls.signOutButton.hidden = !signedIn;
-  if (shellEls.syncStatus && label) {
-    shellEls.syncStatus.textContent = label;
-    if (signedIn) shellEls.syncStatus.classList.add("online");
+
+  if (shellEls.accountAvatar) {
+    shellEls.accountAvatar.textContent = signedIn && label ? label.trim().charAt(0).toUpperCase() : "·";
+  }
+  if (shellEls.accountEmail) {
+    shellEls.accountEmail.textContent = signedIn && label ? label : "Local mode";
+  }
+  if (shellEls.accountStatus) {
+    shellEls.accountStatus.textContent = signedIn ? "Synced to your account" : "Saved on this device";
   }
 }
 
@@ -291,7 +325,6 @@ async function initStore(onReady) {
   state.auth = firebase.auth();
   state.db = firebase.firestore();
   state.useFirestore = true;
-  if (shellEls.syncStatus) shellEls.syncStatus.textContent = "Checking session";
 
   state.auth.onAuthStateChanged(async (user) => {
     state.user = user;
@@ -320,7 +353,6 @@ async function initStore(onReady) {
 function bootWithFallback(onReady) {
   initStore(onReady).catch((error) => {
     console.error(error);
-    if (shellEls.syncStatus) shellEls.syncStatus.textContent = "Local fallback";
     state.useFirestore = false;
     loadLocal();
     revealShell(false, null);

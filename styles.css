@@ -57,9 +57,72 @@ button {
 }
 
 .topbar-actions {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.account-button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.account-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.account-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.account-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(260px, calc(100vw - 32px));
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  z-index: 1000;
+}
+
+.account-email {
+  margin: 0;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.account-status {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.account-signout {
+  width: 100%;
 }
 
 .eyebrow {
@@ -153,25 +216,6 @@ h2 {
 h3 {
   margin-bottom: 6px;
   font-size: 1.05rem;
-}
-
-.sync-pill {
-  min-width: 112px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 9px 13px;
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 0.86rem;
-  font-weight: 700;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.sync-pill.online {
-  border-color: rgba(33, 110, 95, 0.25);
-  background: #e6f3ef;
-  color: var(--accent-dark);
 }
 
 .summary-grid,
@@ -867,8 +911,6 @@ dd {
     padding-top: 20px;
   }
 
-  .topbar,
-  .topbar-actions,
   .panel-heading,
   .record-topline {
     align-items: stretch;
@@ -900,9 +942,5 @@ dd {
   .record-card,
   .summary-card {
     padding: 16px;
-  }
-
-  .sync-pill {
-    width: 100%;
   }
 }
