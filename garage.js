@@ -7,8 +7,31 @@ const garageEls = {
   vehicleCardTemplate: document.querySelector("#vehicleCardTemplate"),
   settingsForm: document.querySelector("#settingsForm"),
   settingsRows: document.querySelector("#settingsRows"),
-  settingsSaved: document.querySelector("#settingsSaved")
+  settingsSaved: document.querySelector("#settingsSaved"),
+  vehicleImage: document.querySelector("#vehicleImage"),
+  vehicleImagePreview: document.querySelector("#vehicleImagePreview")
 };
+
+// Data URL of the photo chosen in the add-vehicle form (empty = none).
+let pendingImage = "";
+
+garageEls.vehicleImage.addEventListener("change", async () => {
+  const file = garageEls.vehicleImage.files[0];
+  if (!file) {
+    pendingImage = "";
+    garageEls.vehicleImagePreview.hidden = true;
+    return;
+  }
+  try {
+    pendingImage = await fileToResizedDataUrl(file);
+    garageEls.vehicleImagePreview.src = pendingImage;
+    garageEls.vehicleImagePreview.hidden = false;
+  } catch (error) {
+    console.error(error);
+    pendingImage = "";
+    garageEls.vehicleImagePreview.hidden = true;
+  }
+});
 
 function openVehicle(id) {
   window.location.href = `./vehicle.html?id=${encodeURIComponent(id)}`;
@@ -23,6 +46,12 @@ function renderGarage() {
     const card = garageEls.vehicleCardTemplate.content.firstElementChild.cloneNode(true);
     const lastRecord = [...vehicle.records].sort((a, b) => b.date.localeCompare(a.date))[0];
     const odometer = latestOdometer(vehicle);
+
+    const thumb = card.querySelector(".vehicle-thumb");
+    if (vehicle.image) {
+      thumb.src = vehicle.image;
+      thumb.hidden = false;
+    }
 
     card.querySelector(".vehicle-name").textContent = vehicle.name || "Unnamed vehicle";
     card.querySelector(".vehicle-plate").textContent = vehicle.plate || "No plate";
@@ -94,6 +123,7 @@ garageEls.vehicleForm.addEventListener("submit", async (event) => {
     plate: form.get("plate").trim().toUpperCase(),
     odometer: Number(form.get("odometer")),
     model: form.get("model").trim(),
+    image: pendingImage,
     createdAt: new Date().toISOString(),
     records: []
   });
@@ -102,6 +132,8 @@ garageEls.vehicleForm.addEventListener("submit", async (event) => {
   state.vehicles.push(vehicle);
   await withButtonBusy(submitButton, "Adding…", () => persist());
   garageEls.vehicleForm.reset();
+  pendingImage = "";
+  garageEls.vehicleImagePreview.hidden = true;
   renderGarage();
 });
 

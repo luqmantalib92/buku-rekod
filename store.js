@@ -56,9 +56,39 @@ function normalizeVehicle(vehicle) {
     plate: source.plate || "",
     odometer: Number(source.odometer || 0),
     model: source.model || "",
+    image: source.image || "",
     createdAt: source.createdAt || new Date().toISOString(),
     records: Array.isArray(source.records) ? source.records : []
   };
+}
+
+// Resize + JPEG-compress an image File into a small data URL so vehicle
+// photos can live inline in Firestore/localStorage (no paid Storage).
+function fileToResizedDataUrl(file, maxSize = 400, quality = 0.7) {
+  return new Promise((resolve, reject) => {
+    if (!file || !file.type || !file.type.startsWith("image/")) {
+      reject(new Error("Please choose an image file."));
+      return;
+    }
+    const reader = new FileReader();
+    reader.onerror = () => reject(reader.error || new Error("Could not read file"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Could not load image"));
+      img.onload = () => {
+        const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 // Accepts new format ({vehicles: []}) and the old single-vehicle format
@@ -244,7 +274,91 @@ const shellEls = {
   accountStatus: document.querySelector("#accountStatus")
 };
 
+/* ---- Custom confirmation dialog (replaces window.confirm) ---- */
+
+let confirmEls = null;
+
+function ensureConfirmModal() {
+  if (confirmEls) return confirmEls;
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.hidden = true;
+
+  const modal = document.createElement("div");
+  modal.className = "modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+
+  const title = document.createElement("h2");
+  title.className = "modal-title";
+  const message = document.createElement("p");
+  message.className = "modal-message";
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "ghost-action";
+  const ok = document.createElement("button");
+  ok.type = "button";
+  ok.className = "primary-action";
+
+  actions.append(cancel, ok);
+  modal.append(title, message, actions);
+  backdrop.append(modal);
+  document.body.append(backdrop);
+
+  confirmEls = { backdrop, title, message, cancel, ok };
+  return confirmEls;
+}
+
+// Promise<boolean> — resolves true on confirm, false on cancel/dismiss.
+function confirmDialog(options) {
+  const opts = options || {};
+  const els = ensureConfirmModal();
+
+  els.title.textContent = opts.title || "Are you sure?";
+  els.message.textContent = opts.message || "";
+  els.message.hidden = !opts.message;
+  els.ok.textContent = opts.confirmLabel || "Confirm";
+  els.cancel.textContent = opts.cancelLabel || "Cancel";
+  els.ok.classList.toggle("danger-action", Boolean(opts.danger));
+
+  els.backdrop.hidden = false;
+  document.body.style.overflow = "hidden";
+  // Focus Cancel for destructive prompts so an accidental Enter won't confirm.
+  (opts.danger ? els.cancel : els.ok).focus();
+
+  return new Promise((resolve) => {
+    function cleanup(result) {
+      els.backdrop.hidden = true;
+      document.body.style.overflow = "";
+      els.ok.removeEventListener("click", onOk);
+      els.cancel.removeEventListener("click", onCancel);
+      els.backdrop.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKey);
+      resolve(result);
+    }
+    function onOk() { cleanup(true); }
+    function onCancel() { cleanup(false); }
+    function onBackdrop(event) { if (event.target === els.backdrop) cleanup(false); }
+    function onKey(event) { if (event.key === "Escape") cleanup(false); }
+
+    els.ok.addEventListener("click", onOk);
+    els.cancel.addEventListener("click", onCancel);
+    els.backdrop.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKey);
+  });
+}
+
 async function signOut() {
+  const ok = await confirmDialog({
+    title: "Sign out?",
+    message: "You'll need to sign in again to view your logs.",
+    confirmLabel: "Sign out",
+    danger: true
+  });
+  if (!ok) return;
   if (state.auth) await state.auth.signOut();
   window.location.replace("./login.html");
 }

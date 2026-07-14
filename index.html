@@ -65,6 +65,11 @@
             Model / year
             <input id="vehicleModel" name="model" autocomplete="off" placeholder="Optional" />
           </label>
+          <label class="span-2 image-field">
+            Photo (optional)
+            <input id="vehicleImage" name="image" type="file" accept="image/*" />
+            <img id="vehicleImagePreview" class="image-preview" alt="Selected vehicle photo" hidden />
+          </label>
           <button type="submit" class="primary-action">Add vehicle</button>
         </form>
       </section>
@@ -97,6 +102,7 @@
 
     <template id="vehicleCardTemplate">
       <button type="button" class="vehicle-card">
+        <img class="vehicle-thumb" alt="" hidden />
         <div class="vehicle-card-main">
           <div class="vehicle-card-title">
             <h3 class="vehicle-name"></h3>

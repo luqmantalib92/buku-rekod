@@ -72,6 +72,12 @@
             Model / year
             <input id="editModel" name="model" autocomplete="off" placeholder="Optional" />
           </label>
+          <label class="span-2 image-field">
+            Photo
+            <input id="editImage" name="image" type="file" accept="image/*" />
+            <img id="editImagePreview" class="image-preview" alt="Vehicle photo" hidden />
+            <button type="button" id="removeEditImage" class="secondary-line" hidden>Remove photo</button>
+          </label>
           <div class="span-2 edit-actions">
             <button type="submit" class="primary-action">Save changes</button>
             <button type="button" id="cancelEdit" class="ghost-action">Cancel</button>

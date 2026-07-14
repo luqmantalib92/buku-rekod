@@ -227,6 +227,57 @@ button {
   animation: pull-refresh-spin 0.7s linear infinite;
 }
 
+/* Confirmation dialog */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(23, 33, 31, 0.5);
+}
+
+.modal {
+  width: min(400px, 100%);
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.modal-message {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.modal-actions .primary-action {
+  min-width: 120px;
+}
+
+.primary-action.danger-action {
+  background: #c0392b;
+}
+
+.primary-action.danger-action:hover {
+  background: #a5301f;
+}
+
 h1,
 h2,
 h3,
@@ -619,6 +670,29 @@ dd {
 .vehicle-card:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.vehicle-thumb {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eef2f0;
+}
+
+.image-field input[type="file"] {
+  border: 1px dashed var(--line);
+  background: #fff;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+}
+
+.image-preview {
+  max-width: 200px;
+  width: 100%;
+  height: auto;
+  margin-top: 4px;
+  border-radius: 8px;
 }
 
 .vehicle-name {

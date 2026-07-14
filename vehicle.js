@@ -10,6 +10,9 @@ const vehicleEls = {
   editPlate: document.querySelector("#editPlate"),
   editOdometer: document.querySelector("#editOdometer"),
   editModel: document.querySelector("#editModel"),
+  editImage: document.querySelector("#editImage"),
+  editImagePreview: document.querySelector("#editImagePreview"),
+  removeEditImage: document.querySelector("#removeEditImage"),
   cancelEdit: document.querySelector("#cancelEdit"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceHeading: document.querySelector("#serviceHeading"),
@@ -194,6 +197,13 @@ function renderVehicle() {
 async function deleteRecord(recordId) {
   const vehicle = getVehicle(currentVehicleId());
   if (!vehicle) return;
+  const ok = await confirmDialog({
+    title: "Delete this record?",
+    message: "This service record will be removed.",
+    confirmLabel: "Delete",
+    danger: true
+  });
+  if (!ok) return;
   vehicle.records = vehicle.records.filter((record) => record.id !== recordId);
   await persist();
   renderVehicle();
@@ -285,12 +295,31 @@ vehicleEls.serviceCategory.addEventListener("change", renderItemChips);
 vehicleEls.clearRecords.addEventListener("click", async () => {
   const vehicle = getVehicle(currentVehicleId());
   if (!vehicle) return;
-  const confirmed = confirm("Clear all service records for this vehicle? The vehicle itself stays saved.");
-  if (!confirmed) return;
+  const ok = await confirmDialog({
+    title: "Clear all records?",
+    message: "Every service record for this vehicle will be removed. The vehicle itself stays saved.",
+    confirmLabel: "Clear all",
+    danger: true
+  });
+  if (!ok) return;
   vehicle.records = [];
   await persist();
   renderVehicle();
 });
+
+// The photo to save on edit (data URL; "" = no photo).
+let editImageData = "";
+
+function showEditImage() {
+  if (editImageData) {
+    vehicleEls.editImagePreview.src = editImageData;
+    vehicleEls.editImagePreview.hidden = false;
+    vehicleEls.removeEditImage.hidden = false;
+  } else {
+    vehicleEls.editImagePreview.hidden = true;
+    vehicleEls.removeEditImage.hidden = true;
+  }
+}
 
 function openEdit() {
   const vehicle = getVehicle(currentVehicleId());
@@ -299,9 +328,29 @@ function openEdit() {
   vehicleEls.editPlate.value = vehicle.plate || "";
   vehicleEls.editOdometer.value = vehicle.odometer || "";
   vehicleEls.editModel.value = vehicle.model || "";
+  vehicleEls.editImage.value = "";
+  editImageData = vehicle.image || "";
+  showEditImage();
   vehicleEls.editPanel.hidden = false;
   vehicleEls.editName.focus();
 }
+
+vehicleEls.editImage.addEventListener("change", async () => {
+  const file = vehicleEls.editImage.files[0];
+  if (!file) return;
+  try {
+    editImageData = await fileToResizedDataUrl(file);
+    showEditImage();
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+vehicleEls.removeEditImage.addEventListener("click", () => {
+  editImageData = "";
+  vehicleEls.editImage.value = "";
+  showEditImage();
+});
 
 function closeEdit() {
   vehicleEls.editPanel.hidden = true;
@@ -328,6 +377,7 @@ vehicleEls.editVehicleForm.addEventListener("submit", async (event) => {
   const odometer = Number(form.get("odometer"));
   if (Number.isFinite(odometer)) vehicle.odometer = odometer;
   vehicle.model = form.get("model").trim();
+  vehicle.image = editImageData;
 
   const submitButton = vehicleEls.editVehicleForm.querySelector('button[type="submit"]');
   await withButtonBusy(submitButton, "Saving…", () => persist());
@@ -338,14 +388,38 @@ vehicleEls.editVehicleForm.addEventListener("submit", async (event) => {
 vehicleEls.deleteVehicle.addEventListener("click", async () => {
   const vehicle = getVehicle(currentVehicleId());
   if (!vehicle) return;
-  const confirmed = confirm(`Delete "${vehicle.name || "this vehicle"}" and all its logs? This can't be undone.`);
-  if (!confirmed) return;
+  const ok = await confirmDialog({
+    title: `Delete "${vehicle.name || "this vehicle"}"?`,
+    message: "The vehicle and all its service logs will be deleted. This can't be undone.",
+    confirmLabel: "Delete",
+    danger: true
+  });
+  if (!ok) return;
   state.vehicles = state.vehicles.filter((item) => item.id !== vehicle.id);
   await persist();
   goGarage();
 });
 
-vehicleEls.backToGarage.addEventListener("click", goGarage);
+vehicleEls.backToGarage.addEventListener("click", async () => {
+  if (editingRecordId) {
+    const ok = await confirmDialog({
+      title: "Discard changes?",
+      message: "You're editing a record. Leaving now won't save your changes.",
+      confirmLabel: "Discard",
+      danger: true
+    });
+    if (!ok) return;
+  }
+  goGarage();
+});
+
+// Guard the browser back button / reload / tab close while mid-edit.
+window.addEventListener("beforeunload", (event) => {
+  if (editingRecordId) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+});
 
 window.onPullRefresh = async () => {
   await refreshData();
