@@ -35,17 +35,22 @@ if (!hasFirebaseConfig()) {
     }
   });
 
+  const signInButton = authEls.form.querySelector('button[type="submit"]');
+
   authEls.form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = new FormData(authEls.form);
     const email = form.get("email").trim();
     const password = form.get("password");
 
+    signInButton.disabled = true;
     try {
       setAuthMessage("Signing in...");
       await auth.signInWithEmailAndPassword(email, password);
+      // On success the auth listener redirects; keep the button disabled.
     } catch (error) {
       setAuthMessage(error.message);
+      signInButton.disabled = false;
     }
   });
 }

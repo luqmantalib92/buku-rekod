@@ -72,7 +72,8 @@ garageEls.settingsForm.addEventListener("submit", async (event) => {
     if (Number.isFinite(value) && value >= 0) leadDays[category.key] = value;
   }
   state.settings = { leadDays };
-  await persist();
+  const submitButton = garageEls.settingsForm.querySelector('button[type="submit"]');
+  await withButtonBusy(submitButton, "Saving…", () => persist());
   renderGarage();
 
   garageEls.settingsSaved.hidden = false;
@@ -97,8 +98,9 @@ garageEls.vehicleForm.addEventListener("submit", async (event) => {
     records: []
   });
 
+  const submitButton = garageEls.vehicleForm.querySelector('button[type="submit"]');
   state.vehicles.push(vehicle);
-  await persist();
+  await withButtonBusy(submitButton, "Adding…", () => persist());
   garageEls.vehicleForm.reset();
   renderGarage();
 });

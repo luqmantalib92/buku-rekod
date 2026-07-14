@@ -214,6 +214,7 @@ async function persist() {
 
 const shellEls = {
   appContent: document.querySelector("#appContent"),
+  appLoading: document.querySelector("#appLoading"),
   signOutButton: document.querySelector("#signOutButton"),
   syncStatus: document.querySelector("#syncStatus")
 };
@@ -228,11 +229,27 @@ if (shellEls.signOutButton) {
 }
 
 function revealShell(signedIn, label) {
+  if (shellEls.appLoading) shellEls.appLoading.hidden = true;
   if (shellEls.appContent) shellEls.appContent.hidden = false;
   if (shellEls.signOutButton) shellEls.signOutButton.hidden = !signedIn;
   if (shellEls.syncStatus && label) {
     shellEls.syncStatus.textContent = label;
     if (signedIn) shellEls.syncStatus.classList.add("online");
+  }
+}
+
+// Disable a button and show a busy label while an async action runs, then
+// restore it — gives submit feedback and prevents double-submits.
+async function withButtonBusy(button, busyLabel, action) {
+  if (!button) return action();
+  const originalLabel = button.textContent;
+  button.disabled = true;
+  if (busyLabel) button.textContent = busyLabel;
+  try {
+    return await action();
+  } finally {
+    button.disabled = false;
+    button.textContent = originalLabel;
   }
 }
 
@@ -265,9 +282,17 @@ async function initStore(onReady) {
       return;
     }
 
-    revealShell(true, user.email || "Signed in");
     state.dataRef = state.db.collection("users").doc(user.uid).collection("garage").doc("main");
-    await loadRemoteData();
+    try {
+      await loadRemoteData();
+    } catch (error) {
+      // Don't leave the loading spinner stuck on a fetch failure — reveal the
+      // app with whatever we have (empty) so the user isn't blocked.
+      console.error(error);
+    }
+    // Reveal only after data is in, so content paints populated (no flash of
+    // the "add your first vehicle" empty state during the fetch).
+    revealShell(true, user.email || "Signed in");
     onReady();
   });
 }

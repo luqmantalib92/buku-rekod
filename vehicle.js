@@ -209,7 +209,8 @@ vehicleEls.serviceForm.addEventListener("submit", async (event) => {
     vehicle.odometer = record.odometer;
   }
 
-  await persist();
+  const submitButton = vehicleEls.serviceForm.querySelector('button[type="submit"]');
+  await withButtonBusy(submitButton, "Saving…", () => persist());
   vehicleEls.serviceForm.reset();
   vehicleEls.serviceDate.valueAsDate = new Date();
   renderItemChips();
@@ -265,7 +266,8 @@ vehicleEls.editVehicleForm.addEventListener("submit", async (event) => {
   if (Number.isFinite(odometer)) vehicle.odometer = odometer;
   vehicle.model = form.get("model").trim();
 
-  await persist();
+  const submitButton = vehicleEls.editVehicleForm.querySelector('button[type="submit"]');
+  await withButtonBusy(submitButton, "Saving…", () => persist());
   closeEdit();
   renderVehicle();
 });
