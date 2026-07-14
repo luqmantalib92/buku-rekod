@@ -254,6 +254,26 @@ select {
   min-height: 46px;
 }
 
+/* Date fields keep the value left-aligned and match the other inputs' height. */
+input[type="date"] {
+  min-height: 46px;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  margin: 0;
+}
+
+/* On touch devices the native date control keeps an intrinsic width and
+   overflows its container; dropping the native appearance lets it shrink.
+   (Scoped to coarse pointers so desktop keeps its calendar picker button.) */
+@media (pointer: coarse) {
+  input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
 textarea {
   resize: vertical;
 }

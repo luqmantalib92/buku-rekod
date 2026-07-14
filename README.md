@@ -23,7 +23,11 @@ Then open `http://localhost:5173`.
 ## Connect Firebase
 
 1. Create a Firebase project.
-2. Add a Web App in project settings and copy the config into `firebase-config.js`.
+2. Add a Web App in project settings, then copy `firebase-config.example.js`
+   to `firebase-config.js` and fill in the values. (`firebase-config.js` is
+   gitignored; the web apiKey is a public client identifier, but restrict it
+   in Google Cloud Console — HTTP referrers + API restrictions — and rely on
+   Firestore rules to protect data.)
 3. Enable Authentication with the Email/Password provider, and add your user under Authentication → Users.
 4. Enable Firestore Database.
 5. Deploy:
