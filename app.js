@@ -319,8 +319,12 @@ els.vehicleForm.addEventListener("submit", async (event) => {
 
 els.serviceForm.addEventListener("submit", async (event) => {
   event.preventDefault();
+  // Guard: a record can only exist under a selected vehicle. The form is
+  // only visible inside a vehicle's page, but this blocks any edge/stale
+  // state from creating an orphan record.
   const vehicle = getVehicle(state.currentVehicleId);
   if (!vehicle) {
+    alert("Select a vehicle first, then add its service record.");
     goGarage();
     return;
   }
