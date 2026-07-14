@@ -4,7 +4,15 @@ const vehicleEls = {
   pageTitle: document.querySelector("#pageTitle"),
   pagePlate: document.querySelector("#pagePlate"),
   backToGarage: document.querySelector("#backToGarage"),
+  editVehicle: document.querySelector("#editVehicle"),
   deleteVehicle: document.querySelector("#deleteVehicle"),
+  editPanel: document.querySelector("#editPanel"),
+  editVehicleForm: document.querySelector("#editVehicleForm"),
+  editName: document.querySelector("#editName"),
+  editPlate: document.querySelector("#editPlate"),
+  editOdometer: document.querySelector("#editOdometer"),
+  editModel: document.querySelector("#editModel"),
+  cancelEdit: document.querySelector("#cancelEdit"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceDate: document.querySelector("#serviceDate"),
   serviceCategory: document.querySelector("#serviceCategory"),
@@ -221,6 +229,48 @@ vehicleEls.clearRecords.addEventListener("click", async () => {
   if (!confirmed) return;
   vehicle.records = [];
   await persist();
+  renderVehicle();
+});
+
+function openEdit() {
+  const vehicle = getVehicle(currentVehicleId());
+  if (!vehicle) return;
+  vehicleEls.editName.value = vehicle.name || "";
+  vehicleEls.editPlate.value = vehicle.plate || "";
+  vehicleEls.editOdometer.value = vehicle.odometer || "";
+  vehicleEls.editModel.value = vehicle.model || "";
+  vehicleEls.editPanel.hidden = false;
+  vehicleEls.editName.focus();
+}
+
+function closeEdit() {
+  vehicleEls.editPanel.hidden = true;
+}
+
+vehicleEls.editVehicle.addEventListener("click", () => {
+  if (vehicleEls.editPanel.hidden) openEdit();
+  else closeEdit();
+});
+
+vehicleEls.cancelEdit.addEventListener("click", closeEdit);
+
+vehicleEls.editVehicleForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const vehicle = getVehicle(currentVehicleId());
+  if (!vehicle) {
+    goGarage();
+    return;
+  }
+
+  const form = new FormData(vehicleEls.editVehicleForm);
+  vehicle.name = form.get("name").trim();
+  vehicle.plate = form.get("plate").trim().toUpperCase();
+  const odometer = Number(form.get("odometer"));
+  if (Number.isFinite(odometer)) vehicle.odometer = odometer;
+  vehicle.model = form.get("model").trim();
+
+  await persist();
+  closeEdit();
   renderVehicle();
 });
 

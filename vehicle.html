@@ -30,8 +30,42 @@
 
       <div class="detail-head">
         <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
-        <button type="button" id="deleteVehicle" class="ghost-action">Delete vehicle</button>
+        <div class="detail-head-actions">
+          <button type="button" id="editVehicle" class="ghost-action edit-action">Edit details</button>
+          <button type="button" id="deleteVehicle" class="ghost-action">Delete vehicle</button>
+        </div>
       </div>
+
+      <section id="editPanel" class="panel edit-panel" aria-labelledby="editHeading" hidden>
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Edit</p>
+            <h2 id="editHeading">Vehicle details</h2>
+          </div>
+        </div>
+        <form id="editVehicleForm" class="form-grid">
+          <label>
+            Vehicle name
+            <input id="editName" name="name" autocomplete="off" required />
+          </label>
+          <label>
+            Plate number
+            <input id="editPlate" name="plate" autocomplete="off" required />
+          </label>
+          <label>
+            Current odometer
+            <input id="editOdometer" name="odometer" type="number" min="0" step="1" required />
+          </label>
+          <label>
+            Model / year
+            <input id="editModel" name="model" autocomplete="off" placeholder="Optional" />
+          </label>
+          <div class="span-2 edit-actions">
+            <button type="submit" class="primary-action">Save changes</button>
+            <button type="button" id="cancelEdit" class="ghost-action">Cancel</button>
+          </div>
+        </form>
+      </section>
 
       <section class="summary-grid" aria-label="Service summary">
         <article class="summary-card">

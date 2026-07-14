@@ -418,12 +418,38 @@ dd {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 16px;
 }
 
+.detail-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .back-action {
   color: var(--accent-dark);
+}
+
+.edit-action {
+  color: var(--accent-dark);
+}
+
+.edit-panel {
+  margin-bottom: 16px;
+}
+
+.edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.edit-actions .primary-action {
+  min-width: 160px;
 }
 
 .vehicle-list {
