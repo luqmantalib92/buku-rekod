@@ -417,6 +417,10 @@ function setupAccountMenu() {
   const { accountButton: button, accountMenu: menu } = shellEls;
   if (!button || !menu) return;
 
+  // The avatar opens the nav + account menu, so make that discoverable.
+  button.title = "Menu & account";
+  button.setAttribute("aria-label", "Open menu and account");
+
   const close = () => { menu.hidden = true; button.setAttribute("aria-expanded", "false"); };
   const open = () => { menu.hidden = false; button.setAttribute("aria-expanded", "true"); };
 

@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.1.2",
+    date: "2026-07-14",
+    notes: [
+      "Every page now has a short subtitle explaining what it does.",
+      "Added helper hints on form fields (units, what's optional, how reminders work).",
+      "Added hover tooltips on the version tag, the menu button, and the main actions."
+    ]
+  },
+  {
     version: "1.1.1",
     date: "2026-07-14",
     notes: [

@@ -68,10 +68,12 @@
             Workshop
             <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" list="workshopSuggestions" />
             <datalist id="workshopSuggestions"></datalist>
+            <p class="field-hint">Pick a workshop you've used before, or type a new one.</p>
           </label>
           <label>
             Cost
             <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
+            <p class="field-hint">Optional, in RM.</p>
           </label>
           <label class="span-2">
             <span>Service category <span class="req" aria-hidden="true">*</span></span>
@@ -91,10 +93,12 @@
           <label>
             Next service date
             <input id="nextDate" name="nextDate" type="date" />
+            <p class="field-hint">Optional — sets a reminder before it's due.</p>
           </label>
           <label>
             Next service odometer
             <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
+            <p class="field-hint">Optional.</p>
           </label>
           <div class="span-2 edit-actions">
             <button type="submit" id="serviceSubmit" class="primary-action">Add service record</button>

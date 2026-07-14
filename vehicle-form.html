@@ -51,6 +51,7 @@
           <div>
             <p class="eyebrow" id="formEyebrow">Setup</p>
             <h2 id="formHeading">Add a vehicle</h2>
+            <p class="panel-subtitle" id="formSubtitle">Enter the basics to add it to your garage — you can add a photo and edit anything later.</p>
           </div>
         </div>
 
@@ -66,10 +67,12 @@
           <label>
             <span>Current odometer <span class="req" aria-hidden="true">*</span></span>
             <input id="vehicleOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
+            <p class="field-hint">Latest reading, in km.</p>
           </label>
           <label>
             Model / year
-            <input id="vehicleModel" name="model" autocomplete="off" placeholder="Optional" />
+            <input id="vehicleModel" name="model" autocomplete="off" placeholder="e.g. 2018 1.5L" />
+            <p class="field-hint">Optional.</p>
           </label>
           <label class="span-2 image-field">
             Photo (optional)

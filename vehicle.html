@@ -45,8 +45,8 @@
       <div class="detail-head">
         <button type="button" id="backToGarage" class="ghost-action back-action">&larr; Garage</button>
         <div class="detail-head-actions">
-          <button type="button" id="editVehicle" class="ghost-action edit-action">Edit details</button>
-          <button type="button" id="deleteVehicle" class="ghost-action danger-action">Delete vehicle</button>
+          <button type="button" id="editVehicle" class="ghost-action edit-action" title="Edit this vehicle's name, plate, odometer and photo">Edit details</button>
+          <button type="button" id="deleteVehicle" class="ghost-action danger-action" title="Delete this vehicle and all its service records">Delete vehicle</button>
         </div>
       </div>
 
@@ -78,6 +78,7 @@
           <div>
             <p class="eyebrow">Upcoming</p>
             <h2 id="remindersHeading">Service reminders</h2>
+            <p class="panel-subtitle">Based on the next-service dates you set, and your lead time in Reminder settings.</p>
           </div>
         </div>
         <div id="reminderList" class="reminder-list"></div>
@@ -88,10 +89,11 @@
           <div>
             <p class="eyebrow">Log book</p>
             <h2 id="historyHeading">Service records</h2>
+            <p class="panel-subtitle">Everything you've logged for this vehicle, newest first.</p>
           </div>
           <div class="heading-actions">
-            <button type="button" id="addRecord" class="primary-action heading-action">Add record</button>
-            <button type="button" id="clearRecords" class="ghost-action danger-action">Clear all</button>
+            <button type="button" id="addRecord" class="primary-action heading-action" title="Log a new service for this vehicle">Add record</button>
+            <button type="button" id="clearRecords" class="ghost-action danger-action" title="Remove all records (keeps the vehicle)">Clear all</button>
           </div>
         </div>
         <div id="emptyState" class="empty-state" hidden>
