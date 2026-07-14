@@ -82,6 +82,7 @@ garageEls.settingsForm.addEventListener("submit", async (event) => {
 function onGarageReady() {
   renderGarage();
   renderSettings();
+  if (typeof initPush === "function") initPush();
 }
 
 garageEls.vehicleForm.addEventListener("submit", async (event) => {

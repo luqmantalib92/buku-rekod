@@ -645,6 +645,27 @@ dd {
   font-weight: 800;
 }
 
+.notify-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.settings-subhead {
+  margin: 0 0 4px;
+  font-weight: 800;
+}
+
+.notify-action {
+  color: var(--accent-dark);
+  flex: none;
+}
+
 .input-with-affix {
   position: relative;
   display: grid;
