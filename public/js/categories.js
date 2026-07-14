@@ -107,7 +107,7 @@ editorEls.form.addEventListener("submit", async (event) => {
   setTimeout(() => { editorEls.saved.hidden = true; }, 2000);
 });
 
-guardBreadcrumbs(() => dirty);
+setupBackButton("./index.html", () => dirty);
 
 // Guard the browser back button / reload / tab close with unsaved changes.
 window.addEventListener("beforeunload", (event) => {

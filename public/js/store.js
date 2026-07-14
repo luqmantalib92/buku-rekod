@@ -525,22 +525,24 @@ function setupAccountMenu() {
 
 setupAccountMenu();
 
-// On pages with unsaved-change guards, intercept breadcrumb clicks so the
-// nice confirm dialog runs before navigating away. `isDirty` is a getter.
-function guardBreadcrumbs(isDirty) {
-  for (const crumb of document.querySelectorAll(".crumb")) {
-    crumb.addEventListener("click", async (event) => {
-      if (!isDirty()) return;
-      event.preventDefault();
+// Wire the circular back button (#backButton) to navigate up a level. If
+// `isDirty` is supplied and returns true, confirm before leaving. `href` may
+// be a string or a getter.
+function setupBackButton(href, isDirty) {
+  const btn = document.querySelector("#backButton");
+  if (!btn) return;
+  btn.addEventListener("click", async () => {
+    if (isDirty && isDirty()) {
       const ok = await confirmDialog({
         title: "Discard changes?",
         message: "You have unsaved changes. Leaving now won't save them.",
         confirmLabel: "Discard",
         danger: true
       });
-      if (ok) window.location.href = crumb.href;
-    });
-  }
+      if (!ok) return;
+    }
+    window.location.href = typeof href === "function" ? href() : href;
+  });
 }
 
 // Unique, sorted workshop names across all records — powers the workshop

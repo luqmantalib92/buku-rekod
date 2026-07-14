@@ -3,9 +3,6 @@
    - vehicle-form.html?id=<id>    → edit that vehicle (returns to its logbook) */
 
 const formEls = {
-  pageTitle: document.querySelector("#pageTitle"),
-  crumbVehicle: document.querySelector("#crumbVehicle"),
-  crumbSep: document.querySelector("#crumbSep"),
   formSubtitle: document.querySelector("#formSubtitle"),
   vehicleForm: document.querySelector("#vehicleForm"),
   name: document.querySelector("#vehicleName"),
@@ -71,14 +68,8 @@ function initForm() {
       return;
     }
     document.title = `Edit ${vehicle.name || "vehicle"} | Service Log`;
-    formEls.pageTitle.textContent = "Edit vehicle";
     formEls.formSubtitle.textContent = "Update this vehicle's details. Changes save to its logbook.";
     formEls.submit.textContent = "Save changes";
-    // Breadcrumb: Garage › {vehicle}
-    formEls.crumbVehicle.textContent = vehicle.name || "Vehicle";
-    formEls.crumbVehicle.href = `./vehicle.html?id=${encodeURIComponent(editId)}`;
-    formEls.crumbVehicle.hidden = false;
-    formEls.crumbSep.hidden = false;
     formEls.name.value = vehicle.name || "";
     formEls.plate.value = vehicle.plate || "";
     formEls.odometer.value = vehicle.odometer || "";
@@ -158,7 +149,7 @@ formEls.vehicleForm.addEventListener("submit", async (event) => {
 });
 
 formEls.cancel.addEventListener("click", tryLeave);
-guardBreadcrumbs(() => dirty);
+setupBackButton(returnHref, () => dirty);
 
 window.addEventListener("beforeunload", (event) => {
   if (dirty) {

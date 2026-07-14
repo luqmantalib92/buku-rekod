@@ -4,8 +4,6 @@
    Always returns to the vehicle's logbook. */
 
 const recordEls = {
-  pageTitle: document.querySelector("#pageTitle"),
-  crumbVehicle: document.querySelector("#crumbVehicle"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceDate: document.querySelector("#serviceDate"),
   serviceCategory: document.querySelector("#serviceCategory"),
@@ -109,9 +107,6 @@ function initForm() {
     return;
   }
 
-  // Breadcrumb: Garage › {vehicle}
-  recordEls.crumbVehicle.textContent = vehicle.name || "Vehicle";
-  recordEls.crumbVehicle.href = returnHref;
   populateCategories();
   populateWorkshopSuggestions();
 
@@ -124,7 +119,6 @@ function initForm() {
 
   if (record) {
     document.title = "Edit service record | Service Log";
-    recordEls.pageTitle.textContent = "Edit service record";
     recordEls.submit.textContent = "Save changes";
     recordEls.serviceCategory.value = record.category || "other";
     renderItemChips();
@@ -233,7 +227,7 @@ recordEls.serviceForm.addEventListener("submit", async (event) => {
 });
 
 recordEls.cancel.addEventListener("click", tryLeave);
-guardBreadcrumbs(() => dirty);
+setupBackButton(() => (vehicleId ? returnHref : "./index.html"), () => dirty);
 
 window.addEventListener("beforeunload", (event) => {
   if (dirty) {

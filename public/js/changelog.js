@@ -3,6 +3,14 @@
 
 const CHANGELOG = [
   {
+    version: "1.3.2",
+    date: "2026-07-14",
+    notes: [
+      "Cleaner header: the app icon on the home screen, and a round back button on other pages.",
+      "Dropped the breadcrumb and the page-title text for a simpler, Airbnb-style top bar."
+    ]
+  },
+  {
     version: "1.3.1",
     date: "2026-07-14",
     notes: [
@@ -148,6 +156,8 @@ function renderChangelog() {
 
   list.replaceChildren(frag);
 }
+
+setupBackButton("./index.html");
 
 window.onPullRefresh = async () => {
   await refreshData();

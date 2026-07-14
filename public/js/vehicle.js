@@ -3,7 +3,6 @@
    vehicle itself happens on vehicle-form.html. */
 
 const vehicleEls = {
-  pageTitle: document.querySelector("#pageTitle"),
   editVehicle: document.querySelector("#editVehicle"),
   deleteVehicle: document.querySelector("#deleteVehicle"),
   addRecord: document.querySelector("#addRecord"),
@@ -117,7 +116,6 @@ function renderVehicle() {
   }
 
   document.title = `${vehicle.name || "Vehicle"} | Service Log`;
-  vehicleEls.pageTitle.textContent = vehicle.name || "Vehicle";
   updateSummary(vehicle);
   renderReminders(vehicle);
   renderRecords(vehicle);
@@ -174,6 +172,8 @@ vehicleEls.deleteVehicle.addEventListener("click", async () => {
   await persist();
   goGarage();
 });
+
+setupBackButton("./index.html");
 
 window.onPullRefresh = async () => {
   await refreshData();
