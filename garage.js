@@ -46,7 +46,7 @@ function renderGarage() {
 
 function renderSettings() {
   garageEls.settingsRows.replaceChildren();
-  for (const category of SERVICE_CATEGORIES) {
+  for (const category of getCategories()) {
     const label = document.createElement("label");
     label.className = "settings-row";
     label.textContent = category.label;
@@ -67,7 +67,7 @@ garageEls.settingsForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const form = new FormData(garageEls.settingsForm);
   const leadDays = {};
-  for (const category of SERVICE_CATEGORIES) {
+  for (const category of getCategories()) {
     const value = Number(form.get(category.key));
     if (Number.isFinite(value) && value >= 0) leadDays[category.key] = value;
   }

@@ -726,6 +726,84 @@ dd {
   font-weight: 800;
 }
 
+.settings-link {
+  margin: 16px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  font-weight: 800;
+}
+
+.settings-link a {
+  color: var(--accent-dark);
+}
+
+/* Categories editor */
+.category-editor {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.category-edit-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  background: #fbfcfa;
+  display: grid;
+  gap: 12px;
+}
+
+.category-edit-head {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.category-name-label {
+  flex: 1;
+}
+
+.category-items {
+  display: grid;
+  gap: 8px;
+}
+
+.category-item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.category-item-row input {
+  flex: 1;
+}
+
+.secondary-line {
+  justify-self: start;
+  border: 1px dashed var(--line);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--accent-dark);
+  font-weight: 800;
+  min-height: 40px;
+  padding: 8px 14px;
+  touch-action: manipulation;
+}
+
+.secondary-line:hover {
+  background: #edf5f2;
+}
+
+.secondary-line:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.category-form-actions,
+#categoryForm .edit-actions {
+  margin-top: 14px;
+}
+
 .input-with-affix {
   position: relative;
   display: grid;

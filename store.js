@@ -5,6 +5,7 @@ const LOCAL_KEY = "vehicle-service-log:v1";
 const state = {
   vehicles: [],
   settings: { leadDays: {} },
+  categories: [],
   user: null,
   auth: null,
   db: null,
@@ -75,6 +76,7 @@ function ingest(data) {
     state.vehicles = [];
   }
   state.settings = normalizeSettings(source.settings);
+  state.categories = normalizeCategories(source.categories);
 }
 
 function getVehicle(id) {
@@ -91,16 +93,34 @@ function latestOdometer(vehicle) {
 
 /* ---- Service categories (groups) ---- */
 
-const SERVICE_CATEGORIES = [
+// Built-in seed. Used until the user customizes categories (then their saved
+// list in state.categories takes over). getCategories() is the source of truth.
+const DEFAULT_CATEGORIES = [
   { key: "engine-oil", label: "Engine & oil", lead: 30, items: ["Engine oil", "Oil filter", "Air filter", "Cabin/aircond filter"] },
   { key: "brakes-fluids", label: "Brakes & fluids", lead: 30, items: ["Brake pads", "Brake fluid", "Coolant", "ATF/gearbox oil"] },
   { key: "electrical-wear", label: "Electrical & wear", lead: 30, items: ["Battery", "Spark plugs", "Wipers", "Bulbs"] },
-  { key: "tyres-alignment", label: "Tyres & alignment", lead: 30, items: ["Tyre rotation", "Alignment & balancing", "New tyres"] },
+  { key: "tyres-alignment", label: "Tyres & alignment", lead: 30, items: ["Tyre rotation", "Alignment & balancing", "New front tyre", "New back tyre", "New tyres"] },
   { key: "other", label: "Other", lead: 30, items: [] }
 ];
 
+function getCategories() {
+  return state.categories.length ? state.categories : DEFAULT_CATEGORIES;
+}
+
+function normalizeCategories(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((entry) => ({
+      key: entry.key || makeId(),
+      label: String(entry.label || "").trim(),
+      lead: Number.isFinite(Number(entry.lead)) ? Number(entry.lead) : 30,
+      items: Array.isArray(entry.items) ? entry.items.map(String) : []
+    }))
+    .filter((entry) => entry.label);
+}
+
 function categoryLabel(key) {
-  const category = SERVICE_CATEGORIES.find((entry) => entry.key === key);
+  const category = getCategories().find((entry) => entry.key === key);
   return category ? category.label : "Other";
 }
 
@@ -109,16 +129,16 @@ function categoryLabel(key) {
 function leadDaysFor(key) {
   const override = Number(state.settings?.leadDays?.[key]);
   if (Number.isFinite(override) && override >= 0) return override;
-  const category = SERVICE_CATEGORIES.find((entry) => entry.key === key);
+  const category = getCategories().find((entry) => entry.key === key);
   return category && Number.isFinite(category.lead) ? category.lead : DUE_SOON_DAYS;
 }
 
 function normalizeSettings(settings) {
   const leadDays = {};
   const source = (settings && settings.leadDays) || {};
-  for (const category of SERVICE_CATEGORIES) {
-    const value = Number(source[category.key]);
-    if (Number.isFinite(value) && value >= 0) leadDays[category.key] = value;
+  for (const key of Object.keys(source)) {
+    const value = Number(source[key]);
+    if (Number.isFinite(value) && value >= 0) leadDays[key] = value;
   }
   return { leadDays };
 }
@@ -180,7 +200,7 @@ function loadLocal() {
 }
 
 function saveLocal() {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify({ vehicles: state.vehicles, settings: state.settings }));
+  localStorage.setItem(LOCAL_KEY, JSON.stringify({ vehicles: state.vehicles, settings: state.settings, categories: state.categories }));
 }
 
 async function loadRemoteData() {
@@ -203,6 +223,7 @@ async function persist() {
     await state.dataRef.set({
       vehicles: state.vehicles,
       settings: state.settings,
+      categories: state.categories,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } else {

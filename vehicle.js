@@ -39,7 +39,7 @@ function currentVehicleId() {
 const selectedItems = new Set();
 
 function populateCategories() {
-  for (const category of SERVICE_CATEGORIES) {
+  for (const category of getCategories()) {
     const option = document.createElement("option");
     option.value = category.key;
     option.textContent = category.label;
@@ -48,7 +48,7 @@ function populateCategories() {
 }
 
 function renderItemChips() {
-  const category = SERVICE_CATEGORIES.find((entry) => entry.key === vehicleEls.serviceCategory.value);
+  const category = getCategories().find((entry) => entry.key === vehicleEls.serviceCategory.value);
   vehicleEls.itemChips.replaceChildren();
   selectedItems.clear();
 
@@ -289,7 +289,13 @@ window.onPullRefresh = async () => {
   renderVehicle();
 };
 
+// Categories are populated after boot so the dropdown reflects the user's
+// saved custom categories (from getCategories()), not just the defaults.
+function initVehiclePage() {
+  populateCategories();
+  renderItemChips();
+  renderVehicle();
+}
+
 vehicleEls.serviceDate.valueAsDate = new Date();
-populateCategories();
-renderItemChips();
-bootWithFallback(renderVehicle);
+bootWithFallback(initVehiclePage);
