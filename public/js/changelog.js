@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.6.1",
+    date: "2026-07-15",
+    notes: [
+      "Tidied the vehicle cards: removed the \"View logs\" button and the logs count.",
+      "Fixed the email wrapping in the avatar popup (smaller text, wider popup).",
+      "Moved the version number into the Settings list as a plain row, and removed it from the avatar popup."
+    ]
+  },
+  {
     version: "1.6.0",
     date: "2026-07-15",
     notes: [

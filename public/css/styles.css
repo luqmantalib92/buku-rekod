@@ -198,6 +198,15 @@ button {
   font-size: 0.85rem;
 }
 
+/* Version row: same look as the links, but static (no chevron, not a link). */
+.settings-version {
+  cursor: default;
+}
+
+.settings-version::after {
+  content: none;
+}
+
 .settings-link:hover > span:first-child {
   color: var(--accent-dark);
 }
@@ -250,7 +259,7 @@ button {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  width: min(280px, calc(100vw - 32px));
+  width: min(320px, calc(100vw - 24px));
   display: grid;
   gap: 2px;
   padding: 8px;
@@ -259,6 +268,16 @@ button {
   background: var(--surface);
   box-shadow: var(--shadow);
   z-index: 1000;
+}
+
+/* Keep the email on one line where possible in the compact popup. */
+.account-menu .account-email {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.account-menu .account-status {
+  font-size: 0.78rem;
 }
 
 .account-menu-head {
@@ -1225,7 +1244,7 @@ dd {
 
 .vehicle-card-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin: 0;
 }

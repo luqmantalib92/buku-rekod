@@ -67,7 +67,6 @@ function buildVehicleCard(vehicle) {
   card.querySelector(".vehicle-name").textContent = vehicle.name || "Unnamed vehicle";
   card.querySelector(".vehicle-plate").textContent = vehicle.plate || "No plate";
   card.querySelector(".vehicle-odometer").textContent = odometer > 0 ? formatKm(odometer) : "-";
-  card.querySelector(".vehicle-count").textContent = String(vehicle.records.length);
   card.querySelector(".vehicle-last").textContent = lastRecord ? formatDate(lastRecord.date) : "-";
 
   const dueCount = vehicleDueCount(vehicle);
