@@ -94,12 +94,13 @@ function buildRecordCard(record) {
     if (record.nextDone) {
       dueEl.textContent = "Serviced";
       dueEl.className = "record-due record-due-done";
+      item.classList.add("is-done");
       doneBtn.textContent = "Undo serviced";
     } else {
       const status = recordNextStatus(record);
       dueEl.textContent = dueText(status.days);
       dueEl.className = `record-due record-due-${status.status}`;
-      if (status.status !== "upcoming") item.classList.add(`is-${status.status}`);
+      item.classList.add(`is-${status.status}`);
       doneBtn.textContent = "Mark serviced";
     }
     doneBtn.addEventListener("click", () => toggleServiced(record.id));

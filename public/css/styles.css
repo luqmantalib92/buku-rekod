@@ -1282,15 +1282,25 @@ dd {
 .record-due-overdue { background: #fbeae6; color: #c0392b; }
 .record-due-done { background: #e3f3ec; color: #1f7a54; }
 
-/* Highlight cards whose next service is close or overdue. */
+/* Colour-code cards by next-service status (left accent stripe) so you can
+   tell at a glance what's done, upcoming, due soon or overdue. */
+.record-card.is-upcoming {
+  border-left: 4px solid #2f6f9f;
+}
+
 .record-card.is-due-soon {
-  border-color: #e8c99a;
+  border-left: 4px solid var(--warn);
   background: #fffaf3;
 }
 
 .record-card.is-overdue {
-  border-color: #e6b0a6;
+  border-left: 4px solid #c0392b;
   background: #fff6f4;
+}
+
+.record-card.is-done {
+  border-left: 4px solid #1f7a54;
+  background: #f1faf5;
 }
 
 /* Grouped logbook section headers. */

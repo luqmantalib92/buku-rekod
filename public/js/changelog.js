@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.5.4",
+    date: "2026-07-15",
+    notes: [
+      "Record cards now have a coloured left stripe by status: green = serviced, red = overdue, amber = due soon, blue = upcoming."
+    ]
+  },
+  {
     version: "1.5.3",
     date: "2026-07-15",
     notes: [
