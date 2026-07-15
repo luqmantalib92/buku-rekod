@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.5.3",
+    date: "2026-07-15",
+    notes: [
+      "Mobile: the vehicle summary is now a compact 2-column layout instead of four tall cards.",
+      "Mobile: each record's ⋮ menu button stays neatly at the top-right of the card.",
+      "Mobile: added a floating + button to quickly add a record (Clear all stays in the header)."
+    ]
+  },
+  {
     version: "1.5.2",
     date: "2026-07-14",
     notes: [

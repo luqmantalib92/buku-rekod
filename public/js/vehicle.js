@@ -7,6 +7,7 @@ const vehicleEls = {
   deleteVehicle: document.querySelector("#deleteVehicle"),
   addRecord: document.querySelector("#addRecord"),
   emptyAddRecord: document.querySelector("#emptyAddRecord"),
+  fabAddRecord: document.querySelector("#fabAddRecord"),
   clearRecords: document.querySelector("#clearRecords"),
   recordList: document.querySelector("#recordList"),
   emptyState: document.querySelector("#emptyState"),
@@ -208,6 +209,7 @@ async function deleteRecord(recordId) {
 
 vehicleEls.addRecord.addEventListener("click", () => openRecordForm(null));
 vehicleEls.emptyAddRecord.addEventListener("click", () => openRecordForm(null));
+vehicleEls.fabAddRecord.addEventListener("click", () => openRecordForm(null));
 
 vehicleEls.editVehicle.addEventListener("click", () => {
   window.location.href = `./vehicle-form.html?id=${encodeURIComponent(currentVehicleId())}`;

@@ -813,6 +813,38 @@ select:focus {
   gap: 12px;
 }
 
+/* Floating action button (mobile only; toggled on in the media query). */
+.fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+  place-items: center;
+  z-index: 900;
+  touch-action: manipulation;
+  display: none;
+}
+
+.fab:hover {
+  background: var(--accent-dark);
+}
+
+.fab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.fab svg {
+  width: 26px;
+  height: 26px;
+}
+
 /* Skeleton loading placeholders (shown while data is being fetched). */
 .skeleton-card {
   border: 1px solid var(--line);
@@ -1492,15 +1524,44 @@ dd {
   .app-shell {
     width: min(100% - 20px, 1180px);
     padding-top: 20px;
+    padding-bottom: 88px; /* clear the floating add button */
   }
 
-  .panel-heading,
-  .record-topline {
+  .panel-heading {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .summary-grid,
+  /* Keep record cards' top line as a row so the ⋮ menu stays top-right. */
+  .record-topline {
+    align-items: flex-start;
+  }
+
+  /* Compact vehicle summary: 2 small cards per row instead of 4 tall ones. */
+  .summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .summary-card {
+    min-height: 0;
+    padding: 12px;
+  }
+
+  .summary-card span {
+    margin-bottom: 6px;
+    font-size: 0.72rem;
+  }
+
+  .summary-card strong {
+    font-size: 1.05rem;
+  }
+
+  .summary-card small {
+    margin-top: 4px;
+    font-size: 0.72rem;
+  }
+
   .content-grid,
   .form-grid,
   .settings-grid,
@@ -1521,18 +1582,22 @@ dd {
     width: 100%;
   }
 
-  .heading-actions {
-    width: 100%;
+  /* "Add record" becomes a floating button; "Clear all" tucks to the right. */
+  #addRecord {
+    display: none;
   }
 
-  .heading-actions .primary-action,
-  .heading-actions .ghost-action {
-    flex: 1;
+  .heading-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .fab {
+    display: grid;
   }
 
   .panel,
-  .record-card,
-  .summary-card {
+  .record-card {
     padding: 16px;
   }
 }
