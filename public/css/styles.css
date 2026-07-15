@@ -1064,16 +1064,12 @@ dd {
 }
 
 .vehicle-card {
-  display: grid;
-  gap: 14px;
-  width: 100%;
-  text-align: left;
+  position: relative;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
-  padding: 18px;
   box-shadow: var(--shadow);
-  transition: border-color 140ms ease, transform 140ms ease;
+  transition: border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
 }
 
 .vehicle-card:hover {
@@ -1082,13 +1078,106 @@ dd {
   transform: translateY(-2px);
 }
 
-.vehicle-card:active {
+/* The tap-to-open area (everything except the ⋮ menu). */
+.vehicle-open {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+  padding: 18px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.vehicle-open:active {
   transform: scale(0.99);
 }
 
-.vehicle-card:focus-visible {
+.vehicle-open:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+.vehicle-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.vehicle-menu-btn {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.vehicle-menu-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.vehicle-menu-btn:hover {
+  background: var(--fill);
+}
+
+.vehicle-menu-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.vehicle-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  min-width: 170px;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.vehicle-menu button {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ink);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.vehicle-menu button:hover {
+  background: var(--fill);
+}
+
+.vehicle-menu button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.vehicle-menu .vehicle-delete {
+  color: #c0392b;
 }
 
 .vehicle-thumb {
@@ -1592,8 +1681,9 @@ dd {
     width: 100%;
   }
 
-  /* "Add record" becomes a floating button; "Clear all" tucks to the right. */
-  #addRecord {
+  /* The header add buttons become floating buttons on mobile. */
+  #addRecord,
+  #addVehicle {
     display: none;
   }
 
@@ -1608,6 +1698,10 @@ dd {
 
   .panel,
   .record-card {
+    padding: 16px;
+  }
+
+  .vehicle-open {
     padding: 16px;
   }
 }

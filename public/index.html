@@ -60,34 +60,49 @@
         </div>
         <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
       </section>
+
+      <button type="button" id="fabAddVehicle" class="fab" aria-label="Add vehicle" title="Add vehicle">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
     </main>
 
     <template id="vehicleCardTemplate">
-      <button type="button" class="vehicle-card">
-        <img class="vehicle-thumb" alt="" hidden />
-        <div class="vehicle-card-main">
-          <div class="vehicle-card-title">
-            <h3 class="vehicle-name"></h3>
-            <span class="vehicle-due" hidden></span>
+      <article class="vehicle-card">
+        <button type="button" class="vehicle-open">
+          <img class="vehicle-thumb" alt="" hidden />
+          <div class="vehicle-card-main">
+            <div class="vehicle-card-title">
+              <h3 class="vehicle-name"></h3>
+              <span class="vehicle-due" hidden></span>
+            </div>
+            <p class="vehicle-plate"></p>
           </div>
-          <p class="vehicle-plate"></p>
+          <dl class="vehicle-card-stats">
+            <div>
+              <dt>Odometer</dt>
+              <dd class="vehicle-odometer"></dd>
+            </div>
+            <div>
+              <dt>Logs</dt>
+              <dd class="vehicle-count"></dd>
+            </div>
+            <div>
+              <dt>Last service</dt>
+              <dd class="vehicle-last"></dd>
+            </div>
+          </dl>
+          <span class="vehicle-card-cta" aria-hidden="true">View logs &rarr;</span>
+        </button>
+        <div class="vehicle-actions">
+          <button type="button" class="vehicle-menu-btn" aria-label="Vehicle actions" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="12" cy="19" r="1.9" /></svg>
+          </button>
+          <div class="vehicle-menu" role="menu" hidden>
+            <button type="button" class="vehicle-edit" role="menuitem">Edit details</button>
+            <button type="button" class="vehicle-delete account-link-danger" role="menuitem">Delete vehicle</button>
+          </div>
         </div>
-        <dl class="vehicle-card-stats">
-          <div>
-            <dt>Odometer</dt>
-            <dd class="vehicle-odometer"></dd>
-          </div>
-          <div>
-            <dt>Logs</dt>
-            <dd class="vehicle-count"></dd>
-          </div>
-          <div>
-            <dt>Last service</dt>
-            <dd class="vehicle-last"></dd>
-          </div>
-        </dl>
-        <span class="vehicle-card-cta" aria-hidden="true">View logs &rarr;</span>
-      </button>
+      </article>
     </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>

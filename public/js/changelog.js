@@ -3,6 +3,15 @@
 
 const CHANGELOG = [
   {
+    version: "1.6.0",
+    date: "2026-07-15",
+    notes: [
+      "Edit and Delete for a vehicle moved to a ⋮ menu on each garage card — the logbook page is now cleaner.",
+      "Removed \"Clear all\" from the logbook (delete individual records via their ⋮ menu).",
+      "Add vehicle is now a floating + button on mobile (with a tooltip), matching Add record."
+    ]
+  },
+  {
     version: "1.5.4",
     date: "2026-07-15",
     notes: [

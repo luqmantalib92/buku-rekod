@@ -3,12 +3,9 @@
    vehicle itself happens on vehicle-form.html. */
 
 const vehicleEls = {
-  editVehicle: document.querySelector("#editVehicle"),
-  deleteVehicle: document.querySelector("#deleteVehicle"),
   addRecord: document.querySelector("#addRecord"),
   emptyAddRecord: document.querySelector("#emptyAddRecord"),
   fabAddRecord: document.querySelector("#fabAddRecord"),
-  clearRecords: document.querySelector("#clearRecords"),
   recordList: document.querySelector("#recordList"),
   emptyState: document.querySelector("#emptyState"),
   recordTemplate: document.querySelector("#recordTemplate"),
@@ -211,40 +208,6 @@ async function deleteRecord(recordId) {
 vehicleEls.addRecord.addEventListener("click", () => openRecordForm(null));
 vehicleEls.emptyAddRecord.addEventListener("click", () => openRecordForm(null));
 vehicleEls.fabAddRecord.addEventListener("click", () => openRecordForm(null));
-
-vehicleEls.editVehicle.addEventListener("click", () => {
-  window.location.href = `./vehicle-form.html?id=${encodeURIComponent(currentVehicleId())}`;
-});
-
-vehicleEls.clearRecords.addEventListener("click", async () => {
-  const vehicle = getVehicle(currentVehicleId());
-  if (!vehicle) return;
-  const ok = await confirmDialog({
-    title: "Clear all records?",
-    message: "Every service record for this vehicle will be removed. The vehicle itself stays saved.",
-    confirmLabel: "Clear all",
-    danger: true
-  });
-  if (!ok) return;
-  vehicle.records = [];
-  await persist();
-  renderVehicle();
-});
-
-vehicleEls.deleteVehicle.addEventListener("click", async () => {
-  const vehicle = getVehicle(currentVehicleId());
-  if (!vehicle) return;
-  const ok = await confirmDialog({
-    title: `Delete "${vehicle.name || "this vehicle"}"?`,
-    message: "The vehicle and all its service logs will be deleted. This can't be undone.",
-    confirmLabel: "Delete",
-    danger: true
-  });
-  if (!ok) return;
-  state.vehicles = state.vehicles.filter((item) => item.id !== vehicle.id);
-  await persist();
-  goGarage();
-});
 
 setupBackButton("./index.html");
 
