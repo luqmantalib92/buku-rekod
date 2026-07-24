@@ -20,26 +20,7 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Vehicle details">
-        <button type="button" id="backButton" class="icon-back" aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-        <div class="topbar-actions">
-          <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account">
-            <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
-          </button>
-          <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
-            <div class="account-menu-head">
-              <span class="account-avatar account-menu-avatar" id="accountMenuAvatar" aria-hidden="true">&middot;</span>
-              <div class="account-menu-id">
-                <p class="account-email" id="accountEmail">Local mode</p>
-                <p class="account-status" id="accountStatus">Saved on this device</p>
-              </div>
-            </div>
-            <hr class="account-divider" />
-            <a href="./settings.html" class="account-link" role="menuitem"><span>Settings</span><span class="account-link-chev" aria-hidden="true">&rsaquo;</span></a>
-            <button type="button" id="signOutButton" class="account-link account-link-danger" role="menuitem" hidden>Sign out</button>
-          </div>
-          </div>
-      </section>
+      <section class="topbar" data-shell="back" aria-label="Vehicle details"></section>
 
       <section class="panel" aria-label="Vehicle details">
         <div class="panel-heading">
@@ -61,13 +42,23 @@
           </label>
           <label>
             <span>Current odometer <span class="req" aria-hidden="true">*</span></span>
-            <input id="vehicleOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
+            <input id="vehicleOdometer" name="odometer" type="number" min="0" step="1" inputmode="numeric" placeholder="85000" required />
             <p class="field-hint">Latest reading, in km.</p>
           </label>
           <label>
             Model / year
             <input id="vehicleModel" name="model" autocomplete="off" placeholder="e.g. 2018 1.5L" />
             <p class="field-hint">Optional.</p>
+          </label>
+          <label>
+            Road tax expires
+            <input id="vehicleRoadTax" name="roadTaxExpiry" type="date" />
+            <p class="field-hint">Optional — you'll see a warning 30 days before.</p>
+          </label>
+          <label>
+            Insurance expires
+            <input id="vehicleInsurance" name="insuranceExpiry" type="date" />
+            <p class="field-hint">Optional — you'll see a warning 30 days before.</p>
           </label>
           <label class="span-2 image-field">
             Photo (optional)
@@ -88,6 +79,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     <script src="./js/version.js"></script>
+    <script src="./js/shell.js"></script>
     <script src="./js/firebase-config.js"></script>
     <script src="./js/store.js"></script>
     <script src="./js/vehicle-form.js"></script>

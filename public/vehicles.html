@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vehicles | Service Log</title>
+    <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <link rel="icon" href="./assets/icon-192.png" />
+    <meta name="theme-color" content="#ff385c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Service Log" />
+  </head>
+  <body>
+    <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
+      <span class="app-loading-spinner"></span>
+    </div>
+    <main class="app-shell" id="appContent" hidden>
+      <section class="topbar" data-shell="brand" aria-label="Garage overview"></section>
+
+      <section class="panel" aria-label="Garage">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Your vehicles</p>
+            <h2>Garage</h2>
+            <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
+          </div>
+          <button type="button" id="addVehicle" class="primary-action heading-action" title="Add a new vehicle to your garage">Add vehicle</button>
+        </div>
+        <div id="vehicleEmpty" class="empty-state" hidden>
+          <p>Add your first vehicle to start building service logs.</p>
+          <button type="button" id="emptyAddVehicle" class="primary-action">Add vehicle</button>
+        </div>
+        <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
+      </section>
+
+      <button type="button" id="fabAddVehicle" class="fab" aria-label="Add vehicle" title="Add vehicle">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
+      </button>
+    </main>
+
+    <template id="vehicleCardTemplate">
+      <article class="vehicle-card">
+        <button type="button" class="vehicle-open">
+          <img class="vehicle-thumb" alt="" hidden />
+          <div class="vehicle-card-main">
+            <div class="vehicle-card-title">
+              <h3 class="vehicle-name"></h3>
+              <span class="vehicle-due" hidden></span>
+            </div>
+            <p class="vehicle-plate"></p>
+          </div>
+          <dl class="vehicle-card-stats">
+            <div>
+              <dt>Odometer</dt>
+              <dd class="vehicle-odometer"></dd>
+            </div>
+            <div>
+              <dt>Last service</dt>
+              <dd class="vehicle-last"></dd>
+            </div>
+          </dl>
+        </button>
+        <div class="vehicle-actions">
+          <button type="button" class="vehicle-menu-btn" aria-label="Vehicle actions" aria-haspopup="true" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="12" cy="19" r="1.9" /></svg>
+          </button>
+          <div class="vehicle-menu" role="menu" hidden>
+            <button type="button" class="vehicle-odometer-update" role="menuitem">Update odometer</button>
+            <button type="button" class="vehicle-edit" role="menuitem">Edit details</button>
+            <button type="button" class="vehicle-delete account-link-danger" role="menuitem">Delete vehicle</button>
+          </div>
+        </div>
+      </article>
+    </template>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="./js/version.js"></script>
+    <script src="./js/shell.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/store.js"></script>
+    <script src="./js/garage.js"></script>
+    <script src="./js/pull-refresh.js"></script>
+  </body>
+</html>

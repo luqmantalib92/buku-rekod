@@ -20,26 +20,7 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Service record">
-        <button type="button" id="backButton" class="icon-back" aria-label="Back"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-        <div class="topbar-actions">
-          <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account">
-            <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
-          </button>
-          <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
-            <div class="account-menu-head">
-              <span class="account-avatar account-menu-avatar" id="accountMenuAvatar" aria-hidden="true">&middot;</span>
-              <div class="account-menu-id">
-                <p class="account-email" id="accountEmail">Local mode</p>
-                <p class="account-status" id="accountStatus">Saved on this device</p>
-              </div>
-            </div>
-            <hr class="account-divider" />
-            <a href="./settings.html" class="account-link" role="menuitem"><span>Settings</span><span class="account-link-chev" aria-hidden="true">&rsaquo;</span></a>
-            <button type="button" id="signOutButton" class="account-link account-link-danger" role="menuitem" hidden>Sign out</button>
-          </div>
-          </div>
-      </section>
+      <section class="topbar" data-shell="back" aria-label="Service record"></section>
 
       <section class="panel" aria-label="Service record">
         <div class="panel-heading">
@@ -57,7 +38,8 @@
           </label>
           <label>
             <span>Odometer reading <span class="req" aria-hidden="true">*</span></span>
-            <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" placeholder="85000" required />
+            <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" inputmode="numeric" placeholder="85000" required />
+            <p id="odometerHint" class="field-hint" hidden></p>
           </label>
           <label>
             Workshop
@@ -67,7 +49,7 @@
           </label>
           <label>
             Cost
-            <input id="serviceCost" name="cost" type="number" min="0" step="0.01" placeholder="280.00" />
+            <input id="serviceCost" name="cost" type="number" min="0" step="0.01" inputmode="decimal" placeholder="280.00" />
             <p class="field-hint">Optional, in RM.</p>
           </label>
           <label class="span-2">
@@ -96,7 +78,7 @@
           </label>
           <label>
             Next service odometer
-            <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" placeholder="95000" />
+            <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" inputmode="numeric" placeholder="95000" />
             <p class="field-hint">Optional.</p>
           </label>
           <div class="span-2 edit-actions">
@@ -111,6 +93,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     <script src="./js/version.js"></script>
+    <script src="./js/shell.js"></script>
     <script src="./js/firebase-config.js"></script>
     <script src="./js/store.js"></script>
     <script src="./js/record-form.js"></script>

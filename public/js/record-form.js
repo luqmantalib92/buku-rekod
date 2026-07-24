@@ -8,6 +8,7 @@ const recordEls = {
   formSubtitle: document.querySelector("#formSubtitle"),
   serviceForm: document.querySelector("#serviceForm"),
   serviceDate: document.querySelector("#serviceDate"),
+  odometerHint: document.querySelector("#odometerHint"),
   serviceCategory: document.querySelector("#serviceCategory"),
   itemChips: document.querySelector("#serviceItemChips"),
   chipsHint: document.querySelector("#chipsHint"),
@@ -26,11 +27,14 @@ const returnHref = `./vehicle.html?id=${encodeURIComponent(vehicleId || "")}`;
 const selectedItems = new Set();
 let dirty = false;
 
+// After a successful save: go to the vehicle logbook and replace the form in
+// history so pressing back doesn't return into the form we just submitted.
 function leave() {
   dirty = false;
-  window.location.href = vehicleId ? returnHref : "./index.html";
+  window.location.replace(vehicleId ? returnHref : "./vehicles.html");
 }
 
+// Cancel / discard: return to wherever we came from.
 async function tryLeave() {
   if (dirty) {
     const ok = await confirmDialog({
@@ -41,7 +45,8 @@ async function tryLeave() {
     });
     if (!ok) return;
   }
-  leave();
+  dirty = false;
+  goBack(vehicleId ? returnHref : "./vehicles.html");
 }
 
 function populateCategories() {
@@ -87,6 +92,7 @@ function renderItemChips() {
       if (on) selectedItems.delete(item);
       else selectedItems.add(item);
       dirty = true;
+      if (!on) maybeAutoSuggest();
     });
     recordEls.itemChips.append(chip);
   }
@@ -105,7 +111,7 @@ function initForm() {
   const vehicle = getVehicle(vehicleId);
   if (!vehicle) {
     // Unknown / missing vehicle — nothing to log against.
-    window.location.href = "./index.html";
+    window.location.href = "./vehicles.html";
     return;
   }
 
@@ -139,11 +145,48 @@ function initForm() {
   } else {
     renderItemChips();
     recordEls.serviceDate.valueAsDate = new Date();
+    // Show the last known reading as a starting point for the odometer.
+    const lastOdo = latestOdometer(vehicle);
+    if (lastOdo > 0) {
+      recordEls.serviceForm.odometer.placeholder = String(lastOdo);
+      recordEls.odometerHint.textContent = `Last saved: ${formatKm(lastOdo)}.`;
+      recordEls.odometerHint.hidden = false;
+    }
     // Date is prefilled to today, so start the cursor on the odometer.
     // Pointer devices only, to avoid popping the mobile keyboard on open.
     if (window.matchMedia("(pointer: fine)").matches) {
       recordEls.serviceForm.odometer.focus();
     }
+  }
+}
+
+// On new records, ticking an item auto-fills the next-service fields (only
+// the empty ones) so most logs never need the Suggest button. Edits and
+// manually-entered values are left alone; the button still overwrites.
+function maybeAutoSuggest() {
+  if (recordId) return;
+  const form = recordEls.serviceForm;
+  if (form.nextDate.value && form.nextOdometer.value) return;
+
+  const suggestion = suggestNextService({
+    categoryKey: recordEls.serviceCategory.value,
+    items: [...selectedItems],
+    date: form.date.value,
+    odometer: form.odometer.value || latestOdometer(getVehicle(vehicleId) || { records: [] })
+  });
+  if (!suggestion) return;
+
+  let filled = false;
+  if (suggestion.nextDate && !form.nextDate.value) {
+    form.nextDate.value = suggestion.nextDate;
+    filled = true;
+  }
+  if (suggestion.nextOdometer && !form.nextOdometer.value) {
+    form.nextOdometer.value = suggestion.nextOdometer;
+    filled = true;
+  }
+  if (filled) {
+    showSuggestNote(`Next service auto-filled. ${suggestion.note}`);
   }
 }
 
@@ -199,7 +242,7 @@ recordEls.serviceForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const vehicle = getVehicle(vehicleId);
   if (!vehicle) {
-    window.location.href = "./index.html";
+    window.location.href = "./vehicles.html";
     return;
   }
 
@@ -232,7 +275,7 @@ recordEls.serviceForm.addEventListener("submit", async (event) => {
 });
 
 recordEls.cancel.addEventListener("click", tryLeave);
-setupBackButton(() => (vehicleId ? returnHref : "./index.html"), () => dirty);
+setupBackButton(() => (vehicleId ? returnHref : "./vehicles.html"), () => dirty);
 
 window.addEventListener("beforeunload", (event) => {
   if (dirty) {

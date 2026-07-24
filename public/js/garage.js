@@ -1,4 +1,4 @@
-/* Garage page: the list of vehicles (main screen). Adding a vehicle happens
+/* Garage page (vehicles.html): the list of vehicles. Adding a vehicle happens
    on vehicle-form.html; each card has a ⋮ menu to edit or delete. */
 
 const garageEls = {
@@ -93,6 +93,10 @@ function buildVehicleCard(vehicle) {
       menuBtn.setAttribute("aria-expanded", "true");
     }
   });
+  card.querySelector(".vehicle-odometer-update").addEventListener("click", async () => {
+    const saved = await promptOdometerUpdate(vehicle.id);
+    if (saved) renderGarage();
+  });
   card.querySelector(".vehicle-edit").addEventListener("click", () => openVehicleForm(vehicle.id));
   card.querySelector(".vehicle-delete").addEventListener("click", () => deleteVehicle(vehicle.id));
 
@@ -114,4 +118,6 @@ window.onPullRefresh = async () => {
 };
 
 renderSkeletonCards(garageEls.vehicleList, 4);
-bootWithFallback(renderGarage);
+bootWithFallback(() => {
+  renderGarage();
+});

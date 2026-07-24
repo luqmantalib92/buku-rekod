@@ -12,7 +12,8 @@ function initSettings() {
   }
 }
 
-setupBackButton("./index.html");
+// Settings is a top-level tab (bottom nav), so there's no back button — the
+// topbar shows the app icon, which links Home.
 
 window.onPullRefresh = async () => {
   await refreshData();

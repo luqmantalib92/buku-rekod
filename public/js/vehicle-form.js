@@ -11,6 +11,8 @@ const formEls = {
   plate: document.querySelector("#vehiclePlate"),
   odometer: document.querySelector("#vehicleOdometer"),
   model: document.querySelector("#vehicleModel"),
+  roadTax: document.querySelector("#vehicleRoadTax"),
+  insurance: document.querySelector("#vehicleInsurance"),
   image: document.querySelector("#vehicleImage"),
   imageHint: document.querySelector("#vehicleImageHint"),
   imagePreview: document.querySelector("#vehicleImagePreview"),
@@ -22,7 +24,7 @@ const formEls = {
 const IMAGE_HINT_DEFAULT = "JPG or PNG, up to 15 MB. It's auto-compressed before saving.";
 
 const editId = new URLSearchParams(window.location.search).get("id");
-const returnHref = editId ? `./vehicle.html?id=${encodeURIComponent(editId)}` : "./index.html";
+const returnHref = editId ? `./vehicle.html?id=${encodeURIComponent(editId)}` : "./vehicles.html";
 
 let imageData = "";   // data URL of the chosen/existing photo ("" = none)
 let dirty = false;    // unsaved changes present?
@@ -43,11 +45,14 @@ function showImage() {
   }
 }
 
+// After a successful save: go to the vehicle/garage and replace the form in
+// history so pressing back doesn't return into the form we just submitted.
 function leave() {
   dirty = false;
-  window.location.href = returnHref;
+  window.location.replace(returnHref);
 }
 
+// Cancel / discard: return to wherever we came from.
 async function tryLeave() {
   if (dirty) {
     const ok = await confirmDialog({
@@ -58,7 +63,8 @@ async function tryLeave() {
     });
     if (!ok) return;
   }
-  leave();
+  dirty = false;
+  goBack(returnHref);
 }
 
 function initForm() {
@@ -66,7 +72,7 @@ function initForm() {
     const vehicle = getVehicle(editId);
     if (!vehicle) {
       // Unknown / deleted vehicle — bounce back to the garage.
-      window.location.href = "./index.html";
+      window.location.href = "./vehicles.html";
       return;
     }
     document.title = `Edit ${vehicle.name || "vehicle"} | Service Log`;
@@ -78,6 +84,8 @@ function initForm() {
     formEls.plate.value = vehicle.plate || "";
     formEls.odometer.value = vehicle.odometer || "";
     formEls.model.value = vehicle.model || "";
+    formEls.roadTax.value = vehicle.roadTaxExpiry || "";
+    formEls.insurance.value = vehicle.insuranceExpiry || "";
     imageData = vehicle.image || "";
     showImage();
   }
@@ -123,17 +131,21 @@ formEls.vehicleForm.addEventListener("submit", async (event) => {
   const plate = form.get("plate").trim().toUpperCase();
   const odometer = Number(form.get("odometer"));
   const model = form.get("model").trim();
+  const roadTaxExpiry = form.get("roadTaxExpiry") || "";
+  const insuranceExpiry = form.get("insuranceExpiry") || "";
 
   if (editId) {
     const vehicle = getVehicle(editId);
     if (!vehicle) {
-      window.location.href = "./index.html";
+      window.location.href = "./vehicles.html";
       return;
     }
     vehicle.name = name;
     vehicle.plate = plate;
     if (Number.isFinite(odometer)) vehicle.odometer = odometer;
     vehicle.model = model;
+    vehicle.roadTaxExpiry = roadTaxExpiry;
+    vehicle.insuranceExpiry = insuranceExpiry;
     vehicle.image = imageData;
   } else {
     state.vehicles.push(normalizeVehicle({
@@ -142,6 +154,8 @@ formEls.vehicleForm.addEventListener("submit", async (event) => {
       plate,
       odometer,
       model,
+      roadTaxExpiry,
+      insuranceExpiry,
       image: imageData,
       createdAt: new Date().toISOString(),
       records: []

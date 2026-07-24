@@ -3,6 +3,75 @@
 
 const CHANGELOG = [
   {
+    version: "1.7.7",
+    date: "2026-07-25",
+    notes: [
+      "Home now opens on a compact month calendar: today is highlighted and each day with something scheduled shows a dot — red for overdue, amber for due soon, pink for upcoming.",
+      "Tap a dotted day to see exactly what's due then (service, road tax or insurance) and jump to that vehicle; use the arrows to look ahead by month.",
+      "Your full service history sits just below the calendar, newest first."
+    ]
+  },
+  {
+    version: "1.7.6",
+    date: "2026-07-25",
+    notes: [
+      "Settings now shows the app icon (tap to go Home) instead of a back arrow, since it's a tab in the bottom bar.",
+      "The back button now returns you to where you actually came from — open a vehicle from Home and back goes to Home; open it from the garage and back goes to the garage.",
+      "After saving a service record or vehicle, pressing back no longer drops you into the form you just saved."
+    ]
+  },
+  {
+    version: "1.7.5",
+    date: "2026-07-25",
+    notes: [
+      "Removed the top-right account avatar — your profile and Sign out now live on the Settings tab, reachable from the bottom bar."
+    ]
+  },
+  {
+    version: "1.7.4",
+    date: "2026-07-25",
+    notes: [
+      "New Home screen: an at-a-glance agenda of what's due across your whole garage — overdue, due soon and upcoming services, plus road tax and insurance, sorted soonest first, with your recent services below.",
+      "A bottom tab bar to move between Home, Vehicles and Settings.",
+      "Your garage (the list of vehicles) now lives under the Vehicles tab."
+    ]
+  },
+  {
+    version: "1.7.3",
+    date: "2026-07-24",
+    notes: [
+      "Fresh coat of paint: buttons, inputs and cards now use rounder corners and softer, more layered shadows (a HeroUI-style look).",
+      "Buttons and chips gently press down when you tap them, and inputs sit on a subtle fill that brightens on hover — no layout or feature changes."
+    ]
+  },
+  {
+    version: "1.7.2",
+    date: "2026-07-16",
+    notes: [
+      "App shortcuts: long-press the app icon (Android/desktop) for quick \"Add record\" and \"Update odometer\" actions.",
+      "With one vehicle in the garage, a shortcut jumps straight to the form or dialog; with several, it opens the garage to pick from."
+    ]
+  },
+  {
+    version: "1.7.1",
+    date: "2026-07-16",
+    notes: [
+      "Under the hood: the top bar (back button / app icon + account menu) is now built by a single shared script instead of being copy-pasted into every page. Nothing changes visually."
+    ]
+  },
+  {
+    version: "1.7.0",
+    date: "2026-07-16",
+    notes: [
+      "The app now works offline and opens instantly: pages and scripts are cached on your device (service worker).",
+      "Quick odometer update — tap Update on the odometer card (or the garage card's ⋮ menu) to log your current km without a service record.",
+      "Road tax and insurance expiry dates per vehicle, with a warning 30 days before they lapse — set them in Edit details.",
+      "Reminders now also watch the odometer: a record's next-service km can turn it due soon (within 1,000 km) or overdue, not just the date.",
+      "Record form: ticking an item now auto-fills the next service date/odometer (still editable), and the odometer field shows your last saved reading.",
+      "Number fields now open the numeric keypad on phones."
+    ]
+  },
+  {
     version: "1.6.1",
     date: "2026-07-15",
     notes: [

@@ -12,9 +12,15 @@ const vehicleEls = {
   summaryVehicle: document.querySelector("#summaryVehicle"),
   summaryPlate: document.querySelector("#summaryPlate"),
   summaryOdometer: document.querySelector("#summaryOdometer"),
+  summaryOdometerMeta: document.querySelector("#summaryOdometerMeta"),
+  updateOdometer: document.querySelector("#updateOdometer"),
   summaryLastService: document.querySelector("#summaryLastService"),
   summaryLastServiceMeta: document.querySelector("#summaryLastServiceMeta"),
-  summaryCost: document.querySelector("#summaryCost")
+  summaryCost: document.querySelector("#summaryCost"),
+  summaryRoadTax: document.querySelector("#summaryRoadTax"),
+  summaryRoadTaxMeta: document.querySelector("#summaryRoadTaxMeta"),
+  summaryInsurance: document.querySelector("#summaryInsurance"),
+  summaryInsuranceMeta: document.querySelector("#summaryInsuranceMeta")
 };
 
 function currentVehicleId() {
@@ -22,7 +28,7 @@ function currentVehicleId() {
 }
 
 function goGarage() {
-  window.location.href = "./index.html";
+  window.location.href = "./vehicles.html";
 }
 
 function openRecordForm(recordId) {
@@ -31,11 +37,25 @@ function openRecordForm(recordId) {
   window.location.href = `./record-form.html?vehicle=${id}${suffix}`;
 }
 
-// Human "days left" text for a record's next-service status.
-function dueText(days) {
-  if (days < 0) return `${Math.abs(days)} day(s) overdue`;
-  if (days === 0) return "due today";
-  return `in ${days} day(s)`;
+// Human text for a record's next-service status — km-driven ("in 800 km")
+// when the odometer is the more urgent signal, otherwise days.
+function dueText(status) {
+  if (status.by === "km") {
+    const km = Math.abs(status.kmLeft).toLocaleString("en-MY");
+    if (status.kmLeft < 0) return `${km} km overdue`;
+    if (status.kmLeft === 0) return "due now";
+    return `in ${km} km`;
+  }
+  if (status.days < 0) return `${Math.abs(status.days)} day(s) overdue`;
+  if (status.days === 0) return "due today";
+  return `in ${status.days} day(s)`;
+}
+
+// Human text for a road tax / insurance expiry entry.
+function expiryText(entry) {
+  if (entry.days < 0) return `Expired ${Math.abs(entry.days)} day(s) ago`;
+  if (entry.days === 0) return "Expires today";
+  return `Expires in ${entry.days} day(s)`;
 }
 
 function updateSummary(vehicle) {
@@ -46,11 +66,25 @@ function updateSummary(vehicle) {
   vehicleEls.summaryVehicle.textContent = vehicle.name || "Unnamed vehicle";
   vehicleEls.summaryPlate.textContent = vehicle.plate || "-";
   vehicleEls.summaryOdometer.textContent = odometer > 0 ? formatKm(odometer) : "-";
+  vehicleEls.summaryOdometerMeta.textContent = vehicle.odometerDate
+    ? `Updated ${formatDate(vehicle.odometerDate)}`
+    : "Latest saved reading";
   vehicleEls.summaryLastService.textContent = latestRecord ? formatDate(latestRecord.date) : "-";
   vehicleEls.summaryLastServiceMeta.textContent = latestRecord
     ? `${formatKm(latestRecord.odometer)} at ${latestRecord.workshop || "unspecified workshop"}`
     : "No records yet";
   vehicleEls.summaryCost.textContent = formatMoney(totalCost);
+
+  const expiries = new Map(vehicleExpiries(vehicle).map((entry) => [entry.field, entry]));
+  for (const [field, valueEl, metaEl] of [
+    ["roadTaxExpiry", vehicleEls.summaryRoadTax, vehicleEls.summaryRoadTaxMeta],
+    ["insuranceExpiry", vehicleEls.summaryInsurance, vehicleEls.summaryInsuranceMeta]
+  ]) {
+    const entry = expiries.get(field);
+    valueEl.textContent = entry ? formatDate(entry.date) : "-";
+    metaEl.textContent = entry ? expiryText(entry) : "Set it in Edit details";
+    metaEl.className = entry && entry.status !== "ok" ? `summary-meta-${entry.status}` : "";
+  }
 }
 
 function closeAllRecordMenus() {
@@ -68,7 +102,7 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeAllRecordMenus();
 });
 
-function buildRecordCard(record) {
+function buildRecordCard(record, currentOdometer) {
   const item = vehicleEls.recordTemplate.content.firstElementChild.cloneNode(true);
   item.querySelector("h3").textContent = formatDate(record.date);
   item.querySelector(".record-category").textContent = categoryLabel(record.category);
@@ -85,19 +119,22 @@ function buildRecordCard(record) {
   // Status pill + card highlight + the mark-serviced menu item.
   const dueEl = item.querySelector(".record-due");
   const doneBtn = item.querySelector(".record-done");
-  if (record.nextDate) {
-    dueEl.hidden = false;
+  if (record.nextDate || record.nextOdometer) {
     doneBtn.hidden = false;
     if (record.nextDone) {
+      dueEl.hidden = false;
       dueEl.textContent = "Serviced";
       dueEl.className = "record-due record-due-done";
       item.classList.add("is-done");
       doneBtn.textContent = "Undo serviced";
     } else {
-      const status = recordNextStatus(record);
-      dueEl.textContent = dueText(status.days);
-      dueEl.className = `record-due record-due-${status.status}`;
-      item.classList.add(`is-${status.status}`);
+      const status = recordNextStatus(record, currentOdometer);
+      if (status) {
+        dueEl.hidden = false;
+        dueEl.textContent = dueText(status);
+        dueEl.className = `record-due record-due-${status.status}`;
+        item.classList.add(`is-${status.status}`);
+      }
       doneBtn.textContent = "Mark serviced";
     }
     doneBtn.addEventListener("click", () => toggleServiced(record.id));
@@ -131,14 +168,17 @@ const RECORD_GROUP_LABELS = {
 function renderRecords(vehicle) {
   vehicleEls.recordList.replaceChildren();
 
+  const currentOdometer = latestOdometer(vehicle);
+
   // Bucket records by next-service status; history = no active reminder.
   const groups = { overdue: [], "due-soon": [], upcoming: [], history: [] };
   for (const record of vehicle.records) {
-    const status = recordNextStatus(record);
+    const status = recordNextStatus(record, currentOdometer);
     (status ? groups[status.status] : groups.history).push(record);
   }
 
-  const byNextDate = (a, b) => (a.nextDate || "").localeCompare(b.nextDate || "");
+  // Records tracked only by odometer have no next date — sort them last.
+  const byNextDate = (a, b) => (a.nextDate || "9999").localeCompare(b.nextDate || "9999");
   const byServiceDesc = (a, b) => b.date.localeCompare(a.date) || Number(b.odometer || 0) - Number(a.odometer || 0);
   groups.overdue.sort(byNextDate);
   groups["due-soon"].sort(byNextDate);
@@ -163,7 +203,7 @@ function renderRecords(vehicle) {
     vehicleEls.recordList.append(header);
 
     for (const record of items) {
-      vehicleEls.recordList.append(buildRecordCard(record));
+      vehicleEls.recordList.append(buildRecordCard(record, currentOdometer));
     }
   }
 }
@@ -205,11 +245,16 @@ async function deleteRecord(recordId) {
   renderVehicle();
 }
 
+vehicleEls.updateOdometer.addEventListener("click", async () => {
+  const saved = await promptOdometerUpdate(currentVehicleId());
+  if (saved) renderVehicle();
+});
+
 vehicleEls.addRecord.addEventListener("click", () => openRecordForm(null));
 vehicleEls.emptyAddRecord.addEventListener("click", () => openRecordForm(null));
 vehicleEls.fabAddRecord.addEventListener("click", () => openRecordForm(null));
 
-setupBackButton("./index.html");
+setupBackButton("./vehicles.html");
 
 window.onPullRefresh = async () => {
   await refreshData();

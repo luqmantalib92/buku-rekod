@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Garage | Service Log</title>
+    <title>Home | Service Log</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
@@ -20,91 +20,54 @@
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" aria-label="Garage overview">
-        <a href="./index.html" class="brand" aria-label="Service Log">
-          <img src="./assets/icon-192.png" alt="Service Log" class="brand-icon" />
-        </a>
-        <div class="topbar-actions">
-          <button type="button" id="accountButton" class="account-button" aria-haspopup="true" aria-expanded="false" aria-label="Account">
-            <span class="account-avatar" id="accountAvatar" aria-hidden="true">&middot;</span>
+      <section class="topbar" data-shell="brand" aria-label="Home"></section>
+
+      <section class="panel" aria-label="Service calendar">
+        <div class="cal-head">
+          <button type="button" id="calPrev" class="cal-nav-btn" aria-label="Previous month">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
           </button>
-          <div id="accountMenu" class="account-menu" role="menu" aria-label="Account" hidden>
-            <div class="account-menu-head">
-              <span class="account-avatar account-menu-avatar" id="accountMenuAvatar" aria-hidden="true">&middot;</span>
-              <div class="account-menu-id">
-                <p class="account-email" id="accountEmail">Local mode</p>
-                <p class="account-status" id="accountStatus">Saved on this device</p>
-              </div>
-            </div>
-            <hr class="account-divider" />
-            <a href="./settings.html" class="account-link" role="menuitem"><span>Settings</span><span class="account-link-chev" aria-hidden="true">&rsaquo;</span></a>
-            <button type="button" id="signOutButton" class="account-link account-link-danger" role="menuitem" hidden>Sign out</button>
-          </div>
-          </div>
+          <h2 id="calTitle" class="cal-title" aria-live="polite">Month</h2>
+          <button type="button" id="calNext" class="cal-nav-btn" aria-label="Next month">
+            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div id="calGrid" class="cal-grid" role="grid" aria-label="Month calendar"></div>
+        <div class="cal-legend" aria-hidden="true">
+          <span><i class="cal-dot cal-dot-overdue"></i>Overdue</span>
+          <span><i class="cal-dot cal-dot-due-soon"></i>Due soon</span>
+          <span><i class="cal-dot cal-dot-ok"></i>Upcoming</span>
+        </div>
+        <div id="calDayDetail" class="cal-day-detail" hidden>
+          <p id="calDayTitle" class="cal-day-detail-title"></p>
+          <div id="calDayList" class="reminder-list"></div>
+        </div>
       </section>
 
-      <section class="panel" aria-label="Garage">
+      <section class="panel" aria-label="Service history">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Your vehicles</p>
-            <h2>Garage</h2>
-            <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
+            <p class="eyebrow">Logbook</p>
+            <h2>Service history</h2>
+            <p class="panel-subtitle">Every service you've logged, newest first.</p>
           </div>
-          <button type="button" id="addVehicle" class="primary-action heading-action" title="Add a new vehicle to your garage">Add vehicle</button>
         </div>
-        <div id="vehicleEmpty" class="empty-state" hidden>
-          <p>Add your first vehicle to start building service logs.</p>
-          <button type="button" id="emptyAddVehicle" class="primary-action">Add vehicle</button>
+        <div id="historyEmpty" class="empty-state" hidden>
+          <p id="historyEmptyText">No services logged yet.</p>
+          <button type="button" id="historyEmptyAction" class="primary-action">Go to garage</button>
         </div>
-        <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
+        <div id="historyList" class="reminder-list" aria-live="polite"></div>
       </section>
-
-      <button type="button" id="fabAddVehicle" class="fab" aria-label="Add vehicle" title="Add vehicle">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
-      </button>
     </main>
-
-    <template id="vehicleCardTemplate">
-      <article class="vehicle-card">
-        <button type="button" class="vehicle-open">
-          <img class="vehicle-thumb" alt="" hidden />
-          <div class="vehicle-card-main">
-            <div class="vehicle-card-title">
-              <h3 class="vehicle-name"></h3>
-              <span class="vehicle-due" hidden></span>
-            </div>
-            <p class="vehicle-plate"></p>
-          </div>
-          <dl class="vehicle-card-stats">
-            <div>
-              <dt>Odometer</dt>
-              <dd class="vehicle-odometer"></dd>
-            </div>
-            <div>
-              <dt>Last service</dt>
-              <dd class="vehicle-last"></dd>
-            </div>
-          </dl>
-        </button>
-        <div class="vehicle-actions">
-          <button type="button" class="vehicle-menu-btn" aria-label="Vehicle actions" aria-haspopup="true" aria-expanded="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="12" cy="19" r="1.9" /></svg>
-          </button>
-          <div class="vehicle-menu" role="menu" hidden>
-            <button type="button" class="vehicle-edit" role="menuitem">Edit details</button>
-            <button type="button" class="vehicle-delete account-link-danger" role="menuitem">Delete vehicle</button>
-          </div>
-        </div>
-      </article>
-    </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
     <script src="./js/version.js"></script>
+    <script src="./js/shell.js"></script>
     <script src="./js/firebase-config.js"></script>
     <script src="./js/store.js"></script>
-    <script src="./js/garage.js"></script>
+    <script src="./js/agenda.js"></script>
     <script src="./js/pull-refresh.js"></script>
   </body>
 </html>

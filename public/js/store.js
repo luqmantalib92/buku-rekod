@@ -55,8 +55,11 @@ function normalizeVehicle(vehicle) {
     name: source.name || "",
     plate: source.plate || "",
     odometer: Number(source.odometer || 0),
+    odometerDate: source.odometerDate || "",
     model: source.model || "",
     image: source.image || "",
+    roadTaxExpiry: source.roadTaxExpiry || "",
+    insuranceExpiry: source.insuranceExpiry || "",
     createdAt: source.createdAt || new Date().toISOString(),
     records: Array.isArray(source.records) ? source.records : []
   };
@@ -305,25 +308,57 @@ function daysUntil(dateStr) {
   return Math.round((target - today) / 86400000);
 }
 
-// Next-service status for a single record: null when there's no next date or
-// it's already been marked serviced. Otherwise { days, status } where status
-// is "overdue" | "due-soon" | "upcoming".
-function recordNextStatus(record) {
-  if (!record || !record.nextDate || record.nextDone) return null;
-  const days = daysUntil(record.nextDate);
-  if (days === null) return null;
-  let status = "upcoming";
-  if (days < 0) status = "overdue";
-  else if (days <= leadDaysFor(record.category || "other")) status = "due-soon";
-  return { days, status };
+// Start warning when the next-service odometer is this close (km).
+const KM_DUE_SOON = 1000;
+
+const STATUS_RANK = { ok: 0, upcoming: 0, "due-soon": 1, overdue: 2 };
+
+// Next-service status for a single record, by date and/or odometer: null when
+// there's nothing to track or it's been marked serviced. Otherwise
+// { days, kmLeft, status, by } — status is "overdue" | "due-soon" | "upcoming"
+// (the worse of the two signals) and `by` says which signal drove it.
+function recordNextStatus(record, currentOdometer) {
+  if (!record || record.nextDone) return null;
+
+  let days = null;
+  let dateStatus = null;
+  if (record.nextDate) {
+    days = daysUntil(record.nextDate);
+    if (days !== null) {
+      if (days < 0) dateStatus = "overdue";
+      else if (days <= leadDaysFor(record.category || "other")) dateStatus = "due-soon";
+      else dateStatus = "upcoming";
+    }
+  }
+
+  let kmLeft = null;
+  let kmStatus = null;
+  const nextOdo = Number(record.nextOdometer);
+  const currentOdo = Number(currentOdometer);
+  if (Number.isFinite(nextOdo) && nextOdo > 0 && Number.isFinite(currentOdo) && currentOdo > 0) {
+    kmLeft = nextOdo - currentOdo;
+    if (kmLeft < 0) kmStatus = "overdue";
+    else if (kmLeft <= KM_DUE_SOON) kmStatus = "due-soon";
+    else kmStatus = "upcoming";
+  }
+
+  if (dateStatus === null && kmStatus === null) return null;
+  let by = "date";
+  let status = dateStatus;
+  if (kmStatus !== null && (dateStatus === null || STATUS_RANK[kmStatus] > STATUS_RANK[dateStatus])) {
+    by = "km";
+    status = kmStatus;
+  }
+  return { days, kmLeft, status, by };
 }
 
 // One reminder per category, based on the most recent record in that category
-// that carries a next-service date. Overdue first, then soonest.
+// with a next-service date or odometer. Overdue first, then soonest.
 function vehicleReminders(vehicle) {
+  const currentOdo = latestOdometer(vehicle);
   const latestByCategory = new Map();
   for (const record of vehicle.records) {
-    if (!record.nextDate || record.nextDone) continue;
+    if (record.nextDone || (!record.nextDate && !record.nextOdometer)) continue;
     const key = record.category || "other";
     const existing = latestByCategory.get(key);
     if (!existing || (record.date || "") > (existing.date || "")) {
@@ -333,20 +368,46 @@ function vehicleReminders(vehicle) {
 
   const reminders = [];
   for (const [key, record] of latestByCategory) {
-    const days = daysUntil(record.nextDate);
-    if (days === null) continue;
-    let status = "ok";
-    if (days < 0) status = "overdue";
-    else if (days <= leadDaysFor(key)) status = "due-soon";
-    reminders.push({ category: key, label: categoryLabel(key), nextDate: record.nextDate, days, status });
+    const next = recordNextStatus(record, currentOdo);
+    if (!next) continue;
+    reminders.push({
+      category: key,
+      label: categoryLabel(key),
+      nextDate: record.nextDate,
+      days: next.days,
+      kmLeft: next.kmLeft,
+      status: next.status === "upcoming" ? "ok" : next.status
+    });
   }
 
-  reminders.sort((a, b) => a.days - b.days);
+  reminders.sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status] || (a.days ?? 9999) - (b.days ?? 9999));
   return reminders;
 }
 
+/* ---- Vehicle-level expiries (road tax & insurance) ---- */
+
+const EXPIRY_LEAD_DAYS = 30;
+
+// Road tax / insurance status entries for a vehicle. Dates the user hasn't
+// set are skipped. status is "ok" | "due-soon" | "overdue".
+function vehicleExpiries(vehicle) {
+  const entries = [];
+  for (const [field, label] of [["roadTaxExpiry", "Road tax"], ["insuranceExpiry", "Insurance"]]) {
+    const date = vehicle[field];
+    if (!date) continue;
+    const days = daysUntil(date);
+    if (days === null) continue;
+    let status = "ok";
+    if (days < 0) status = "overdue";
+    else if (days <= EXPIRY_LEAD_DAYS) status = "due-soon";
+    entries.push({ field, label, date, days, status });
+  }
+  return entries;
+}
+
 function vehicleDueCount(vehicle) {
-  return vehicleReminders(vehicle).filter((reminder) => reminder.status !== "ok").length;
+  return vehicleReminders(vehicle).filter((reminder) => reminder.status !== "ok").length
+    + vehicleExpiries(vehicle).filter((entry) => entry.status !== "ok").length;
 }
 
 function loadLocal() {
@@ -485,6 +546,124 @@ function confirmDialog(options) {
   });
 }
 
+/* ---- Input dialog (a confirm dialog with one field) ---- */
+
+let promptEls = null;
+
+function ensurePromptModal() {
+  if (promptEls) return promptEls;
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.hidden = true;
+
+  const modal = document.createElement("form");
+  modal.className = "modal";
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+
+  const title = document.createElement("h2");
+  title.className = "modal-title";
+  const message = document.createElement("p");
+  message.className = "modal-message";
+  const field = document.createElement("label");
+  field.className = "modal-field";
+  const fieldLabel = document.createElement("span");
+  const input = document.createElement("input");
+  field.append(fieldLabel, input);
+  const actions = document.createElement("div");
+  actions.className = "modal-actions";
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "ghost-action";
+  const ok = document.createElement("button");
+  ok.type = "submit";
+  ok.className = "primary-action";
+
+  actions.append(cancel, ok);
+  modal.append(title, message, field, actions);
+  backdrop.append(modal);
+  document.body.append(backdrop);
+
+  promptEls = { backdrop, modal, title, message, fieldLabel, input, cancel, ok };
+  return promptEls;
+}
+
+// Promise<string|null> — resolves with the input value on confirm, or null on
+// cancel/dismiss. `inputAttrs` are set directly on the input element.
+function promptDialog(options) {
+  const opts = options || {};
+  const els = ensurePromptModal();
+
+  els.title.textContent = opts.title || "";
+  els.message.textContent = opts.message || "";
+  els.message.hidden = !opts.message;
+  els.fieldLabel.textContent = opts.label || "";
+  els.ok.textContent = opts.confirmLabel || "Save";
+  els.cancel.textContent = opts.cancelLabel || "Cancel";
+
+  for (const [name, value] of Object.entries(opts.inputAttrs || {})) {
+    els.input.setAttribute(name, value);
+  }
+  els.input.value = opts.value || "";
+
+  els.backdrop.hidden = false;
+  document.body.style.overflow = "hidden";
+  els.input.focus();
+  els.input.select();
+
+  return new Promise((resolve) => {
+    function cleanup(result) {
+      els.backdrop.hidden = true;
+      document.body.style.overflow = "";
+      els.modal.removeEventListener("submit", onSubmit);
+      els.cancel.removeEventListener("click", onCancel);
+      els.backdrop.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKey);
+      resolve(result);
+    }
+    function onSubmit(event) {
+      event.preventDefault();
+      cleanup(els.input.value);
+    }
+    function onCancel() { cleanup(null); }
+    function onBackdrop(event) { if (event.target === els.backdrop) cleanup(null); }
+    function onKey(event) { if (event.key === "Escape") cleanup(null); }
+
+    els.modal.addEventListener("submit", onSubmit);
+    els.cancel.addEventListener("click", onCancel);
+    els.backdrop.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKey);
+  });
+}
+
+// Quick odometer update (no service record needed) — keeps km-based
+// reminders honest between services. Resolves true if a value was saved.
+async function promptOdometerUpdate(vehicleId) {
+  const vehicle = getVehicle(vehicleId);
+  if (!vehicle) return false;
+  const current = latestOdometer(vehicle);
+
+  const value = await promptDialog({
+    title: "Update odometer",
+    message: current > 0
+      ? `Last saved reading: ${formatKm(current)}.`
+      : "Enter the current odometer reading.",
+    label: "Current odometer (km)",
+    value: current > 0 ? String(current) : "",
+    confirmLabel: "Save",
+    inputAttrs: { type: "number", min: "0", step: "1", inputmode: "numeric", required: "required" }
+  });
+  if (value === null) return false;
+
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) return false;
+  vehicle.odometer = number;
+  vehicle.odometerDate = new Date().toISOString().slice(0, 10);
+  await persist();
+  return true;
+}
+
 async function signOut() {
   const ok = await confirmDialog({
     title: "Sign out?",
@@ -528,9 +707,29 @@ function setupAccountMenu() {
 
 setupAccountMenu();
 
+// Navigate "up". Prefer the real previous page when we arrived from another
+// page in this app — so a vehicle opened from Home returns to Home, and one
+// opened from the garage returns to the garage. Fall back to an explicit
+// parent href for direct loads, deep links and PWA shortcuts (no in-app
+// referrer). `fallback` may be a string or a getter.
+function goBack(fallback) {
+  const href = typeof fallback === "function" ? fallback() : fallback;
+  const ref = document.referrer;
+  if (ref && window.history.length > 1) {
+    try {
+      if (new URL(ref).origin === window.location.origin) {
+        window.history.back();
+        return;
+      }
+    } catch { /* malformed referrer — use the fallback below */ }
+  }
+  window.location.href = href;
+}
+
 // Wire the circular back button (#backButton) to navigate up a level. If
 // `isDirty` is supplied and returns true, confirm before leaving. `href` may
-// be a string or a getter.
+// be a string or a getter and is used as the fallback when there's no in-app
+// history to step back to.
 function setupBackButton(href, isDirty) {
   const btn = document.querySelector("#backButton");
   if (!btn) return;
@@ -544,7 +743,7 @@ function setupBackButton(href, isDirty) {
       });
       if (!ok) return;
     }
-    window.location.href = typeof href === "function" ? href() : href;
+    goBack(href);
   });
 }
 

@@ -10,8 +10,21 @@
   --accent-dark: #e00b41;
   --accent-tint: #ffe8ec;
   --warn: #a75f18;
-  --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  --shadow-lift: 0 10px 28px rgba(0, 0, 0, 0.14);
+
+  /* HeroUI-inspired design tokens: rounder corners, soft layered shadows and a
+     single easing/timing so every interactive element presses the same way. */
+  --radius-sm: 8px;    /* HeroUI "small"  */
+  --radius: 12px;      /* HeroUI "medium" — buttons, inputs */
+  --radius-lg: 14px;   /* HeroUI "large"  — cards, panels */
+  --radius-full: 9999px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur: 250ms;
+  --press: scale(0.97); /* tactile push-down on tap */
+
+  /* HeroUI's diffuse, multi-layer elevation (small / medium / large). */
+  --shadow-sm: 0 0 5px rgba(0, 0, 0, 0.02), 0 2px 10px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.30);
+  --shadow: 0 0 15px rgba(0, 0, 0, 0.03), 0 2px 30px rgba(0, 0, 0, 0.08), 0 0 1px rgba(0, 0, 0, 0.30);
+  --shadow-lift: 0 0 30px rgba(0, 0, 0, 0.04), 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 1px rgba(0, 0, 0, 0.30);
 }
 
 * {
@@ -48,7 +61,8 @@ button {
 .app-shell {
   width: min(1180px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 32px 0 48px;
+  /* Bottom padding clears the fixed bottom tab bar. */
+  padding: 32px 0 calc(84px + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -507,6 +521,10 @@ button {
   line-height: 1.5;
 }
 
+.modal-field {
+  margin-top: 4px;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -557,15 +575,16 @@ h3 {
   gap: 16px;
 }
 
+/* 6 cards → two even rows of 3 on desktop. */
 .summary-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .summary-card,
 .panel,
 .record-card {
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
 }
 
@@ -608,6 +627,51 @@ dt {
   display: block;
   margin-top: 8px;
   line-height: 1.35;
+}
+
+/* Card title row with an inline action (e.g. odometer "Update"). */
+.summary-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.summary-card-head span {
+  margin-bottom: 0;
+}
+
+.summary-inline-btn {
+  border: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-tint);
+  color: var(--accent-dark);
+  font-size: 0.75rem;
+  font-weight: 800;
+  touch-action: manipulation;
+}
+
+.summary-inline-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.summary-inline-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Road tax / insurance status lines. */
+small.summary-meta-due-soon {
+  color: var(--warn);
+  font-weight: 700;
+}
+
+small.summary-meta-overdue {
+  color: #c0392b;
+  font-weight: 700;
 }
 
 .content-grid {
@@ -672,12 +736,20 @@ select {
   min-width: 0;
   max-width: 100%;
   border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
+  border-radius: var(--radius);
+  background: var(--fill);
   color: var(--ink);
   padding: 12px 13px;
   outline: none;
-  transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), background var(--dur) var(--ease);
+}
+
+/* HeroUI inputs sit on a subtle fill and brighten to white on hover/focus. */
+input:hover,
+textarea:hover,
+select:hover {
+  background: #fff;
+  border-color: #b0b0b0;
 }
 
 select {
@@ -725,9 +797,21 @@ select:focus {
 .ghost-action,
 .icon-button {
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-weight: 800;
   touch-action: manipulation;
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), opacity var(--dur) var(--ease);
+}
+
+/* HeroUI's signature push-down: every button dips slightly on press. */
+.primary-action:active,
+.ghost-action:active,
+.icon-button:active,
+.chip:active,
+.summary-inline-btn:active,
+.secondary-line:active {
+  transform: var(--press);
 }
 
 .primary-action:focus-visible,
@@ -836,7 +920,8 @@ select:focus {
 .fab {
   position: fixed;
   right: 16px;
-  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  /* Sits above the bottom tab bar. */
+  bottom: calc(78px + env(safe-area-inset-bottom, 0px));
   width: 56px;
   height: 56px;
   border: 0;
@@ -1085,10 +1170,10 @@ dd {
 .vehicle-card {
   position: relative;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow);
-  transition: border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
 
 .vehicle-card:hover {
@@ -1104,7 +1189,7 @@ dd {
   width: 100%;
   padding: 18px;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: transparent;
   color: inherit;
   font: inherit;
@@ -1115,6 +1200,10 @@ dd {
 
 .vehicle-open:active {
   transform: scale(0.99);
+}
+
+.chip {
+  transition: transform var(--dur) var(--ease), background var(--dur) var(--ease), border-color var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
 .vehicle-open:focus-visible {
@@ -1162,7 +1251,7 @@ dd {
   top: calc(100% + 6px);
   right: 0;
   z-index: 20;
-  min-width: 170px;
+  min-width: 200px;
   display: grid;
   gap: 2px;
   padding: 6px;
@@ -1276,6 +1365,8 @@ dd {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  /* Keep the due badge clear of the absolutely-positioned ⋮ button. */
+  padding-right: 28px;
 }
 
 .vehicle-due {
@@ -1488,6 +1579,221 @@ dd {
   border-left-color: #cbd5cf;
 }
 
+/* Home service calendar (compact month view with status dots). */
+.cal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.cal-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.cal-nav-btn {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.cal-nav-btn:hover { background: var(--fill); }
+.cal-nav-btn:active { transform: var(--press); }
+.cal-nav-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cal-nav-btn svg { width: 18px; height: 18px; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.cal-weekday {
+  text-align: center;
+  padding: 2px 0 6px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.cal-cell.is-blank { visibility: hidden; }
+
+.cal-cell.has-events { cursor: pointer; }
+.cal-cell.has-events:hover { background: var(--fill); }
+
+.cal-cell.is-today {
+  background: var(--accent-tint);
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
+.cal-cell.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.cal-cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.cal-dot {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+}
+
+.cal-dot-overdue { background: #c0392b; }
+.cal-dot-due-soon { background: var(--warn); }
+.cal-dot-ok { background: var(--accent); }
+
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 14px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.cal-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cal-legend .cal-dot {
+  position: static;
+  transform: none;
+}
+
+.cal-day-detail {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+}
+
+.cal-day-detail-title {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+/* Calendar day-detail + history rows reuse .reminder but are tappable links. */
+.agenda-item {
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.agenda-item:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.agenda-item:active {
+  transform: var(--press);
+}
+
+.agenda-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.agenda-item-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Bottom tab bar: primary navigation (Home · Vehicles · Settings). */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 950;
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.06);
+}
+
+.bottom-nav-tab {
+  flex: 1 1 0;
+  max-width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.7rem;
+  font-weight: 700;
+  touch-action: manipulation;
+  transition: color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.bottom-nav-tab:hover {
+  color: var(--ink);
+}
+
+.bottom-nav-tab:active {
+  transform: var(--press);
+}
+
+.bottom-nav-tab.is-active {
+  color: var(--accent);
+}
+
+.bottom-nav-tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.bottom-nav-icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.bottom-nav-label {
+  line-height: 1;
+}
+
 /* Reminder settings */
 .settings-panel summary {
   cursor: pointer;
@@ -1642,7 +1948,7 @@ dd {
   .app-shell {
     width: min(100% - 20px, 1180px);
     padding-top: 20px;
-    padding-bottom: 88px; /* clear the floating add button */
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); /* clear the bottom tab bar */
   }
 
   .panel-heading {
@@ -1669,6 +1975,14 @@ dd {
   .summary-card span {
     margin-bottom: 6px;
     font-size: 0.72rem;
+  }
+
+  .summary-card-head {
+    margin-bottom: 6px;
+  }
+
+  .summary-card-head span {
+    margin-bottom: 0;
   }
 
   .summary-card strong {
