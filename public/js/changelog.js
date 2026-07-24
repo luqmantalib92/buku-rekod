@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.7.9",
+    date: "2026-07-25",
+    notes: [
+      "New app icon: a cleaner wrench mark on a subtle red gradient (home-screen, tab and install icons all updated)."
+    ]
+  },
+  {
     version: "1.7.8",
     date: "2026-07-25",
     notes: [
