@@ -12,11 +12,19 @@ const homeEls = {
   calDayDetail: document.querySelector("#calDayDetail"),
   calDayTitle: document.querySelector("#calDayTitle"),
   calDayList: document.querySelector("#calDayList"),
-  historyList: document.querySelector("#historyList"),
-  historyEmpty: document.querySelector("#historyEmpty"),
-  historyEmptyText: document.querySelector("#historyEmptyText"),
-  historyEmptyAction: document.querySelector("#historyEmptyAction")
+  scheduleList: document.querySelector("#scheduleList"),
+  scheduleEmpty: document.querySelector("#scheduleEmpty"),
+  scheduleEmptyText: document.querySelector("#scheduleEmptyText"),
+  scheduleEmptyAction: document.querySelector("#scheduleEmptyAction"),
+  scheduleGroupTemplate: document.querySelector("#scheduleGroupTemplate")
 };
+
+// Upcoming & due list, grouped by status (soonest first within each group).
+const SCHEDULE_GROUPS = [
+  { key: "overdue", label: "Overdue", statuses: ["overdue"] },
+  { key: "due-soon", label: "Due soon", statuses: ["due-soon"] },
+  { key: "upcoming", label: "Upcoming", statuses: ["ok"] }
+];
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = ["January", "February", "March", "April", "May", "June",
@@ -47,9 +55,45 @@ function longDate(key) {
   return d.toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 
-homeEls.historyEmptyAction.addEventListener("click", () => {
+homeEls.scheduleEmptyAction.addEventListener("click", () => {
   window.location.href = "./vehicles.html";
 });
+
+// "in 12 day(s)" / "due today" / "3 day(s) overdue".
+function daysPhrase(days) {
+  if (days < 0) return `${Math.abs(days)} day(s) overdue`;
+  if (days === 0) return "due today";
+  return `in ${days} day(s)`;
+}
+
+// "820 km left" / "due now" / "150 km overdue".
+function kmPhrase(kmLeft) {
+  const km = Math.abs(kmLeft).toLocaleString("en-MY");
+  if (kmLeft < 0) return `${km} km overdue`;
+  if (kmLeft === 0) return "due now";
+  return `${km} km left`;
+}
+
+// Combine whichever signals a service reminder has (date and/or odometer).
+function serviceMeta(reminder) {
+  const parts = [];
+  if (reminder.days !== null && reminder.days !== undefined) parts.push(daysPhrase(reminder.days));
+  if (reminder.kmLeft !== null && reminder.kmLeft !== undefined) parts.push(kmPhrase(reminder.kmLeft));
+  return parts.join(" · ");
+}
+
+function expiryMeta(days) {
+  if (days < 0) return `expired ${Math.abs(days)} day(s) ago`;
+  if (days === 0) return "expires today";
+  return `expires in ${days} day(s)`;
+}
+
+// Lower = more urgent. Prefer the date signal; fall back to odometer.
+function urgency(item) {
+  if (item.days !== null && item.days !== undefined) return item.days;
+  if (item.kmLeft !== null && item.kmLeft !== undefined) return item.kmLeft <= 0 ? -1 : 9000;
+  return 99999;
+}
 
 // Map of dateKey -> [{ vehicleId, vehicleName, title, status }] for every
 // scheduled service / expiry that has an actual date to place on the calendar.
@@ -78,9 +122,9 @@ function worstStatus(items) {
     STATUS_WEIGHT[item.status] > STATUS_WEIGHT[worst] ? item.status : worst, "ok");
 }
 
-function buildEventRow({ vehicleId, vehicleName, title, meta }) {
+function buildEventRow({ vehicleId, vehicleName, title, meta, status = "ok" }) {
   const link = document.createElement("a");
-  link.className = "reminder reminder-ok agenda-item";
+  link.className = `reminder reminder-${status} agenda-item`;
   link.href = `./vehicle.html?id=${encodeURIComponent(vehicleId)}`;
   const label = document.createElement("span");
   label.className = "reminder-label";
@@ -106,12 +150,7 @@ function renderDayDetail(key, byDate) {
   homeEls.calDayDetail.hidden = false;
   homeEls.calDayTitle.textContent = longDate(key);
   homeEls.calDayList.replaceChildren();
-  for (const item of items) {
-    const row = buildEventRow(item);
-    row.classList.remove("reminder-ok");
-    row.classList.add(`reminder-${item.status}`);
-    homeEls.calDayList.append(row);
-  }
+  for (const item of items) homeEls.calDayList.append(buildEventRow(item));
 }
 
 function renderCalendar() {
@@ -185,36 +224,68 @@ function shiftMonth(delta) {
 homeEls.calPrev.addEventListener("click", () => shiftMonth(-1));
 homeEls.calNext.addEventListener("click", () => shiftMonth(1));
 
-function renderHistory() {
-  const rows = [];
+// Every tracked service reminder + expiry across the garage, with status and
+// human meta. Unlike the calendar dots this also includes odometer-only
+// reminders that have no date to plot.
+function collectDue() {
+  const items = [];
   for (const vehicle of state.vehicles) {
     const name = vehicle.name || "Unnamed vehicle";
-    for (const record of vehicle.records) {
-      rows.push({ vehicleId: vehicle.id, vehicleName: name, record });
+    for (const reminder of vehicleReminders(vehicle)) {
+      items.push({
+        vehicleId: vehicle.id,
+        vehicleName: name,
+        title: reminder.label,
+        status: reminder.status,
+        meta: serviceMeta(reminder),
+        days: reminder.days,
+        kmLeft: reminder.kmLeft
+      });
+    }
+    for (const entry of vehicleExpiries(vehicle)) {
+      items.push({
+        vehicleId: vehicle.id,
+        vehicleName: name,
+        title: entry.label,
+        status: entry.status,
+        meta: expiryMeta(entry.days),
+        days: entry.days,
+        kmLeft: null
+      });
     }
   }
-  rows.sort((a, b) => (b.record.date || "").localeCompare(a.record.date || ""));
+  return items;
+}
 
-  homeEls.historyEmpty.hidden = rows.length > 0;
-  homeEls.historyEmptyText.textContent = state.vehicles.length
-    ? "No services logged yet. Open a vehicle to log one."
-    : "Add your first vehicle to start building service logs.";
-  homeEls.historyEmptyAction.textContent = state.vehicles.length ? "View garage" : "Add a vehicle";
+function renderSchedule() {
+  homeEls.scheduleList.replaceChildren();
+  const items = collectDue();
+  let shown = 0;
 
-  homeEls.historyList.replaceChildren();
-  for (const { vehicleId, vehicleName, record } of rows) {
-    homeEls.historyList.append(buildEventRow({
-      vehicleId,
-      vehicleName,
-      title: categoryLabel(record.category),
-      meta: formatDate(record.date)
-    }));
+  for (const group of SCHEDULE_GROUPS) {
+    const groupItems = items
+      .filter((item) => group.statuses.includes(item.status))
+      .sort((a, b) => urgency(a) - urgency(b));
+    if (!groupItems.length) continue;
+    shown += groupItems.length;
+
+    const node = homeEls.scheduleGroupTemplate.content.firstElementChild.cloneNode(true);
+    node.querySelector(".schedule-group-label").textContent = group.label;
+    const list = node.querySelector(".reminder-list");
+    for (const item of groupItems) list.append(buildEventRow(item));
+    homeEls.scheduleList.append(node);
   }
+
+  homeEls.scheduleEmpty.hidden = shown > 0;
+  homeEls.scheduleEmptyText.textContent = state.vehicles.length
+    ? "Nothing scheduled. Add a next-service date to a record to start tracking what's next."
+    : "Add your first vehicle to start building service logs.";
+  homeEls.scheduleEmptyAction.textContent = state.vehicles.length ? "View garage" : "Add a vehicle";
 }
 
 function renderHome() {
   renderCalendar();
-  renderHistory();
+  renderSchedule();
 }
 
 window.onPullRefresh = async () => {

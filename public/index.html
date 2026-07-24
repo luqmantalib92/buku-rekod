@@ -44,21 +44,28 @@
         </div>
       </section>
 
-      <section class="panel" aria-label="Service history">
+      <section class="panel" aria-label="Upcoming and due">
         <div class="panel-heading">
           <div>
-            <p class="eyebrow">Logbook</p>
-            <h2>Service history</h2>
-            <p class="panel-subtitle">Every service you've logged, newest first.</p>
+            <p class="eyebrow">Schedule</p>
+            <h2>Upcoming &amp; due</h2>
+            <p class="panel-subtitle">What's coming up across your garage, soonest first.</p>
           </div>
         </div>
-        <div id="historyEmpty" class="empty-state" hidden>
-          <p id="historyEmptyText">No services logged yet.</p>
-          <button type="button" id="historyEmptyAction" class="primary-action">Go to garage</button>
+        <div id="scheduleEmpty" class="empty-state" hidden>
+          <p id="scheduleEmptyText">Nothing scheduled. Add a next-service date to a record to start tracking what's next.</p>
+          <button type="button" id="scheduleEmptyAction" class="primary-action">Go to garage</button>
         </div>
-        <div id="historyList" class="reminder-list" aria-live="polite"></div>
+        <div id="scheduleList" class="schedule" aria-live="polite"></div>
       </section>
     </main>
+
+    <template id="scheduleGroupTemplate">
+      <div class="schedule-group">
+        <p class="schedule-group-label"></p>
+        <div class="reminder-list"></div>
+      </div>
+    </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>

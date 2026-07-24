@@ -1706,7 +1706,27 @@ dd {
   font-weight: 800;
 }
 
-/* Calendar day-detail + history rows reuse .reminder but are tappable links. */
+/* Upcoming & due list, grouped by status. */
+.schedule {
+  display: grid;
+  gap: 20px;
+}
+
+.schedule-group {
+  display: grid;
+  gap: 10px;
+}
+
+.schedule-group-label {
+  margin: 0;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+/* Calendar day-detail + schedule rows reuse .reminder but are tappable links. */
 .agenda-item {
   color: inherit;
   text-decoration: none;

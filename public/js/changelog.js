@@ -3,6 +3,14 @@
 
 const CHANGELOG = [
   {
+    version: "1.7.8",
+    date: "2026-07-25",
+    notes: [
+      "The list under the calendar now shows what's coming up — overdue, due soon and upcoming services plus road tax and insurance, soonest first — instead of past services.",
+      "Odometer-based reminders with no set date also appear here (they can't be shown as a calendar dot)."
+    ]
+  },
+  {
     version: "1.7.7",
     date: "2026-07-25",
     notes: [
