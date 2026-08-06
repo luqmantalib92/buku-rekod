@@ -225,7 +225,7 @@ function renderVehicle() {
     return;
   }
 
-  document.title = `${vehicle.name || "Vehicle"} | Service Log`;
+  document.title = `${vehicle.name || "Vehicle"} | Logbook`;
   updateSummary(vehicle);
   renderRecords(vehicle);
 }

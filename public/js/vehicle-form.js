@@ -75,7 +75,7 @@ function initForm() {
       window.location.href = "./vehicles.html";
       return;
     }
-    document.title = `Edit ${vehicle.name || "vehicle"} | Service Log`;
+    document.title = `Edit ${vehicle.name || "vehicle"} | Logbook`;
     formEls.formEyebrow.textContent = "Edit";
     formEls.formHeading.textContent = "Edit vehicle";
     formEls.formSubtitle.textContent = "Update this vehicle's details. Changes save to its logbook.";

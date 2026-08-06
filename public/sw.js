@@ -11,7 +11,7 @@
 
 importScripts("./js/version.js");
 
-const CACHE_NAME = `service-log-v${APP_VERSION}`;
+const CACHE_NAME = `logbook-v${APP_VERSION}`;
 
 /* Posters are immutable per URL and expensive to refetch, so they live in
    their own cache that release bumps don't clear (see `activate`). Bounded so

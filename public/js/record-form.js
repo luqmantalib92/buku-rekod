@@ -127,7 +127,7 @@ function initForm() {
   }
 
   if (record) {
-    document.title = "Edit service record | Service Log";
+    document.title = "Edit service record | Logbook";
     recordEls.formHeading.textContent = "Edit service record";
     recordEls.formSubtitle.textContent = `Update this service record for ${vehicle.name || "this vehicle"}.`;
     recordEls.submit.textContent = "Save changes";

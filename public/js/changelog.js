@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.8.4",
+    date: "2026-08-06",
+    notes: [
+      "Renamed the app to Logbook everywhere it still said Service Log — browser tabs, the sign-in screen and the name used when you add it to your home screen."
+    ]
+  },
+  {
     version: "1.8.3",
     date: "2026-08-06",
     notes: [
