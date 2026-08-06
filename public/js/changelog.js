@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.8.5",
+    date: "2026-08-06",
+    notes: [
+      "New app icon: a checklist on blue, replacing the wrench mark. On iPhone you'll need to delete the home-screen app and add it again to pick up the new icon."
+    ]
+  },
+  {
     version: "1.8.4",
     date: "2026-08-06",
     notes: [
