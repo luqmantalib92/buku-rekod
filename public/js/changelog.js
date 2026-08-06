@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.8.2",
+    date: "2026-08-06",
+    notes: [
+      "Fixed movie posters that could stay blank forever: if an image request ever failed, the failure was cached and reused on every later visit. Only successful images are cached now, and the old cache is cleared automatically on update."
+    ]
+  },
+  {
     version: "1.8.1",
     date: "2026-08-06",
     notes: [
