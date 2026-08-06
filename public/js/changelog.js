@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.8.7",
+    date: "2026-08-06",
+    notes: [
+      "Fixed the browser-tab and iPhone home-screen icons, which were showing a zoomed-in corner of the artwork instead of the whole thing."
+    ]
+  },
+  {
     version: "1.8.6",
     date: "2026-08-06",
     notes: [
