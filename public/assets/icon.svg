@@ -1,35 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="192 192 640 640" role="img" aria-labelledby="title desc">
   <title id="title">Logbook</title>
   <desc id="desc">A blue icon with a tilted white paper, blue checkmark, and soft long shadow.</desc>
+  <!-- The background bleeds to all four edges and the artwork is held at 80%
+       about the centre, so the paper stays inside the maskable safe zone (a
+       circle of 40% radius) that Android crops to. Squaring the original
+       rounded tile without this margin clipped the paper's corners. Each
+       platform applies its own mask; do not pre-round this. -->
   <defs>
     <linearGradient id="blue" x1="230" y1="205" x2="797" y2="822" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#27b8e9"/>
-      <stop offset="1" stop-color="#1689df"/>
+      <stop offset="0" stop-color="#27b8e9"/><stop offset="1" stop-color="#1689df"/>
     </linearGradient>
     <linearGradient id="paper" x1="349" y1="310" x2="675" y2="716" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#fff"/>
-      <stop offset="1" stop-color="#f7f9fc"/>
+      <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f7f9fc"/>
     </linearGradient>
     <linearGradient id="fold" x1="537" y1="504" x2="680" y2="646" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#f4f8fc"/>
-      <stop offset="1" stop-color="#dcecfb"/>
+      <stop offset="0" stop-color="#f4f8fc"/><stop offset="1" stop-color="#dcecfb"/>
     </linearGradient>
     <linearGradient id="line" x1="402" y1="693" x2="698" y2="693" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#168ddd"/>
-      <stop offset="1" stop-color="#eff5fd"/>
+      <stop stop-color="#168ddd"/><stop offset="1" stop-color="#eff5fd"/>
     </linearGradient>
     <filter id="soft" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="3"/></filter>
     <clipPath id="tileClip"><rect x="192" y="192" width="640" height="640"/></clipPath>
   </defs>
   <rect x="192" y="192" width="640" height="640" fill="url(#blue)"/>
   <g clip-path="url(#tileClip)">
-    <path d="M641 315 835 509v347H503L402 741l294-109z" fill="#0878ce" opacity=".36"/>
-    <path d="M642 316 832 505v328H503L402 738l294-106z" fill="#117fda" opacity=".22"/>
+    <g transform="translate(512 512) scale(.8) translate(-512 -512)">
+      <!-- Long shadow runs past the canvas so it still reaches the corner
+           once scaled; tileClip trims it at the edge. -->
+      <path d="M641 315 960 634V960H594L402 741l294-109z" fill="#0878ce" opacity=".36"/>
+      <path d="M642 316 960 632V960H638L402 738l294-106z" fill="#117fda" opacity=".22"/>
+      <path d="M334 371Q330 342 359 337l250-39q27-4 31 25l49 307-254 41q-27 4-32-24z" fill="#0873bf" opacity=".22" filter="url(#soft)"/>
+      <path d="M333 370Q329 341 359 337l249-39q27-4 31 25l49 308-253 40q-28 5-33-24z" fill="url(#paper)"/>
+      <path d="M640 319 688 631 576 649 505 578z" fill="url(#fold)"/>
+      <path d="m414 500 28-33 55 47 91-130 37 26-119 168z" fill="#1598df"/>
+      <path d="M432 675 686 635q15-3 13 12t-17 17l-249 40q-20 3-26-8t5-18q5-3 20-3z" fill="#0b75c9" opacity=".30" filter="url(#soft)"/>
+      <path d="M431 675 686 635q10-2 12 7 2 10-9 12l-255 41q-17 3-24-5-8-11 3-17 6-3 18-2z" fill="url(#line)"/>
+    </g>
   </g>
-  <path d="M334 371Q330 342 359 337l250-39q27-4 31 25l49 307-254 41q-27 4-32-24z" fill="#0873bf" opacity=".22" filter="url(#soft)"/>
-  <path d="M333 370Q329 341 359 337l249-39q27-4 31 25l49 308-253 40q-28 5-33-24z" fill="url(#paper)"/>
-  <path d="M640 319 688 631 576 649 505 578z" fill="url(#fold)"/>
-  <path d="m414 500 28-33 55 47 91-130 37 26-119 168z" fill="#1598df"/>
-  <path d="M432 675 686 635q15-3 13 12t-17 17l-249 40q-20 3-26-8t5-18q5-3 20-3z" fill="#0b75c9" opacity=".30" filter="url(#soft)"/>
-  <path d="M431 675 686 635q10-2 12 7 2 10-9 12l-255 41q-17 3-24-5-8-11 3-17 6-3 18-2z" fill="url(#line)"/>
 </svg>

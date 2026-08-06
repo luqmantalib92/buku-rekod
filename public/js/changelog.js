@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "1.8.6",
+    date: "2026-08-06",
+    notes: [
+      "Fixed the app icon being cut off at the corners — the checklist now sits further in from the edges, so nothing is lost when iOS and Android round it off."
+    ]
+  },
+  {
     version: "1.8.5",
     date: "2026-08-06",
     notes: [
