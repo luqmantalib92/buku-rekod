@@ -1,6 +1,5 @@
 {
   "projects": {
-    "default": "my-personal-log",
-    "legacy": "vehicle-service-logs"
+    "default": "my-personal-log"
   }
 }

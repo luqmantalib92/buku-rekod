@@ -119,9 +119,11 @@ implicit:
 4. `firebase deploy --project <new-id> --only hosting,firestore:rules`
 5. Open the new site, sign in, then Settings → Backup & restore → **Import from file**.
 
-`.firebaserc` pins the deploy targets — `default` is the live project and
-`legacy` the previous one, so `firebase use legacy` reaches the old project
-without retyping ids.
+`.firebaserc` pins the deploy target: `default` is the live project, so
+`firebase deploy` needs no `--project` flag. Keep the old project reachable
+under a second alias (`firebase use --add`) until you're sure the move is
+complete — the 2026 migration off `vehicle-service-logs` did exactly that, and
+the alias was dropped once that project was deleted.
 
 Two things that don't move on their own:
 
