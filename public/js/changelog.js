@@ -3,6 +3,24 @@
 
 const CHANGELOG = [
   {
+    version: "1.8.1",
+    date: "2026-08-06",
+    notes: [
+      "Settings and What's new now keep the tabs of the mini app you came from — open Settings from Movies and the bottom bar still shows Watchlist and Search."
+    ]
+  },
+  {
+    version: "1.8.0",
+    date: "2026-08-06",
+    notes: [
+      "Logbook is now a super app: tap the app icon in the top-left to open the launcher and switch between mini apps. Home still opens straight on your service calendar — nothing moved.",
+      "New Movies mini app: search TMDb for a movie, drama or series and save it to a private watchlist, with its poster, type and release year.",
+      "Your watchlist shows newest saved first, with a Watched toggle and All / To watch / Watched filters — plus an optional 'group by release year' view.",
+      "Posters are cached on-device, so the watchlist still renders offline and doesn't re-download artwork on every visit.",
+      "Under the hood: the shared data layer was split into a common core and one module per mini app, so each page only loads what it needs."
+    ]
+  },
+  {
     version: "1.7.9",
     date: "2026-07-25",
     notes: [

@@ -6,11 +6,18 @@
    - page navigations  → network first, cached page as offline fallback
    - same-origin files → stale-while-revalidate (serve cache, refresh behind)
    - Firebase SDK (gstatic, versioned URLs) → cache first
-   - everything else (Firestore, auth APIs) → untouched, network only */
+   - TMDb posters     → cache first, in a cache that survives version bumps
+   - everything else (Firestore, auth, TMDb API) → untouched, network only */
 
 importScripts("./js/version.js");
 
 const CACHE_NAME = `service-log-v${APP_VERSION}`;
+
+/* Posters are immutable per URL and expensive to refetch, so they live in
+   their own cache that release bumps don't clear (see `activate`). Bounded so
+   a long watchlist can't grow storage without limit. */
+const POSTER_CACHE = "tmdb-posters-v1";
+const POSTER_CACHE_MAX = 300;
 
 const SHELL = [
   "./",
@@ -20,6 +27,8 @@ const SHELL = [
   "./vehicle-form.html",
   "./record-form.html",
   "./login.html",
+  "./movies.html",
+  "./movie-search.html",
   "./settings.html",
   "./reminders.html",
   "./categories.html",
@@ -29,7 +38,12 @@ const SHELL = [
   "./js/version.js",
   "./js/shell.js",
   "./js/firebase-config.js",
-  "./js/store.js",
+  "./js/core.js",
+  "./js/garage.store.js",
+  "./js/watchlist.store.js",
+  "./js/tmdb.js",
+  "./js/movies.js",
+  "./js/movie-search.js",
   "./js/auth.js",
   "./js/garage.js",
   "./js/agenda.js",
@@ -61,7 +75,8 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil((async () => {
     for (const key of await caches.keys()) {
-      if (key !== CACHE_NAME) await caches.delete(key);
+      // Keep the poster cache across releases — its entries are still valid.
+      if (key !== CACHE_NAME && key !== POSTER_CACHE) await caches.delete(key);
     }
     await self.clients.claim();
   })());
@@ -99,6 +114,29 @@ async function cacheFirst(request) {
   return response;
 }
 
+// Oldest-first eviction — Cache Storage returns keys in insertion order.
+async function trimPosterCache(cache) {
+  const keys = await cache.keys();
+  if (keys.length <= POSTER_CACHE_MAX) return;
+  for (const key of keys.slice(0, keys.length - POSTER_CACHE_MAX)) {
+    await cache.delete(key);
+  }
+}
+
+async function posterCacheFirst(request) {
+  const cache = await caches.open(POSTER_CACHE);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  const response = await fetch(request);
+  // Poster requests are cross-origin/opaque, so `ok` is false and status 0 —
+  // cache those too, or nothing would ever be stored.
+  if (response.ok || response.type === "opaque") {
+    await cache.put(request, response.clone());
+    trimPosterCache(cache);
+  }
+  return response;
+}
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
@@ -107,6 +145,10 @@ self.addEventListener("fetch", (event) => {
 
   if (url.origin === "https://www.gstatic.com") {
     event.respondWith(cacheFirst(request));
+    return;
+  }
+  if (url.origin === "https://image.tmdb.org") {
+    event.respondWith(posterCacheFirst(request));
     return;
   }
   if (url.origin !== location.origin) return;

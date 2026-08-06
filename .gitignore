@@ -5,3 +5,7 @@
 # The web apiKey is a public client identifier, but keep it out of the
 # repo to avoid secret-scanner noise. It still ships in the deployed JS.
 public/js/firebase-config.js
+
+# Local TMDb API key (copy from tmdb-config.example.js).
+# Read-only and rate-limited, but keep it out of the repo all the same.
+public/js/tmdb-config.js

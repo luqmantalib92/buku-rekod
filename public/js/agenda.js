@@ -2,7 +2,7 @@
    status-coloured dot on each day that has something scheduled (a record's next
    service, or road-tax / insurance expiry) — with the full service history
    below. Reuses the reminder logic (vehicleReminders / vehicleExpiries) from
-   store.js so the dots match the statuses shown elsewhere. */
+   garage.store.js so the dots match the statuses shown elsewhere. */
 
 const homeEls = {
   calTitle: document.querySelector("#calTitle"),

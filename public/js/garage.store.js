@@ -1,21 +1,17 @@
-/* Shared data + auth layer used by both the garage and vehicle pages. */
+/* Vehicle Log data module — the garage domain: vehicles, service records,
+   categories, service intervals and reminders.
 
-const LOCAL_KEY = "vehicle-service-log:v1";
+   Auth, boot, persistence plumbing and the shared dialogs live in core.js;
+   this file only describes the garage's own data and rules, then registers
+   itself with defineStore() at the bottom. Requires core.js first. */
+
+const GARAGE_LOCAL_KEY = "vehicle-service-log:v1";
 
 const state = {
   vehicles: [],
   settings: { leadDays: {} },
-  categories: [],
-  user: null,
-  auth: null,
-  db: null,
-  dataRef: null,
-  useFirestore: false
+  categories: []
 };
-
-function hasFirebaseConfig() {
-  return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && window.firebase?.auth && window.firebase?.firestore);
-}
 
 /* ---- Formatting ---- */
 
@@ -31,19 +27,6 @@ function formatMoney(value) {
     style: "currency",
     currency: "MYR"
   }).format(number);
-}
-
-function formatDate(value) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("en-MY", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric"
-  }).format(new Date(`${value}T00:00:00`));
-}
-
-function makeId() {
-  return crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
 }
 
 /* ---- Data model ---- */
@@ -140,7 +123,7 @@ function fileToResizedDataUrl(file) {
 
 // Accepts new format ({vehicles: []}) and the old single-vehicle format
 // ({vehicle, records}), migrating the latter into a one-vehicle garage.
-function ingest(data) {
+function ingestGarage(data) {
   const source = data || {};
   if (Array.isArray(source.vehicles)) {
     state.vehicles = source.vehicles.map(normalizeVehicle);
@@ -300,14 +283,6 @@ function suggestNextService({ categoryKey, items, date, odometer }) {
 
 const DUE_SOON_DAYS = 30;
 
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const target = new Date(`${dateStr}T00:00:00`);
-  return Math.round((target - today) / 86400000);
-}
-
 // Start warning when the next-service odometer is this close (km).
 const KM_DUE_SOON = 1000;
 
@@ -410,232 +385,7 @@ function vehicleDueCount(vehicle) {
     + vehicleExpiries(vehicle).filter((entry) => entry.status !== "ok").length;
 }
 
-function loadLocal() {
-  const raw = localStorage.getItem(LOCAL_KEY);
-  if (!raw) {
-    state.vehicles = [];
-    return;
-  }
-  try {
-    ingest(JSON.parse(raw));
-  } catch {
-    state.vehicles = [];
-  }
-}
-
-function saveLocal() {
-  localStorage.setItem(LOCAL_KEY, JSON.stringify({ vehicles: state.vehicles, settings: state.settings, categories: state.categories }));
-}
-
-async function loadRemoteData() {
-  if (!state.dataRef) return;
-  const snapshot = await state.dataRef.get();
-  ingest(snapshot.exists ? snapshot.data() : {});
-}
-
-// Re-pull the latest data (used by pull-to-refresh). The caller re-renders.
-async function refreshData() {
-  if (state.useFirestore && state.dataRef) {
-    await loadRemoteData();
-  } else {
-    loadLocal();
-  }
-}
-
-async function persist() {
-  if (state.useFirestore && state.dataRef) {
-    await state.dataRef.set({
-      vehicles: state.vehicles,
-      settings: state.settings,
-      categories: state.categories,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    });
-  } else {
-    saveLocal();
-  }
-}
-
-/* ---- Shared shell (topbar) ---- */
-
-const shellEls = {
-  appContent: document.querySelector("#appContent"),
-  appLoading: document.querySelector("#appLoading"),
-  signOutButton: document.querySelector("#signOutButton"),
-  accountButton: document.querySelector("#accountButton"),
-  accountMenu: document.querySelector("#accountMenu"),
-  accountAvatar: document.querySelector("#accountAvatar"),
-  accountMenuAvatar: document.querySelector("#accountMenuAvatar"),
-  accountEmail: document.querySelector("#accountEmail"),
-  accountStatus: document.querySelector("#accountStatus")
-};
-
-/* ---- Custom confirmation dialog (replaces window.confirm) ---- */
-
-let confirmEls = null;
-
-function ensureConfirmModal() {
-  if (confirmEls) return confirmEls;
-
-  const backdrop = document.createElement("div");
-  backdrop.className = "modal-backdrop";
-  backdrop.hidden = true;
-
-  const modal = document.createElement("div");
-  modal.className = "modal";
-  modal.setAttribute("role", "dialog");
-  modal.setAttribute("aria-modal", "true");
-
-  const title = document.createElement("h2");
-  title.className = "modal-title";
-  const message = document.createElement("p");
-  message.className = "modal-message";
-  const actions = document.createElement("div");
-  actions.className = "modal-actions";
-  const cancel = document.createElement("button");
-  cancel.type = "button";
-  cancel.className = "ghost-action";
-  const ok = document.createElement("button");
-  ok.type = "button";
-  ok.className = "primary-action";
-
-  actions.append(cancel, ok);
-  modal.append(title, message, actions);
-  backdrop.append(modal);
-  document.body.append(backdrop);
-
-  confirmEls = { backdrop, title, message, cancel, ok };
-  return confirmEls;
-}
-
-// Promise<boolean> — resolves true on confirm, false on cancel/dismiss.
-function confirmDialog(options) {
-  const opts = options || {};
-  const els = ensureConfirmModal();
-
-  els.title.textContent = opts.title || "Are you sure?";
-  els.message.textContent = opts.message || "";
-  els.message.hidden = !opts.message;
-  els.ok.textContent = opts.confirmLabel || "Confirm";
-  els.cancel.textContent = opts.cancelLabel || "Cancel";
-  els.ok.classList.toggle("danger-action", Boolean(opts.danger));
-
-  els.backdrop.hidden = false;
-  document.body.style.overflow = "hidden";
-  // Focus Cancel for destructive prompts so an accidental Enter won't confirm.
-  (opts.danger ? els.cancel : els.ok).focus();
-
-  return new Promise((resolve) => {
-    function cleanup(result) {
-      els.backdrop.hidden = true;
-      document.body.style.overflow = "";
-      els.ok.removeEventListener("click", onOk);
-      els.cancel.removeEventListener("click", onCancel);
-      els.backdrop.removeEventListener("click", onBackdrop);
-      document.removeEventListener("keydown", onKey);
-      resolve(result);
-    }
-    function onOk() { cleanup(true); }
-    function onCancel() { cleanup(false); }
-    function onBackdrop(event) { if (event.target === els.backdrop) cleanup(false); }
-    function onKey(event) { if (event.key === "Escape") cleanup(false); }
-
-    els.ok.addEventListener("click", onOk);
-    els.cancel.addEventListener("click", onCancel);
-    els.backdrop.addEventListener("click", onBackdrop);
-    document.addEventListener("keydown", onKey);
-  });
-}
-
-/* ---- Input dialog (a confirm dialog with one field) ---- */
-
-let promptEls = null;
-
-function ensurePromptModal() {
-  if (promptEls) return promptEls;
-
-  const backdrop = document.createElement("div");
-  backdrop.className = "modal-backdrop";
-  backdrop.hidden = true;
-
-  const modal = document.createElement("form");
-  modal.className = "modal";
-  modal.setAttribute("role", "dialog");
-  modal.setAttribute("aria-modal", "true");
-
-  const title = document.createElement("h2");
-  title.className = "modal-title";
-  const message = document.createElement("p");
-  message.className = "modal-message";
-  const field = document.createElement("label");
-  field.className = "modal-field";
-  const fieldLabel = document.createElement("span");
-  const input = document.createElement("input");
-  field.append(fieldLabel, input);
-  const actions = document.createElement("div");
-  actions.className = "modal-actions";
-  const cancel = document.createElement("button");
-  cancel.type = "button";
-  cancel.className = "ghost-action";
-  const ok = document.createElement("button");
-  ok.type = "submit";
-  ok.className = "primary-action";
-
-  actions.append(cancel, ok);
-  modal.append(title, message, field, actions);
-  backdrop.append(modal);
-  document.body.append(backdrop);
-
-  promptEls = { backdrop, modal, title, message, fieldLabel, input, cancel, ok };
-  return promptEls;
-}
-
-// Promise<string|null> — resolves with the input value on confirm, or null on
-// cancel/dismiss. `inputAttrs` are set directly on the input element.
-function promptDialog(options) {
-  const opts = options || {};
-  const els = ensurePromptModal();
-
-  els.title.textContent = opts.title || "";
-  els.message.textContent = opts.message || "";
-  els.message.hidden = !opts.message;
-  els.fieldLabel.textContent = opts.label || "";
-  els.ok.textContent = opts.confirmLabel || "Save";
-  els.cancel.textContent = opts.cancelLabel || "Cancel";
-
-  for (const [name, value] of Object.entries(opts.inputAttrs || {})) {
-    els.input.setAttribute(name, value);
-  }
-  els.input.value = opts.value || "";
-
-  els.backdrop.hidden = false;
-  document.body.style.overflow = "hidden";
-  els.input.focus();
-  els.input.select();
-
-  return new Promise((resolve) => {
-    function cleanup(result) {
-      els.backdrop.hidden = true;
-      document.body.style.overflow = "";
-      els.modal.removeEventListener("submit", onSubmit);
-      els.cancel.removeEventListener("click", onCancel);
-      els.backdrop.removeEventListener("click", onBackdrop);
-      document.removeEventListener("keydown", onKey);
-      resolve(result);
-    }
-    function onSubmit(event) {
-      event.preventDefault();
-      cleanup(els.input.value);
-    }
-    function onCancel() { cleanup(null); }
-    function onBackdrop(event) { if (event.target === els.backdrop) cleanup(null); }
-    function onKey(event) { if (event.key === "Escape") cleanup(null); }
-
-    els.modal.addEventListener("submit", onSubmit);
-    els.cancel.addEventListener("click", onCancel);
-    els.backdrop.addEventListener("click", onBackdrop);
-    document.addEventListener("keydown", onKey);
-  });
-}
+/* ---- Garage actions ---- */
 
 // Quick odometer update (no service record needed) — keeps km-based
 // reminders honest between services. Resolves true if a value was saved.
@@ -664,89 +414,6 @@ async function promptOdometerUpdate(vehicleId) {
   return true;
 }
 
-async function signOut() {
-  const ok = await confirmDialog({
-    title: "Sign out?",
-    message: "You'll need to sign in again to view your logs.",
-    confirmLabel: "Sign out",
-    danger: true
-  });
-  if (!ok) return;
-  if (state.auth) await state.auth.signOut();
-  window.location.replace("./login.html");
-}
-
-if (shellEls.signOutButton) {
-  shellEls.signOutButton.addEventListener("click", signOut);
-}
-
-// Top-right avatar popover: shows email, a Settings link, Sign out and the
-// version. Toggles on click; closes on outside click or Escape.
-function setupAccountMenu() {
-  const { accountButton: button, accountMenu: menu } = shellEls;
-  if (!button || !menu) return;
-
-  const close = () => { menu.hidden = true; button.setAttribute("aria-expanded", "false"); };
-
-  button.addEventListener("click", (event) => {
-    event.stopPropagation();
-    if (menu.hidden) {
-      menu.hidden = false;
-      button.setAttribute("aria-expanded", "true");
-    } else {
-      close();
-    }
-  });
-  document.addEventListener("click", (event) => {
-    if (!menu.hidden && !menu.contains(event.target) && !button.contains(event.target)) close();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !menu.hidden) close();
-  });
-}
-
-setupAccountMenu();
-
-// Navigate "up". Prefer the real previous page when we arrived from another
-// page in this app — so a vehicle opened from Home returns to Home, and one
-// opened from the garage returns to the garage. Fall back to an explicit
-// parent href for direct loads, deep links and PWA shortcuts (no in-app
-// referrer). `fallback` may be a string or a getter.
-function goBack(fallback) {
-  const href = typeof fallback === "function" ? fallback() : fallback;
-  const ref = document.referrer;
-  if (ref && window.history.length > 1) {
-    try {
-      if (new URL(ref).origin === window.location.origin) {
-        window.history.back();
-        return;
-      }
-    } catch { /* malformed referrer — use the fallback below */ }
-  }
-  window.location.href = href;
-}
-
-// Wire the circular back button (#backButton) to navigate up a level. If
-// `isDirty` is supplied and returns true, confirm before leaving. `href` may
-// be a string or a getter and is used as the fallback when there's no in-app
-// history to step back to.
-function setupBackButton(href, isDirty) {
-  const btn = document.querySelector("#backButton");
-  if (!btn) return;
-  btn.addEventListener("click", async () => {
-    if (isDirty && isDirty()) {
-      const ok = await confirmDialog({
-        title: "Discard changes?",
-        message: "You have unsaved changes. Leaving now won't save them.",
-        confirmLabel: "Discard",
-        danger: true
-      });
-      if (!ok) return;
-    }
-    goBack(href);
-  });
-}
-
 // Unique, sorted workshop names across all records — powers the workshop
 // autocomplete suggestions.
 function getWorkshopNames() {
@@ -760,104 +427,20 @@ function getWorkshopNames() {
   return [...names].sort((a, b) => a.localeCompare(b));
 }
 
-function revealShell(signedIn, label) {
-  if (shellEls.appLoading) shellEls.appLoading.hidden = true;
-  if (shellEls.appContent) shellEls.appContent.hidden = false;
-  if (shellEls.signOutButton) shellEls.signOutButton.hidden = !signedIn;
+/* ---- Registration ---- */
 
-  const initial = signedIn && label ? label.trim().charAt(0).toUpperCase() : "·";
-  if (shellEls.accountAvatar) shellEls.accountAvatar.textContent = initial;
-  if (shellEls.accountMenuAvatar) shellEls.accountMenuAvatar.textContent = initial;
-  if (shellEls.accountEmail) {
-    shellEls.accountEmail.textContent = signedIn && label ? label : "Local mode";
-  }
-  if (shellEls.accountStatus) {
-    shellEls.accountStatus.textContent = signedIn ? "Synced to your account" : "Saved on this device";
-  }
-}
-
-// Disable a button and show a busy label while an async action runs, then
-// restore it — gives submit feedback and prevents double-submits.
-async function withButtonBusy(button, busyLabel, action) {
-  if (!button) return action();
-  const originalLabel = button.textContent;
-  button.disabled = true;
-  if (busyLabel) button.textContent = busyLabel;
-  try {
-    return await action();
-  } finally {
-    button.disabled = false;
-    button.textContent = originalLabel;
-  }
-}
-
-/**
- * Boot the store, then call onReady() once vehicle data is available.
- * Redirects to the login page when Firebase is configured but no user
- * is signed in. Falls back to local storage if Firebase is unavailable.
- */
-// Fill a list container with placeholder skeleton cards while data loads.
-// The real render later calls replaceChildren(), which clears these.
-function renderSkeletonCards(container, count = 3) {
-  if (!container) return;
-  const frag = document.createDocumentFragment();
-  for (let i = 0; i < count; i += 1) {
-    const card = document.createElement("div");
-    card.className = "skeleton-card";
-    card.setAttribute("aria-hidden", "true");
-    for (const cls of ["skeleton-line skeleton-line-lg", "skeleton-line skeleton-line-sm", "skeleton-line"]) {
-      const line = document.createElement("div");
-      line.className = cls;
-      card.append(line);
-    }
-    frag.append(card);
-  }
-  container.replaceChildren(frag);
-}
-
-async function initStore(onReady) {
-  if (!hasFirebaseConfig()) {
-    loadLocal();
-    revealShell(false, null);
-    onReady();
-    return;
-  }
-
-  firebase.initializeApp(firebaseConfig);
-  state.auth = firebase.auth();
-  state.db = firebase.firestore();
-  state.useFirestore = true;
-
-  state.auth.onAuthStateChanged(async (user) => {
-    state.user = user;
+defineStore({
+  localKey: GARAGE_LOCAL_KEY,
+  docPath: (uid) => ["users", uid, "garage", "main"],
+  ingest: ingestGarage,
+  serialize: () => ({
+    vehicles: state.vehicles,
+    settings: state.settings,
+    categories: state.categories
+  }),
+  reset: () => {
     state.vehicles = [];
-
-    if (!user) {
-      state.dataRef = null;
-      window.location.replace("./login.html");
-      return;
-    }
-
-    state.dataRef = state.db.collection("users").doc(user.uid).collection("garage").doc("main");
-    // Reveal as soon as auth resolves so a slow or blocked Firestore fetch
-    // can never leave the loading spinner stuck. Data renders when it lands.
-    revealShell(true, user.email || "Signed in");
-    try {
-      await loadRemoteData();
-    } catch (error) {
-      console.error(error);
-    }
-    onReady();
-  });
-}
-
-// Local fallback shared by both pages when initStore rejects.
-function bootWithFallback(onReady) {
-  initStore(onReady).catch((error) => {
-    console.error(error);
-    state.useFirestore = false;
-    loadLocal();
-    revealShell(false, null);
-    onReady();
-  });
-}
+    state.settings = { leadDays: {} };
+    state.categories = [];
+  }
+});
