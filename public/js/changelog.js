@@ -3,6 +3,14 @@
 
 const CHANGELOG = [
   {
+    version: "1.8.3",
+    date: "2026-08-06",
+    notes: [
+      "New Backup & restore in Settings: export everything — vehicles, service records and your watchlist — to a single file, and load it back later.",
+      "Restoring writes to whichever account you're signed in as, so exporting from one account and importing into another is now the way to move your data between devices or Firebase projects."
+    ]
+  },
+  {
     version: "1.8.2",
     date: "2026-08-06",
     notes: [

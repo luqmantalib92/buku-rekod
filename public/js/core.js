@@ -47,19 +47,27 @@ function daysUntil(dateStr) {
 /* ---- Mini-app data modules ----
 
    A mini app describes its own storage by calling defineStore() at parse
-   time. Exactly one store is active per page — the one whose <app>.store.js
-   the page includes.
+   time. The page's own mini app is the *active* store — the one the page
+   reads and writes through persist()/refreshData().
 
+     label     string                  human name, shown in backup summaries
      localKey  string                  localStorage key for offline/local mode
      docPath   (uid) => string[]       Firestore path segments for the doc
      ingest    (data) => void          hydrate in-memory state from a snapshot
      serialize () => object            the object to write back
      reset     () => void              clear in-memory state (signed out / no data)
-*/
+
+   Every registered store is also kept in STORES. Backup & restore includes
+   *all* of them, so a page that pulls in several store modules (backup.html)
+   can walk every mini app's data without knowing which apps exist. Adding a
+   third mini app makes it part of the backup automatically. */
+
+const STORES = [];
 
 let activeStore = null;
 
 function defineStore(config) {
+  if (!STORES.some((entry) => entry.localKey === config.localKey)) STORES.push(config);
   activeStore = config;
   return config;
 }
@@ -67,6 +75,54 @@ function defineStore(config) {
 function requireStore() {
   if (!activeStore) throw new Error("No store defined — include an <app>.store.js before the page script.");
   return activeStore;
+}
+
+/* ---- Whole-store access (used by backup & restore) ----
+   These bypass the active store and the in-memory state on purpose: backup
+   moves raw documents, so it must not depend on which mini app's page it
+   happens to be running on. */
+
+function storeDocRef(store) {
+  if (!appState.db || !appState.user) return null;
+  return store.docPath(appState.user.uid).reduce(
+    (ref, segment, i) => (i % 2 === 0 ? ref.collection(segment) : ref.doc(segment)),
+    appState.db
+  );
+}
+
+// Raw stored data for one mini app, or null when it has never been saved.
+async function readStoreData(store) {
+  if (appState.useFirestore && appState.user) {
+    const ref = storeDocRef(store);
+    if (!ref) return null;
+    const snapshot = await ref.get();
+    if (!snapshot.exists) return null;
+    // updatedAt is a Firestore Timestamp — server bookkeeping, not user data,
+    // and it doesn't survive a JSON round trip meaningfully.
+    const { updatedAt, ...data } = snapshot.data();
+    return data;
+  }
+  const raw = localStorage.getItem(store.localKey);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+// Overwrite one mini app's stored data. Writes wherever the app is currently
+// running — signed into Firestore, or localStorage in local mode — which is
+// what makes restoring into a different Firebase project (and so a different
+// uid) work without any re-keying.
+async function writeStoreData(store, data) {
+  if (appState.useFirestore && appState.user) {
+    const ref = storeDocRef(store);
+    if (!ref) throw new Error("Not signed in.");
+    await ref.set({ ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    return;
+  }
+  localStorage.setItem(store.localKey, JSON.stringify(data));
 }
 
 function loadLocal() {

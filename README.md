@@ -30,9 +30,10 @@ straight on the vehicle service calendar.
 ## Shared
 
 - **Installable**: PWA manifest + iOS home-screen icon; "Add to Home Screen" launches full-screen.
-- **Offline**: a service worker (`sw.js`) precaches the app shell, so the app opens instantly and works offline. Movie posters are cached separately in `tmdb-posters-v1`, which survives version bumps so releases don't force a re-download.
+- **Offline**: a service worker (`sw.js`) precaches the app shell, so the app opens instantly and works offline. Movie posters are cached separately in `tmdb-posters-v2`, which survives version bumps so releases don't force a re-download. Only successful responses are cached, so a failed image can't get stuck.
 - Login on a separate page (`login.html`) via Firebase Authentication.
 - Data lives in `localStorage` and syncs to Firestore once configured.
+- **Backup & restore** (Settings): export every mini app's data to one JSON file and load it back. Restoring writes to whichever account is signed in, so it doubles as the way to move between devices or Firebase projects.
 
 ## Project structure
 
@@ -47,6 +48,7 @@ public/                  # everything served by Firebase Hosting (the web app)
     shell.js             # topbar, app launcher, per-app bottom nav (APPS registry)
     garage.store.js      # Vehicles data module
     watchlist.store.js   # Movies data module
+    backup.js            # export/restore every registered store
     tmdb.js              # TMDb search adapter (the only file that knows TMDb)
     <page>.js            # one script per page
     version.js           # single source of truth for APP_VERSION
@@ -59,10 +61,12 @@ firestore.indexes.json
 ### Adding a mini app
 
 1. Add an entry to `APPS` in `js/shell.js` (name, icon, its pages, its bottom tabs).
-2. Write `<app>.store.js` ending in `defineStore({ localKey, docPath, ingest, serialize, reset })`.
+2. Write `<app>.store.js` ending in `defineStore({ label, localKey, docPath, ingest, serialize, reset })`.
 3. Include `core.js` then `<app>.store.js` then your page script, and add the new files to `SHELL` in `sw.js`.
 
 `core.js` drives whichever store the page registered, so nothing else needs to change.
+Registering also adds the mini app to `STORES`, so Backup & restore picks it up
+automatically — add its store script to `backup.html` and it's included.
 
 ## Run locally
 
@@ -100,6 +104,30 @@ Data is stored per user, one document per mini app:
 `firestore.rules` scopes `users/{userId}/{document=**}` to its owner, so every
 mini app is covered by that one rule. Neither store is queried — both are
 fetched by path — so no Firestore indexes are needed.
+
+## Moving to another Firebase project
+
+Firebase Auth uids are per-project, so the same person gets a **different uid**
+in a new project. Copying Firestore documents directly would preserve the old
+uid in the path and the app would sign you into an empty account. Use Backup &
+restore instead — it writes to whoever is signed in, so the re-keying is
+implicit:
+
+1. In the **old** project's app: Settings → Backup & restore → **Export all data**.
+2. Create the new project's Web App, then copy its config into `public/js/firebase-config.js`.
+3. In the new project: enable Email/Password auth and add your user; enable Firestore.
+4. `firebase deploy --project <new-id> --only hosting,firestore:rules`
+5. Open the new site, sign in, then Settings → Backup & restore → **Import from file**.
+
+`.firebaserc` pins the deploy targets — `default` is the live project and
+`legacy` the previous one, so `firebase use legacy` reaches the old project
+without retyping ids.
+
+Two things that don't move on their own:
+
+- The installed PWA, its service worker and its `localStorage` all belong to the
+  **old origin**. Delete and re-install the app from the new URL.
+- The TMDb key is unrelated to Firebase and needs no change.
 
 ## Connect TMDb (Movies search)
 

@@ -430,6 +430,7 @@ function getWorkshopNames() {
 /* ---- Registration ---- */
 
 defineStore({
+  label: "Vehicles",
   localKey: GARAGE_LOCAL_KEY,
   docPath: (uid) => ["users", uid, "garage", "main"],
   ingest: ingestGarage,

@@ -126,6 +126,7 @@ async function toggleWatched(id) {
 /* ---- Registration ---- */
 
 defineStore({
+  label: "Movies",
   localKey: WATCHLIST_LOCAL_KEY,
   docPath: (uid) => ["users", uid, "watchlist", "main"],
   ingest: ingestWatchlist,

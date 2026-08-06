@@ -75,6 +75,10 @@ const currentPage = window.location.pathname.split("/").pop();
 
 const LAST_APP_KEY = "logbook:last-app";
 
+// Pages that belong to the shell rather than to any one mini app. They sit
+// under the Settings tab and inherit the nav of the app you came from.
+const SHARED_SHELL_PAGES = ["settings.html", "changelog.html", "backup.html"];
+
 // sessionStorage throws in some privacy modes — nav must never be fatal.
 function rememberApp(key) {
   try { sessionStorage.setItem(LAST_APP_KEY, key); } catch { /* not critical */ }
@@ -194,7 +198,7 @@ function buildLauncher() {
 
   const tabs = currentApp.tabs;
   const activeTab = tabs.find((tab) => tab.pages && tab.pages.includes(currentPage))
-    || tabs.find((tab) => tab.key === "settings" && ["settings.html", "changelog.html"].includes(currentPage))
+    || tabs.find((tab) => tab.key === "settings" && SHARED_SHELL_PAGES.includes(currentPage))
     || tabs[0];
 
   const nav = document.createElement("nav");

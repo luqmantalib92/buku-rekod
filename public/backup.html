@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Backup &amp; restore | Logbook</title>
+    <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="stylesheet" href="./css/styles.css" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
+    <link rel="icon" href="./assets/icon-192.png" />
+    <meta name="theme-color" content="#ff385c" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Logbook" />
+  </head>
+  <body>
+    <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
+      <span class="app-loading-spinner"></span>
+    </div>
+    <main class="app-shell" id="appContent" hidden>
+      <section class="topbar" data-shell="back" aria-label="Backup and restore"></section>
+
+      <section class="panel" aria-label="Backup">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Your data</p>
+            <h2>Backup &amp; restore</h2>
+            <p class="panel-subtitle">Save everything to a file, or load it back in — including onto a different account or device.</p>
+          </div>
+        </div>
+
+        <div id="backupSummary" class="backup-summary" aria-live="polite"></div>
+
+        <div class="backup-actions">
+          <button type="button" id="exportButton" class="primary-action">Export all data</button>
+          <button type="button" id="importButton" class="ghost-action">Import from file…</button>
+          <input type="file" id="importFile" accept="application/json,.json" hidden />
+        </div>
+
+        <p id="backupStatus" class="search-status" role="status" aria-live="polite" hidden></p>
+
+        <div class="backup-note">
+          <p><strong>Restoring replaces what's currently saved</strong> for each mini app included in the file. Anything not in the file is left alone.</p>
+          <p>The file is written wherever you're signed in right now, so exporting from one account and importing into another is how you move between Firebase projects — no ID juggling needed.</p>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+    <script src="./js/version.js"></script>
+    <script src="./js/shell.js"></script>
+    <script src="./js/firebase-config.js"></script>
+    <script src="./js/core.js"></script>
+    <!-- Every mini app's store module, so a backup covers all of them. -->
+    <script src="./js/garage.store.js"></script>
+    <script src="./js/tmdb.js"></script>
+    <script src="./js/watchlist.store.js"></script>
+    <script src="./js/backup.js"></script>
+  </body>
+</html>
