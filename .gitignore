@@ -9,3 +9,6 @@ public/js/firebase-config.js
 # Local TMDb API key (copy from tmdb-config.example.js).
 # Read-only and rate-limited, but keep it out of the repo all the same.
 public/js/tmdb-config.js
+
+# Stitch design exports (reference only, ~4 MB of screenshots).
+stitch/
