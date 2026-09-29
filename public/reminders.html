@@ -3,41 +3,53 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Reminders | Logbook</title>
+    <title>Reminders | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
-    <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="back" aria-label="Reminder settings"></section>
+    <main class="app-shell has-action-bar" id="appContent" hidden>
+      <section class="topbar" data-shell="back" data-title="Reminder settings" aria-label="Reminder settings"></section>
 
-      <section class="panel" aria-label="Reminder settings">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Notifications</p>
-            <h2>Reminder settings</h2>
-            <p class="panel-subtitle">How many days before a service's due date to start reminding you, per category.</p>
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Reminders</h1>
+          <p class="page-sub">How many days before a service's due date to start reminding you, per category.</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <i data-icon="gauge"></i>
+        <div>
+          <p>Odometer-based services turn <strong>due soon</strong> 1,000 km before their target reading.</p>
+          <p>Road tax and insurance warn 30 days before they expire.</p>
+        </div>
+      </div>
+
+      <form id="settingsForm" class="form-stack">
+        <div id="settingsRows" class="form-stack"></div>
+        <div class="action-bar">
+          <div class="action-bar-inner">
+            <span id="settingsSaved" class="saved-flash" role="status" hidden>Saved &check;</span>
+            <button type="submit" class="primary-action">Save preferences</button>
           </div>
         </div>
-        <form id="settingsForm">
-          <div id="settingsRows" class="settings-grid"></div>
-          <div class="edit-actions">
-            <button type="submit" class="primary-action">Save settings</button>
-            <span id="settingsSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
-          </div>
-        </form>
-      </section>
+      </form>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>

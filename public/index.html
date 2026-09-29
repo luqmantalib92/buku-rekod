@@ -3,69 +3,87 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Home | Logbook</title>
+    <title>Home | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
-    <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="brand" aria-label="Home"></section>
+    <main class="app-shell has-fab" id="appContent" hidden>
+      <section class="topbar" data-shell="brand" data-title="Home" aria-label="Home"></section>
 
-      <section class="panel" aria-label="Service calendar">
+      <div id="vehicleFilter" class="chips chips-scroll" role="group" aria-label="Filter by vehicle" hidden></div>
+
+      <section class="stat-tiles" aria-label="Status summary">
+        <div class="stat-tile is-overdue">
+          <span class="icon-tile"><i data-icon="alert"></i></span>
+          <div><strong id="statOverdue">0</strong><span>Overdue</span></div>
+        </div>
+        <div class="stat-tile is-due-soon">
+          <span class="icon-tile"><i data-icon="clock"></i></span>
+          <div><strong id="statDueSoon">0</strong><span>Due soon</span></div>
+        </div>
+        <div class="stat-tile is-ok">
+          <span class="icon-tile"><i data-icon="check-circle"></i></span>
+          <div><strong id="statUpcoming">0</strong><span>Upcoming</span></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Service calendar">
         <div class="cal-head">
-          <button type="button" id="calPrev" class="cal-nav-btn" aria-label="Previous month">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-          </button>
-          <h2 id="calTitle" class="cal-title" aria-live="polite">Month</h2>
-          <button type="button" id="calNext" class="cal-nav-btn" aria-label="Next month">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
-          </button>
+          <div class="cal-head-title">
+            <h2 id="calTitle" class="cal-title" aria-live="polite">Month</h2>
+            <button type="button" id="calToday" class="cal-today-btn">Today</button>
+          </div>
+          <div class="cal-nav">
+            <button type="button" id="calPrev" class="cal-nav-btn" aria-label="Previous month"><i data-icon="chevron-left"></i></button>
+            <button type="button" id="calNext" class="cal-nav-btn" aria-label="Next month"><i data-icon="chevron-right"></i></button>
+          </div>
         </div>
         <div id="calGrid" class="cal-grid" role="grid" aria-label="Month calendar"></div>
         <div class="cal-legend" aria-hidden="true">
           <span><i class="cal-dot cal-dot-overdue"></i>Overdue</span>
           <span><i class="cal-dot cal-dot-due-soon"></i>Due soon</span>
           <span><i class="cal-dot cal-dot-ok"></i>Upcoming</span>
+          <span><i class="cal-dot cal-dot-today"></i>Today</span>
         </div>
         <div id="calDayDetail" class="cal-day-detail" hidden>
           <p id="calDayTitle" class="cal-day-detail-title"></p>
-          <div id="calDayList" class="reminder-list"></div>
+          <div id="calDayList" class="due-list"></div>
         </div>
       </section>
 
-      <section class="panel" aria-label="Upcoming and due">
-        <div class="panel-heading">
+      <section class="section" aria-labelledby="scheduleHeading">
+        <div class="section-head">
           <div>
-            <p class="eyebrow">Schedule</p>
-            <h2>Upcoming &amp; due</h2>
-            <p class="panel-subtitle">What's coming up across your garage, soonest first.</p>
+            <h2 class="section-title" id="scheduleHeading">Upcoming &amp; due</h2>
+            <p class="section-sub" id="scheduleSub">What's coming up across your garage, most urgent first.</p>
           </div>
         </div>
         <div id="scheduleEmpty" class="empty-state" hidden>
+          <span class="icon-tile"><i data-icon="calendar"></i></span>
           <p id="scheduleEmptyText">Nothing scheduled. Add a next-service date to a record to start tracking what's next.</p>
           <button type="button" id="scheduleEmptyAction" class="primary-action">Go to garage</button>
         </div>
-        <div id="scheduleList" class="schedule" aria-live="polite"></div>
+        <div id="scheduleList" class="due-list" aria-live="polite"></div>
       </section>
-    </main>
 
-    <template id="scheduleGroupTemplate">
-      <div class="schedule-group">
-        <p class="schedule-group-label"></p>
-        <div class="reminder-list"></div>
-      </div>
-    </template>
+      <button type="button" id="fabAddRecord" class="fab"><i data-icon="plus"></i>Add record</button>
+    </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>

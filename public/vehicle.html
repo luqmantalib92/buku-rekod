@@ -3,122 +3,150 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vehicle | Logbook</title>
+    <title>Vehicle | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
-    <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="back" aria-label="Vehicle overview"></section>
+    <main class="app-shell has-fab" id="appContent" hidden>
+      <section class="topbar" data-shell="back" data-title="Vehicle" aria-label="Vehicle overview"></section>
 
-      <section class="summary-grid" aria-label="Service summary">
-        <article class="summary-card">
-          <span>Vehicle</span>
-          <strong id="summaryVehicle">-</strong>
-          <small id="summaryPlate">-</small>
-        </article>
-        <article class="summary-card">
-          <div class="summary-card-head">
-            <span>Current odometer</span>
-            <button type="button" id="updateOdometer" class="summary-inline-btn" title="Update the odometer without logging a service">Update</button>
+      <section class="card vehicle-hero" aria-label="Vehicle summary">
+        <div class="vehicle-hero-id">
+          <span class="vehicle-thumb-wrap">
+            <i data-icon="car"></i>
+            <img id="summaryImage" class="vehicle-thumb" alt="" hidden />
+          </span>
+          <div class="vehicle-hero-text">
+            <p class="tag-row">
+              <span class="tag tag-primary" id="summaryPlate">-</span>
+              <span class="tag" id="summaryModel" hidden></span>
+            </p>
+            <h1 class="vehicle-hero-name" id="summaryVehicle">-</h1>
+            <p class="vehicle-hero-meta" id="summaryLastServiceMeta">No records yet</p>
           </div>
-          <strong id="summaryOdometer">-</strong>
-          <small id="summaryOdometerMeta">Latest saved reading</small>
-        </article>
-        <article class="summary-card">
-          <span>Last service</span>
-          <strong id="summaryLastService">-</strong>
-          <small id="summaryLastServiceMeta">No records yet</small>
-        </article>
-        <article class="summary-card">
-          <span>Total spent</span>
-          <strong id="summaryCost">RM 0.00</strong>
-          <small>Across all records</small>
-        </article>
-        <article class="summary-card">
-          <span>Road tax</span>
-          <strong id="summaryRoadTax">-</strong>
-          <small id="summaryRoadTaxMeta">Set it in Edit details</small>
-        </article>
-        <article class="summary-card">
-          <span>Insurance</span>
-          <strong id="summaryInsurance">-</strong>
-          <small id="summaryInsuranceMeta">Set it in Edit details</small>
-        </article>
+          <a class="icon-button" id="editVehicle" href="./vehicle-form.html" aria-label="Edit vehicle details" title="Edit details"><i data-icon="pencil"></i></a>
+        </div>
+
+        <div class="odo-panel">
+          <div class="odo-panel-head">
+            <span class="label-caps">Current odometer</span>
+            <span class="muted" id="summaryOdometerMeta">Latest saved reading</span>
+          </div>
+          <div class="odo-panel-row">
+            <strong class="metric" id="summaryOdometer">-</strong>
+            <button type="button" id="updateOdometer" class="inline-btn" title="Update the odometer without logging a service"><i data-icon="gauge"></i>Update</button>
+          </div>
+        </div>
+
+        <div class="expiry-list">
+          <div class="expiry-row" id="roadTaxRow">
+            <span class="icon-tile icon-tile-sm"><i data-icon="receipt"></i></span>
+            <div class="expiry-row-text">
+              <span class="label-caps">Road tax</span>
+              <strong id="summaryRoadTax">Not set</strong>
+            </div>
+            <span class="pill" id="summaryRoadTaxMeta" hidden></span>
+          </div>
+          <div class="expiry-row" id="insuranceRow">
+            <span class="icon-tile icon-tile-sm"><i data-icon="shield"></i></span>
+            <div class="expiry-row-text">
+              <span class="label-caps">Insurance</span>
+              <strong id="summaryInsurance">Not set</strong>
+            </div>
+            <span class="pill" id="summaryInsuranceMeta" hidden></span>
+          </div>
+        </div>
+        <p class="hint"><i data-icon="info"></i><span id="expiryHint">Badges turn amber 30 days before expiry and red once expired.</span></p>
       </section>
 
-      <section class="panel history-panel" aria-labelledby="historyHeading">
-        <div class="panel-heading">
+      <section class="section" id="remindersSection" aria-labelledby="remindersHeading" hidden>
+        <div class="section-head">
           <div>
-            <p class="eyebrow">Log book</p>
-            <h2 id="historyHeading">Service records</h2>
-            <p class="panel-subtitle">Everything you've logged for this vehicle, newest first.</p>
+            <h2 class="section-title" id="remindersHeading">Service reminders</h2>
+            <p class="section-sub">Next due per category</p>
           </div>
-          <div class="heading-actions">
-            <button type="button" id="addRecord" class="primary-action heading-action" title="Log a new service for this vehicle">Add record</button>
+          <span class="count-badge" id="reminderCount"></span>
+        </div>
+        <div class="reminder-rail" id="reminderRail"></div>
+      </section>
+
+      <section class="section" aria-labelledby="historyHeading">
+        <div class="section-head">
+          <div>
+            <h2 class="section-title" id="historyHeading">Service records</h2>
+            <p class="section-sub" id="historySub">Everything you've logged, newest first.</p>
           </div>
         </div>
         <div id="emptyState" class="empty-state" hidden>
+          <span class="icon-tile"><i data-icon="wrench"></i></span>
           <p>Add your first service record to start building the log.</p>
-          <button type="button" id="emptyAddRecord" class="primary-action">Add record</button>
+          <button type="button" id="emptyAddRecord" class="primary-action"><i data-icon="plus"></i>Add record</button>
         </div>
-        <div id="recordList" class="record-list" aria-live="polite"></div>
+        <div id="recordList" class="timeline" aria-live="polite"></div>
       </section>
 
-      <button type="button" id="fabAddRecord" class="fab" aria-label="Add service record" title="Add service record">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
-      </button>
+      <button type="button" id="fabAddRecord" class="fab"><i data-icon="plus"></i>Add service record</button>
     </main>
+
+    <template id="reminderCardTemplate">
+      <article class="card reminder-card">
+        <div class="reminder-card-top">
+          <span class="icon-tile icon-tile-sm reminder-card-icon"></span>
+          <span class="pill reminder-card-status"></span>
+        </div>
+        <p class="reminder-card-label"></p>
+        <strong class="metric reminder-card-target"></strong>
+        <p class="reminder-card-sub"></p>
+        <p class="reminder-card-foot"><span class="reminder-card-foot-label"></span><strong class="reminder-card-foot-value"></strong></p>
+      </article>
+    </template>
 
     <template id="recordTemplate">
       <article class="record-card">
-        <div class="record-topline">
-          <div>
-            <h3></h3>
-            <div class="record-tags">
-              <span class="record-category"></span>
-              <span class="record-due" hidden></span>
+        <span class="timeline-dot" aria-hidden="true"></span>
+        <div class="card record-body">
+          <div class="record-topline">
+            <div class="record-when">
+              <h3 class="record-date"></h3>
+              <span class="tag tag-primary record-odo"></span>
             </div>
-            <p class="record-meta"></p>
-          </div>
-          <div class="record-actions">
-            <button type="button" class="record-menu-btn" aria-label="Record actions" aria-haspopup="true" aria-expanded="false">
-              <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="12" cy="19" r="1.9" /></svg>
-            </button>
-            <div class="record-menu" role="menu" hidden>
-              <button type="button" class="record-done" role="menuitem" hidden></button>
-              <button type="button" class="record-edit" role="menuitem">Edit</button>
-              <button type="button" class="record-delete" role="menuitem">Delete</button>
+            <div class="record-right">
+              <strong class="record-cost"></strong>
+              <div class="menu-wrap record-actions">
+                <button type="button" class="menu-btn record-menu-btn" aria-label="Record actions" aria-haspopup="true" aria-expanded="false"><i data-icon="more"></i></button>
+                <div class="menu record-menu" role="menu" hidden>
+                  <button type="button" class="record-done is-ok" role="menuitem" hidden><i data-icon="check-circle"></i><span class="record-done-label"></span></button>
+                  <button type="button" class="record-edit" role="menuitem"><i data-icon="pencil"></i>Edit</button>
+                  <button type="button" class="record-delete is-danger" role="menuitem"><i data-icon="trash"></i>Delete</button>
+                </div>
+              </div>
             </div>
           </div>
+          <p class="record-workshop"><i data-icon="pin"></i><span class="record-workshop-name"></span></p>
+          <div class="record-tags">
+            <span class="pill pill-primary record-category"></span>
+            <span class="pill record-due" hidden></span>
+          </div>
+          <div class="item-chips record-items"></div>
+          <p class="record-notes"></p>
+          <p class="record-next" hidden><i data-icon="calendar"></i><span>Next service</span><strong class="record-next-value"></strong></p>
         </div>
-        <p class="record-items"></p>
-        <dl class="record-details">
-          <div>
-            <dt>Cost</dt>
-            <dd class="record-cost"></dd>
-          </div>
-          <div>
-            <dt>Next date</dt>
-            <dd class="record-next-date"></dd>
-          </div>
-          <div>
-            <dt>Next odometer</dt>
-            <dd class="record-next-odometer"></dd>
-          </div>
-        </dl>
-        <p class="record-notes"></p>
       </article>
     </template>
 

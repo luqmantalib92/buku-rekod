@@ -1,40 +1,72 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="640" viewBox="192 192 640 640" role="img" aria-labelledby="title desc">
-  <title id="title">Logbook</title>
-  <desc id="desc">A blue icon with a tilted white paper, blue checkmark, and soft long shadow.</desc>
-  <!-- The background bleeds to all four edges and the artwork is held at 80%
-       about the centre, so the paper stays inside the maskable safe zone (a
-       circle of 40% radius) that Android crops to. Squaring the original
-       rounded tile without this margin clipped the paper's corners. Each
-       platform applies its own mask; do not pre-round this. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Buku Rekod</title>
+  <desc id="desc">A dark navy icon with three checked progress bars in blue, green and amber.</desc>
+  <!-- The background bleeds to all four edges and the bars are held at 90%
+       about the centre, so every part stays inside the maskable safe zone (a
+       circle of 40% radius) that Android crops to. Each platform applies its
+       own mask; do not pre-round this. Artwork from the Stitch export
+       (stitch/icon), squared off and with its drop shadow removed. -->
   <defs>
-    <linearGradient id="blue" x1="230" y1="205" x2="797" y2="822" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#27b8e9"/><stop offset="1" stop-color="#1689df"/>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1e2d42"/>
+      <stop offset="1" stop-color="#0f1724"/>
     </linearGradient>
-    <linearGradient id="paper" x1="349" y1="310" x2="675" y2="716" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f7f9fc"/>
+    <radialGradient id="glow" cx="256" cy="120" r="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38bdf8" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#38bdf8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="blueProgress" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0284c7"/>
+      <stop offset="1" stop-color="#38bdf8"/>
     </linearGradient>
-    <linearGradient id="fold" x1="537" y1="504" x2="680" y2="646" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#f4f8fc"/><stop offset="1" stop-color="#dcecfb"/>
+    <linearGradient id="greenProgress" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#059669"/>
+      <stop offset="1" stop-color="#10b981"/>
     </linearGradient>
-    <linearGradient id="line" x1="402" y1="693" x2="698" y2="693" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#168ddd"/><stop offset="1" stop-color="#eff5fd"/>
+    <linearGradient id="amberProgress" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d97706"/>
+      <stop offset="1" stop-color="#fbbf24"/>
     </linearGradient>
-    <filter id="soft" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="3"/></filter>
-    <clipPath id="tileClip"><rect x="192" y="192" width="640" height="640"/></clipPath>
   </defs>
-  <rect x="192" y="192" width="640" height="640" fill="url(#blue)"/>
-  <g clip-path="url(#tileClip)">
-    <g transform="translate(512 512) scale(.8) translate(-512 -512)">
-      <!-- Long shadow runs past the canvas so it still reaches the corner
-           once scaled; tileClip trims it at the edge. -->
-      <path d="M641 315 960 634V960H594L402 741l294-109z" fill="#0878ce" opacity=".36"/>
-      <path d="M642 316 960 632V960H638L402 738l294-106z" fill="#117fda" opacity=".22"/>
-      <path d="M334 371Q330 342 359 337l250-39q27-4 31 25l49 307-254 41q-27 4-32-24z" fill="#0873bf" opacity=".22" filter="url(#soft)"/>
-      <path d="M333 370Q329 341 359 337l249-39q27-4 31 25l49 308-253 40q-28 5-33-24z" fill="url(#paper)"/>
-      <path d="M640 319 688 631 576 649 505 578z" fill="url(#fold)"/>
-      <path d="m414 500 28-33 55 47 91-130 37 26-119 168z" fill="#1598df"/>
-      <path d="M432 675 686 635q15-3 13 12t-17 17l-249 40q-20 3-26-8t5-18q5-3 20-3z" fill="#0b75c9" opacity=".30" filter="url(#soft)"/>
-      <path d="M431 675 686 635q10-2 12 7 2 10-9 12l-255 41q-17 3-24-5-8-11 3-17 6-3 18-2z" fill="url(#line)"/>
+
+  <rect width="512" height="512" fill="url(#bgGrad)"/>
+  <rect width="512" height="512" fill="url(#glow)"/>
+
+  <g transform="translate(256 256) scale(.9) translate(-256 -256)">
+    <!-- Blue bar, ~72% filled -->
+    <g transform="translate(76 126)">
+      <circle cx="28" cy="28" r="28" fill="#0284c7" fill-opacity="0.2"/>
+      <circle cx="28" cy="28" r="26" fill="#0284c7" fill-opacity="0.3"/>
+      <path d="M19 28.5L25 34.5L37 21.5" fill="none" stroke="#38bdf8" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(76 3)">
+        <rect width="284" height="50" rx="25" fill="#e0f2fe" fill-opacity="0.88"/>
+        <rect width="206" height="50" rx="25" fill="url(#blueProgress)"/>
+        <rect x="12" y="5" width="180" height="8" rx="4" fill="#fff" opacity="0.25"/>
+      </g>
+    </g>
+
+    <!-- Green bar, ~50% filled -->
+    <g transform="translate(76 230)">
+      <circle cx="28" cy="28" r="28" fill="#059669" fill-opacity="0.2"/>
+      <circle cx="28" cy="28" r="26" fill="#059669" fill-opacity="0.3"/>
+      <path d="M19 28.5L25 34.5L37 21.5" fill="none" stroke="#34d399" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(76 3)">
+        <rect width="284" height="50" rx="25" fill="#d1fae5" fill-opacity="0.88"/>
+        <rect width="142" height="50" rx="25" fill="url(#greenProgress)"/>
+        <rect x="12" y="5" width="118" height="8" rx="4" fill="#fff" opacity="0.25"/>
+      </g>
+    </g>
+
+    <!-- Amber bar, ~26% filled -->
+    <g transform="translate(76 334)">
+      <circle cx="28" cy="28" r="28" fill="#d97706" fill-opacity="0.2"/>
+      <circle cx="28" cy="28" r="26" fill="#d97706" fill-opacity="0.3"/>
+      <path d="M19 28.5L25 34.5L37 21.5" fill="none" stroke="#fbbf24" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <g transform="translate(76 3)">
+        <rect width="284" height="50" rx="25" fill="#fef3c7" fill-opacity="0.88"/>
+        <rect width="76" height="50" rx="25" fill="url(#amberProgress)"/>
+        <rect x="12" y="5" width="54" height="8" rx="4" fill="#fff" opacity="0.25"/>
+      </g>
     </g>
   </g>
 </svg>

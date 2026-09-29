@@ -461,14 +461,16 @@ function revealShell(signedIn, label) {
 // restore it — gives submit feedback and prevents double-submits.
 async function withButtonBusy(button, busyLabel, action) {
   if (!button) return action();
-  const originalLabel = button.textContent;
+  // Keep the original nodes, not just the text, so buttons with icons or
+  // sub-labels come back intact.
+  const original = [...button.childNodes];
   button.disabled = true;
   if (busyLabel) button.textContent = busyLabel;
   try {
     return await action();
   } finally {
     button.disabled = false;
-    button.textContent = originalLabel;
+    if (busyLabel) button.replaceChildren(...original);
   }
 }
 

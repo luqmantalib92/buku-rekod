@@ -3,47 +3,59 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sign in | Logbook</title>
+    <title>Sign in | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body class="login-page">
     <main class="login-shell">
-      <section class="login-panel panel" aria-labelledby="authHeading">
-        <div>
-          <h1 id="authHeading">Logbook</h1>
-          <p class="login-copy">Sign in to open your logbook.</p>
-        </div>
+      <div class="login-brand">
+        <img src="./assets/icon-512.png" alt="" class="login-icon" />
+        <h1 id="authHeading">Buku Rekod</h1>
+        <p class="login-copy">Sign in to open Buku Rekod.</p>
+      </div>
 
+      <section class="card login-panel" aria-labelledby="authHeading">
         <form id="authForm" class="auth-form">
           <label>
-            Email
-            <input id="authEmail" name="email" type="email" autocomplete="email" required />
+            Email address
+            <span class="input-with-affix has-lead">
+              <i data-icon="mail"></i>
+              <input id="authEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" required />
+            </span>
           </label>
           <label>
             Password
-            <div class="input-with-affix">
+            <span class="input-with-affix has-lead has-trail">
+              <i data-icon="key"></i>
               <input id="authPassword" name="password" type="password" autocomplete="current-password" minlength="6" required />
               <button type="button" id="togglePassword" class="input-affix-btn" aria-label="Show password" aria-pressed="false">Show</button>
-            </div>
+            </span>
           </label>
           <button type="submit" class="primary-action">Sign in</button>
           <p id="authMessage" class="auth-message" role="status"></p>
         </form>
       </section>
+
+      <p class="login-foot">Buku Rekod <span class="app-version"></span></p>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
     <script src="./js/version.js"></script>
+    <script src="./js/shell.js"></script>
     <script src="./js/firebase-config.js"></script>
     <script src="./js/auth.js"></script>
   </body>

@@ -19,12 +19,13 @@ function hasFirebaseConfig() {
   return Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && window.firebase?.auth);
 }
 
-function setAuthMessage(message) {
+function setAuthMessage(message, isError = false) {
   authEls.message.textContent = message;
+  authEls.message.classList.toggle("is-error", isError);
 }
 
 if (!hasFirebaseConfig()) {
-  setAuthMessage("Add your Firebase web config in firebase-config.js first.");
+  setAuthMessage("Add your Firebase web config in firebase-config.js first.", true);
 } else {
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
@@ -49,7 +50,7 @@ if (!hasFirebaseConfig()) {
       await auth.signInWithEmailAndPassword(email, password);
       // On success the auth listener redirects; keep the button disabled.
     } catch (error) {
-      setAuthMessage(error.message);
+      setAuthMessage(error.message, true);
       signInButton.disabled = false;
     }
   });

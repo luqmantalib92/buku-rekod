@@ -11,7 +11,7 @@
 
 importScripts("./js/version.js");
 
-const CACHE_NAME = `logbook-v${APP_VERSION}`;
+const CACHE_NAME = `buku-rekod-v${APP_VERSION}`;
 
 /* Posters are immutable per URL and expensive to refetch, so they live in
    their own cache that release bumps don't clear (see `activate`). Bounded so
@@ -167,7 +167,9 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
 
-  if (url.origin === "https://www.gstatic.com") {
+  // Web fonts: the stylesheet and font files are versioned by URL, so cache
+  // them once and serve offline from then on.
+  if (url.origin === "https://www.gstatic.com" || url.origin === "https://fonts.googleapis.com" || url.origin === "https://fonts.gstatic.com") {
     event.respondWith(cacheFirst(request));
     return;
   }

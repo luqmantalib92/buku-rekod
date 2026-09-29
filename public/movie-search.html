@@ -3,77 +3,69 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Search titles | Logbook</title>
+    <title>Search titles | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
     <link rel="preconnect" href="https://image.tmdb.org" />
     <link rel="preconnect" href="https://api.themoviedb.org" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="brand" aria-label="Search titles"></section>
+      <section class="topbar" data-shell="brand" data-title="Search" aria-label="Search titles"></section>
 
-      <section class="panel" aria-label="Search">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Movies</p>
-            <h2>Search a title</h2>
-            <p class="panel-subtitle">Find a movie or drama, then save it to your watchlist.</p>
-          </div>
-        </div>
+      <form id="searchForm" class="search-bar" role="search">
+        <i data-icon="search"></i>
+        <label class="sr-only" for="searchInput">Search a movie or drama</label>
+        <input
+          type="search"
+          id="searchInput"
+          name="query"
+          class="search-input"
+          placeholder="Search a movie, drama or series"
+          autocomplete="off"
+          enterkeyhint="search"
+        />
+        <button type="button" id="searchClear" class="menu-btn search-clear" aria-label="Clear search" hidden><i data-icon="close"></i></button>
+      </form>
 
-        <form id="searchForm" class="search-form" role="search">
-          <label class="sr-only" for="searchInput">Search a movie or drama</label>
-          <input
-            type="search"
-            id="searchInput"
-            name="query"
-            class="search-input"
-            placeholder="Search a movie or drama…"
-            autocomplete="off"
-            enterkeyhint="search"
-          />
-          <button type="submit" class="primary-action">Search</button>
-        </form>
+      <p id="searchStatus" class="search-status" role="status" aria-live="polite" hidden></p>
 
-        <p id="searchStatus" class="search-status" role="status" aria-live="polite" hidden></p>
+      <div id="searchEmpty" class="empty-state">
+        <span class="icon-tile"><i data-icon="search"></i></span>
+        <p>Type at least 2 characters to search for a movie, drama or series.</p>
+      </div>
 
-        <div id="searchEmpty" class="empty-state">
-          <p>Type at least 2 characters to search for a movie, drama or series.</p>
-        </div>
-
-        <div id="searchResults" class="watchlist-grid"></div>
-      </section>
+      <div id="searchResults" class="result-list"></div>
     </main>
 
     <template id="resultCardTemplate">
-      <article class="poster-card">
+      <article class="card result-card">
         <div class="poster-frame">
+          <div class="poster-fallback" aria-hidden="true"><i data-icon="film"></i></div>
           <img class="poster-img" alt="" loading="lazy" hidden />
-          <div class="poster-fallback" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16M16 4v16M3 9h5M3 15h5M16 9h5M16 15h5"/></svg>
-          </div>
+          <span class="poster-type"></span>
         </div>
-        <div class="poster-body">
-          <h3 class="poster-title"></h3>
-          <p class="poster-meta">
-            <span class="poster-type"></span>
-            <span class="poster-year"></span>
-          </p>
-          <p class="poster-overview"></p>
-          <div class="poster-actions">
-            <button type="button" class="poster-add primary-action"></button>
+        <div class="result-body">
+          <h3 class="result-title"></h3>
+          <p class="poster-meta"><span class="poster-year"></span></p>
+          <p class="result-overview poster-overview"></p>
+          <div class="result-actions">
+            <button type="button" class="poster-add tonal-action"></button>
           </div>
         </div>
       </article>

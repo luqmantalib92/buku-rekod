@@ -12,7 +12,10 @@
    cleanly after a third mini app is added. */
 
 const BACKUP_FORMAT = 1;
-const BACKUP_APP = "logbook";
+const BACKUP_APP = "buku-rekod";
+// Files exported before the rename to Buku Rekod carry the old app tag.
+// Same format, so they still restore.
+const LEGACY_BACKUP_APPS = ["logbook"];
 
 const backupEls = {
   summary: document.querySelector("#backupSummary"),
@@ -58,6 +61,10 @@ async function renderSummary() {
     }
     const row = document.createElement("div");
     row.className = "backup-row";
+    const tile = document.createElement("span");
+    tile.className = "icon-tile icon-tile-sm";
+    tile.append(iconNode(store.label === "Movies" ? "film" : store.label === "Vehicles" ? "car" : "layers"));
+    row.append(tile);
     const name = document.createElement("span");
     name.className = "backup-row-name";
     name.textContent = store.label || store.localKey;
@@ -78,7 +85,7 @@ function backupFilename() {
     String(now.getMonth() + 1).padStart(2, "0"),
     String(now.getDate()).padStart(2, "0")
   ].join("-");
-  return `logbook-backup-${stamp}.json`;
+  return `buku-rekod-backup-${stamp}.json`;
 }
 
 async function exportAll() {
@@ -130,8 +137,9 @@ function parseBackup(text) {
   } catch {
     throw new Error("That file isn't valid JSON.");
   }
-  if (!payload || payload.app !== BACKUP_APP || !payload.stores || typeof payload.stores !== "object") {
-    throw new Error("That doesn't look like a Logbook backup file.");
+  const knownApp = payload && (payload.app === BACKUP_APP || LEGACY_BACKUP_APPS.includes(payload.app));
+  if (!knownApp || !payload.stores || typeof payload.stores !== "object") {
+    throw new Error("That doesn't look like a Buku Rekod backup file.");
   }
   if (Number(payload.formatVersion) > BACKUP_FORMAT) {
     throw new Error("That backup was made by a newer version of the app. Update first, then import.");

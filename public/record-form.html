@@ -3,90 +3,151 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Service record | Logbook</title>
+    <title>Service record | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
-    <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="back" aria-label="Service record"></section>
+    <main class="app-shell has-action-bar" id="appContent" hidden>
+      <section class="topbar" data-shell="back" data-title="Service record" aria-label="Service record"></section>
 
-      <section class="panel" aria-label="Service record">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Log book</p>
-            <h2 id="formHeading">New service record</h2>
-            <p class="panel-subtitle" id="formSubtitle">Log a service for this vehicle.</p>
-          </div>
+      <div class="page-head">
+        <div>
+          <h1 class="page-title" id="formHeading">New service record</h1>
+          <p class="page-sub" id="formSubtitle">Log a service for this vehicle.</p>
         </div>
+      </div>
 
-        <form id="serviceForm" class="form-grid">
+      <form id="serviceForm" class="form-stack">
+        <section class="card vehicle-banner" aria-label="Vehicle">
+          <span class="icon-tile"><i data-icon="car"></i></span>
+          <div class="vehicle-banner-text">
+            <span class="label-caps">Vehicle</span>
+            <strong id="formVehicleName">-</strong>
+          </div>
+          <span class="tag" id="formVehiclePlate" hidden></span>
+        </section>
+
+        <section class="card field-grid" aria-labelledby="serviceHeading">
+          <div class="card-head">
+            <span class="icon-tile icon-tile-sm"><i data-icon="calendar"></i></span>
+            <h2 class="card-title" id="serviceHeading">Service</h2>
+          </div>
           <label>
             <span>Service date <span class="req" aria-hidden="true">*</span></span>
             <input id="serviceDate" name="date" type="date" required />
           </label>
           <label>
-            <span>Odometer reading <span class="req" aria-hidden="true">*</span></span>
-            <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" inputmode="numeric" placeholder="85000" required />
-            <p id="odometerHint" class="field-hint" hidden></p>
+            <span class="field-label-row">
+              <span>Odometer reading <span class="req" aria-hidden="true">*</span></span>
+              <span id="odometerHint" class="field-hint" hidden></span>
+            </span>
+            <span class="input-with-affix has-trail input-metric">
+              <input id="serviceOdometer" name="odometer" type="number" min="0" step="1" inputmode="numeric" placeholder="85000" required />
+              <span class="input-suffix">KM</span>
+            </span>
           </label>
-          <label>
-            Workshop
-            <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" list="workshopSuggestions" />
-            <datalist id="workshopSuggestions"></datalist>
-            <p class="field-hint">Pick a workshop you've used before, or type a new one.</p>
-          </label>
-          <label>
-            Cost
-            <input id="serviceCost" name="cost" type="number" min="0" step="0.01" inputmode="decimal" placeholder="280.00" />
-            <p class="field-hint">Optional, in RM.</p>
-          </label>
-          <label class="span-2">
-            <span>Service category <span class="req" aria-hidden="true">*</span></span>
-            <select id="serviceCategory" name="category" required>
+        </section>
+
+        <section class="card field-grid" aria-labelledby="itemsHeading">
+          <div class="card-head">
+            <span class="icon-tile icon-tile-sm"><i data-icon="wrench"></i></span>
+            <div class="card-head-text">
+              <h2 class="card-title" id="itemsHeading">Category &amp; items</h2>
+              <p class="card-sub">What was done on this visit</p>
+            </div>
+            <span class="count-badge" id="itemCount" hidden></span>
+          </div>
+          <div class="field">
+            <span class="field-label" id="categoryLabel">Service category <span class="req" aria-hidden="true">*</span></span>
+            <div id="categoryChips" class="chips chips-scroll" role="radiogroup" aria-labelledby="categoryLabel"></div>
+            <select id="serviceCategory" name="category" class="sr-only" tabindex="-1" aria-hidden="true" required>
               <option value="" disabled selected>Choose a category</option>
             </select>
-          </label>
-          <div class="field span-2">
+            <p id="categoryError" class="field-hint image-hint-error" hidden>Pick a category first.</p>
+          </div>
+          <div class="field">
             <span class="field-label">Items serviced</span>
             <div id="serviceItemChips" class="chips" role="group" aria-label="Items serviced" hidden></div>
             <p id="chipsHint" class="field-hint">Pick a category to see common items.</p>
           </div>
-          <label class="span-2">
+          <label>
             Details / other items
             <textarea id="serviceItems" name="items" rows="3" placeholder="Anything not covered by the chips above"></textarea>
           </label>
-          <div class="span-2 suggest-row">
-            <button type="button" id="suggestNext" class="secondary-line" title="Estimate the next service from the items you picked">Suggest next service</button>
-            <p id="suggestNote" class="field-hint" role="status" hidden></p>
+        </section>
+
+        <section class="card field-grid" aria-labelledby="workshopHeading">
+          <div class="card-head">
+            <span class="icon-tile icon-tile-sm"><i data-icon="pin"></i></span>
+            <h2 class="card-title" id="workshopHeading">Workshop &amp; cost</h2>
           </div>
           <label>
-            Next service date
-            <input id="nextDate" name="nextDate" type="date" />
-            <p class="field-hint">Optional — sets a reminder before it's due.</p>
+            Workshop
+            <span class="input-with-affix has-lead">
+              <i data-icon="pin"></i>
+              <input id="serviceWorkshop" name="workshop" autocomplete="off" placeholder="Workshop name" list="workshopSuggestions" />
+            </span>
+            <datalist id="workshopSuggestions"></datalist>
           </label>
+          <div class="recent-row" id="recentWorkshops" hidden>
+            <span class="label-caps">Recent</span>
+            <div class="chips chips-scroll" id="recentWorkshopChips"></div>
+          </div>
           <label>
-            Next service odometer
-            <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" inputmode="numeric" placeholder="95000" />
-            <p class="field-hint">Optional.</p>
+            Total cost
+            <span class="input-with-affix has-prefix input-metric">
+              <span class="input-prefix">RM</span>
+              <input id="serviceCost" name="cost" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
+            </span>
+            <span class="field-hint">Optional.</span>
           </label>
-          <div class="span-2 edit-actions">
-            <button type="submit" id="serviceSubmit" class="primary-action">Add service record</button>
+        </section>
+
+        <section class="card field-grid" aria-labelledby="nextHeading">
+          <div class="card-head">
+            <span class="icon-tile icon-tile-sm"><i data-icon="clock"></i></span>
+            <div class="card-head-text">
+              <h2 class="card-title" id="nextHeading">Next service</h2>
+              <p class="card-sub">Optional — sets a reminder before it's due</p>
+            </div>
+          </div>
+          <button type="button" id="suggestNext" class="secondary-line" title="Estimate the next service from the items you picked"><i data-icon="sparkle"></i>Suggest next service</button>
+          <p id="suggestNote" class="field-hint" role="status" hidden></p>
+          <div class="field-row">
+            <label>
+              Target date
+              <input id="nextDate" name="nextDate" type="date" />
+            </label>
+            <label>
+              Target odometer
+              <input id="nextOdometer" name="nextOdometer" type="number" min="0" step="1" inputmode="numeric" placeholder="95000" />
+            </label>
+          </div>
+        </section>
+
+        <div class="action-bar">
+          <div class="action-bar-inner">
             <button type="button" id="cancelForm" class="ghost-action">Cancel</button>
+            <button type="submit" id="serviceSubmit" class="primary-action">Add service record</button>
           </div>
-        </form>
-      </section>
+        </div>
+      </form>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>

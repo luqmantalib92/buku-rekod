@@ -21,6 +21,20 @@ function formatKm(value) {
   return `${number.toLocaleString("en-MY")} km`;
 }
 
+// Fill an element with a big odometer readout: the number, then a small
+// "km" unit. "-" when there's no reading.
+function renderKmMetric(el, value) {
+  const number = Number(value);
+  el.replaceChildren();
+  if (!Number.isFinite(number) || number <= 0) {
+    el.textContent = "-";
+    return;
+  }
+  const unit = document.createElement("small");
+  unit.textContent = "km";
+  el.append(number.toLocaleString("en-MY"), unit);
+}
+
 function formatMoney(value) {
   const number = Number(value || 0);
   return new Intl.NumberFormat("en-MY", {
@@ -378,6 +392,17 @@ function vehicleExpiries(vehicle) {
     entries.push({ field, label, date, days, status });
   }
   return entries;
+}
+
+// Everything tracked for a vehicle (service reminders + expiries), most
+// urgent first. Each entry: { label, status, days, kmLeft }.
+function vehicleAlerts(vehicle) {
+  const items = [
+    ...vehicleReminders(vehicle).map((reminder) => ({ label: reminder.label, status: reminder.status, days: reminder.days, kmLeft: reminder.kmLeft })),
+    ...vehicleExpiries(vehicle).map((entry) => ({ label: entry.label, status: entry.status, days: entry.days, kmLeft: null }))
+  ];
+  const soonest = (item) => (item.days !== null && item.days !== undefined ? item.days : (item.kmLeft !== null && item.kmLeft <= 0 ? -1 : 9999));
+  return items.sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status] || soonest(a) - soonest(b));
 }
 
 function vehicleDueCount(vehicle) {

@@ -3,77 +3,104 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vehicles | Logbook</title>
+    <title>Vehicles | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
-    <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="brand" aria-label="Garage overview"></section>
+    <main class="app-shell has-fab" id="appContent" hidden>
+      <section class="topbar" data-shell="brand" data-title="Vehicles" aria-label="Garage overview"></section>
 
-      <section class="panel" aria-label="Garage">
-        <div class="panel-heading">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">My Garage <span class="count-badge" id="vehicleCount" hidden></span></h1>
+          <p class="page-sub">Tap a vehicle to open its service logbook.</p>
+        </div>
+      </div>
+
+      <section class="stat-pair" id="garageStats" aria-label="Garage summary" hidden>
+        <div class="card stat-card">
+          <span class="icon-tile" id="garageHealthIcon"><i data-icon="shield"></i></span>
           <div>
-            <p class="eyebrow">Your vehicles</p>
-            <h2>Garage</h2>
-            <p class="panel-subtitle">Tap a vehicle to open its service logbook.</p>
+            <span class="stat-card-label">Garage health</span>
+            <strong id="garageHealth">All good</strong>
           </div>
-          <button type="button" id="addVehicle" class="primary-action heading-action" title="Add a new vehicle to your garage">Add vehicle</button>
         </div>
-        <div id="vehicleEmpty" class="empty-state" hidden>
-          <p>Add your first vehicle to start building service logs.</p>
-          <button type="button" id="emptyAddVehicle" class="primary-action">Add vehicle</button>
+        <div class="card stat-card">
+          <span class="icon-tile"><i data-icon="gauge"></i></span>
+          <div>
+            <span class="stat-card-label">Total tracked</span>
+            <strong id="garageKm">0 km</strong>
+          </div>
         </div>
-        <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
       </section>
 
-      <button type="button" id="fabAddVehicle" class="fab" aria-label="Add vehicle" title="Add vehicle">
-        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14" /></svg>
-      </button>
+      <div id="vehicleEmpty" class="empty-state" hidden>
+        <span class="icon-tile"><i data-icon="car"></i></span>
+        <p>Add your first vehicle to start building service logs.</p>
+        <button type="button" id="emptyAddVehicle" class="primary-action"><i data-icon="plus"></i>Add vehicle</button>
+      </div>
+      <div id="vehicleList" class="vehicle-list" aria-live="polite"></div>
+
+      <button type="button" id="fabAddVehicle" class="fab"><i data-icon="plus"></i>Add vehicle</button>
     </main>
 
     <template id="vehicleCardTemplate">
-      <article class="vehicle-card">
-        <button type="button" class="vehicle-open">
-          <img class="vehicle-thumb" alt="" hidden />
-          <div class="vehicle-card-main">
-            <div class="vehicle-card-title">
-              <h3 class="vehicle-name"></h3>
-              <span class="vehicle-due" hidden></span>
-            </div>
-            <p class="vehicle-plate"></p>
-          </div>
-          <dl class="vehicle-card-stats">
-            <div>
-              <dt>Odometer</dt>
-              <dd class="vehicle-odometer"></dd>
-            </div>
-            <div>
-              <dt>Last service</dt>
-              <dd class="vehicle-last"></dd>
-            </div>
-          </dl>
-        </button>
-        <div class="vehicle-actions">
-          <button type="button" class="vehicle-menu-btn" aria-label="Vehicle actions" aria-haspopup="true" aria-expanded="false">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><circle cx="12" cy="5" r="1.9" /><circle cx="12" cy="12" r="1.9" /><circle cx="12" cy="19" r="1.9" /></svg>
+      <article class="card vehicle-card">
+        <div class="vehicle-card-top">
+          <button type="button" class="vehicle-open">
+            <span class="vehicle-thumb-wrap">
+              <i data-icon="car"></i>
+              <img class="vehicle-thumb" alt="" hidden />
+            </span>
+            <span class="vehicle-card-id">
+              <span class="vehicle-name"></span>
+              <span class="vehicle-idline">
+                <span class="tag vehicle-plate"></span>
+                <span class="vehicle-model"></span>
+              </span>
+              <span class="pill vehicle-due" hidden></span>
+            </span>
           </button>
-          <div class="vehicle-menu" role="menu" hidden>
-            <button type="button" class="vehicle-odometer-update" role="menuitem">Update odometer</button>
-            <button type="button" class="vehicle-edit" role="menuitem">Edit details</button>
-            <button type="button" class="vehicle-delete account-link-danger" role="menuitem">Delete vehicle</button>
+          <div class="menu-wrap vehicle-actions">
+            <button type="button" class="menu-btn vehicle-menu-btn" aria-label="Vehicle actions" aria-haspopup="true" aria-expanded="false"><i data-icon="more"></i></button>
+            <div class="menu vehicle-menu" role="menu" hidden>
+              <button type="button" class="vehicle-odometer-update" role="menuitem"><i data-icon="gauge"></i>Update odometer</button>
+              <button type="button" class="vehicle-edit" role="menuitem"><i data-icon="pencil"></i>Edit details</button>
+              <button type="button" class="vehicle-delete is-danger" role="menuitem"><i data-icon="trash"></i>Delete vehicle</button>
+            </div>
           </div>
+        </div>
+        <div class="vehicle-card-stats">
+          <div>
+            <span class="label-caps">Odometer</span>
+            <strong class="metric vehicle-odometer"></strong>
+          </div>
+          <div class="vehicle-last-wrap">
+            <span class="label-caps">Last service</span>
+            <strong class="vehicle-last"></strong>
+            <span class="vehicle-last-km"></span>
+          </div>
+        </div>
+        <p class="vehicle-card-foot vehicle-expiry" hidden><i data-icon="shield"></i><span class="vehicle-expiry-text"></span></p>
+        <div class="vehicle-card-actions">
+          <button type="button" class="tonal-action vehicle-log"><i data-icon="wrench"></i>Log service</button>
+          <button type="button" class="primary-action vehicle-view">Details<i data-icon="arrow-right"></i></button>
         </div>
       </article>
     </template>

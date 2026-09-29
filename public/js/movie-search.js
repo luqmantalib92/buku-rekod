@@ -8,6 +8,7 @@
 const searchEls = {
   form: document.querySelector("#searchForm"),
   input: document.querySelector("#searchInput"),
+  clear: document.querySelector("#searchClear"),
   status: document.querySelector("#searchStatus"),
   empty: document.querySelector("#searchEmpty"),
   results: document.querySelector("#searchResults"),
@@ -47,7 +48,8 @@ function buildResultCard(result) {
     img.src = url;
   }
 
-  card.querySelector(".poster-title").textContent = result.title;
+  card.dataset.type = result.mediaType || "movie";
+  card.querySelector(".result-title").textContent = result.title;
   card.querySelector(".poster-type").textContent = mediaTypeLabel(result.mediaType);
   card.querySelector(".poster-year").textContent = result.releaseYear || "Unknown year";
 
@@ -60,7 +62,7 @@ function buildResultCard(result) {
 
   const addBtn = card.querySelector(".poster-add");
   const markSaved = () => {
-    addBtn.textContent = "Saved";
+    addBtn.replaceChildren(iconNode("check"), "Saved");
     addBtn.disabled = true;
     addBtn.classList.add("is-saved");
   };
@@ -68,7 +70,7 @@ function buildResultCard(result) {
   if (isBookmarked(result)) {
     markSaved();
   } else {
-    addBtn.textContent = "Add to watchlist";
+    addBtn.replaceChildren(iconNode("bookmark-add"), "Save");
     addBtn.setAttribute("aria-label", `Add "${result.title}" to watchlist`);
     addBtn.addEventListener("click", async () => {
       await withButtonBusy(addBtn, "Saving…", () => addBookmark(result));
@@ -102,7 +104,7 @@ async function runSearch(query) {
   try {
     const results = await searchTmdb(query, { signal: controller.signal });
     if (controller.signal.aborted) return;
-    setStatus("");
+    setStatus(results.length ? `Found ${results.length} ${results.length === 1 ? "match" : "matches"} for "${query}"` : "");
     renderResults(results);
   } catch (error) {
     if (error.name === "AbortError") return;
@@ -130,7 +132,17 @@ function scheduleSearch(query) {
   debounceTimer = setTimeout(() => runSearch(trimmed), SEARCH_DEBOUNCE_MS);
 }
 
-searchEls.input.addEventListener("input", (event) => scheduleSearch(event.target.value));
+searchEls.input.addEventListener("input", (event) => {
+  searchEls.clear.hidden = !event.target.value;
+  scheduleSearch(event.target.value);
+});
+
+searchEls.clear.addEventListener("click", () => {
+  searchEls.input.value = "";
+  searchEls.clear.hidden = true;
+  scheduleSearch("");
+  searchEls.input.focus();
+});
 
 // Enter searches immediately, skipping the debounce.
 searchEls.form.addEventListener("submit", (event) => {

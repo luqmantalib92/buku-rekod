@@ -3,76 +3,111 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Vehicle details | Logbook</title>
+    <title>Vehicle details | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
-    <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="back" aria-label="Vehicle details"></section>
+    <main class="app-shell has-action-bar" id="appContent" hidden>
+      <section class="topbar" data-shell="back" data-title="Vehicle details" aria-label="Vehicle details"></section>
 
-      <section class="panel" aria-label="Vehicle details">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow" id="formEyebrow">Setup</p>
-            <h2 id="formHeading">Add a vehicle</h2>
-            <p class="panel-subtitle" id="formSubtitle">Enter the basics to add it to your garage — you can add a photo and edit anything later.</p>
-          </div>
+      <div class="page-head">
+        <div>
+          <p class="pill pill-primary" id="formEyebrow">Setup</p>
+          <h1 class="page-title" id="formHeading">Add a vehicle</h1>
+          <p class="page-sub" id="formSubtitle">Enter the basics to add it to your garage — you can add a photo and edit anything later.</p>
         </div>
+      </div>
 
-        <form id="vehicleForm" class="form-grid">
+      <form id="vehicleForm" class="form-stack">
+        <section class="card field-grid" aria-label="Vehicle photo">
+          <label class="photo-drop" id="photoDrop">
+            <span class="icon-tile"><i data-icon="camera"></i></span>
+            <span class="photo-drop-title">Vehicle photo</span>
+            <span id="vehicleImageHint" class="field-hint">JPG or PNG, up to 15 MB. It's auto-compressed before saving.</span>
+            <span class="photo-drop-cta"><i data-icon="upload"></i>Choose photo</span>
+            <input id="vehicleImage" name="image" type="file" accept="image/*" aria-label="Vehicle photo (optional)" />
+          </label>
+          <img id="vehicleImagePreview" class="image-preview" alt="Selected vehicle photo" hidden />
+          <button type="button" id="removeImage" class="danger-action btn-sm photo-remove" hidden><i data-icon="trash"></i>Remove photo</button>
+        </section>
+
+        <section class="card field-grid" aria-labelledby="identityHeading">
+          <div class="card-head">
+            <span class="icon-tile icon-tile-sm"><i data-icon="car"></i></span>
+            <h2 class="card-title" id="identityHeading">Vehicle identity</h2>
+            <span class="pill card-head-end">Required</span>
+          </div>
           <label>
             <span>Vehicle name <span class="req" aria-hidden="true">*</span></span>
             <input id="vehicleName" name="name" autocomplete="off" placeholder="Myvi, Civic, Hilux" required />
           </label>
           <label>
             <span>Plate number <span class="req" aria-hidden="true">*</span></span>
-            <input id="vehiclePlate" name="plate" autocomplete="off" placeholder="ABC 1234" required />
-          </label>
-          <label>
-            <span>Current odometer <span class="req" aria-hidden="true">*</span></span>
-            <input id="vehicleOdometer" name="odometer" type="number" min="0" step="1" inputmode="numeric" placeholder="85000" required />
-            <p class="field-hint">Latest reading, in km.</p>
+            <input id="vehiclePlate" name="plate" autocomplete="off" autocapitalize="characters" placeholder="ABC 1234" required />
           </label>
           <label>
             Model / year
             <input id="vehicleModel" name="model" autocomplete="off" placeholder="e.g. 2018 1.5L" />
-            <p class="field-hint">Optional.</p>
+            <span class="field-hint">Optional.</span>
           </label>
+        </section>
+
+        <section class="card field-grid" aria-labelledby="odoHeading">
+          <div class="card-head">
+            <span class="icon-tile icon-tile-sm is-ok"><i data-icon="gauge"></i></span>
+            <h2 class="card-title" id="odoHeading">Odometer</h2>
+          </div>
+          <label>
+            <span>Current odometer <span class="req" aria-hidden="true">*</span></span>
+            <span class="input-with-affix has-trail input-metric">
+              <input id="vehicleOdometer" name="odometer" type="number" min="0" step="1" inputmode="numeric" placeholder="85000" required />
+              <span class="input-suffix">KM</span>
+            </span>
+            <span class="field-hint">Used to work out when km-based services fall due.</span>
+          </label>
+        </section>
+
+        <section class="card field-grid" aria-labelledby="complianceHeading">
+          <div class="card-head">
+            <span class="icon-tile icon-tile-sm"><i data-icon="shield"></i></span>
+            <div class="card-head-text">
+              <h2 class="card-title" id="complianceHeading">Road tax &amp; insurance</h2>
+              <p class="card-sub">Optional — warns you 30 days before</p>
+            </div>
+          </div>
           <label>
             Road tax expires
             <input id="vehicleRoadTax" name="roadTaxExpiry" type="date" />
-            <p class="field-hint">Optional — you'll see a warning 30 days before.</p>
           </label>
           <label>
             Insurance expires
             <input id="vehicleInsurance" name="insuranceExpiry" type="date" />
-            <p class="field-hint">Optional — you'll see a warning 30 days before.</p>
           </label>
-          <label class="span-2 image-field">
-            Photo (optional)
-            <input id="vehicleImage" name="image" type="file" accept="image/*" />
-            <p id="vehicleImageHint" class="image-hint field-hint">JPG or PNG, up to 15 MB. It's auto-compressed before saving.</p>
-            <img id="vehicleImagePreview" class="image-preview" alt="Selected vehicle photo" hidden />
-            <button type="button" id="removeImage" class="secondary-line" hidden>Remove photo</button>
-          </label>
-          <div class="span-2 edit-actions">
-            <button type="submit" id="vehicleSubmit" class="primary-action">Add vehicle</button>
+        </section>
+
+        <div class="action-bar">
+          <div class="action-bar-inner">
             <button type="button" id="cancelForm" class="ghost-action">Cancel</button>
+            <button type="submit" id="vehicleSubmit" class="primary-action">Add vehicle</button>
           </div>
-        </form>
-      </section>
+        </div>
+      </form>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>

@@ -3,6 +3,37 @@
 
 const CHANGELOG = [
   {
+    version: "2.0.0",
+    date: "2026-09-29",
+    notes: [
+      "Logbook is now Buku Rekod, at a new address: buku-rekod.web.app. The old address forwards here automatically.",
+      "If you installed the app to your home screen, delete it and add it again from the new address.",
+      "Backups now save as buku-rekod-backup-….json. Older Logbook backups still restore."
+    ]
+  },
+  {
+    version: "1.9.1",
+    date: "2026-09-29",
+    notes: [
+      "New app icon to match the redesign: three checked progress bars in blue, green and amber on dark navy. On iPhone you'll need to delete the home-screen app and add it again to pick up the new icon."
+    ]
+  },
+  {
+    version: "1.9.0",
+    date: "2026-09-29",
+    notes: [
+      "A fresh look across the whole app: new fonts, softer cards, clearer status colours, and a dark theme that follows your phone's setting.",
+      "Home now shows overdue / due soon / upcoming counts at the top, a Today button on the calendar, and a vehicle filter when you have more than one car.",
+      "Add a service record straight from Home with the new Add record button.",
+      "Garage cards show the most urgent item, the odometer in big numbers, road tax or insurance expiry, and one-tap Log service / Details buttons.",
+      "Each vehicle's page has a reminder card per category and shows service records as a timeline with every item as its own chip.",
+      "Record and vehicle forms are split into clear sections, with category chips, recent workshops and a Save bar that stays in reach.",
+      "Reminder settings have 7 / 14 / 30 / 60-day presets per category.",
+      "Watchlist: poster grid with a tap-to-mark-watched circle, filter counts, and a switch for grouping by release year. Search shows results as a list with a Save button.",
+      "The app switcher is now a sheet that slides up from the bottom."
+    ]
+  },
+  {
     version: "1.8.7",
     date: "2026-08-06",
     notes: [
@@ -357,7 +388,7 @@ function renderChangelog() {
 
   for (const entry of CHANGELOG) {
     const card = document.createElement("article");
-    card.className = "changelog-entry";
+    card.className = "card changelog-entry";
 
     const head = document.createElement("div");
     head.className = "changelog-head";
@@ -369,7 +400,7 @@ function renderChangelog() {
 
     if (entry.version === current) {
       const badge = document.createElement("span");
-      badge.className = "changelog-current";
+      badge.className = "pill pill-solid";
       badge.textContent = "Current";
       head.append(badge);
     }

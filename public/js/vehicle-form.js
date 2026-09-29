@@ -34,14 +34,19 @@ function setImageHint(message, isError) {
   formEls.imageHint.classList.toggle("image-hint-error", Boolean(isError));
 }
 
+// With a photo the preview replaces the drop zone's big icon; the zone stays
+// tappable to swap the photo.
 function showImage() {
+  const title = document.querySelector(".photo-drop-title");
   if (imageData) {
     formEls.imagePreview.src = imageData;
     formEls.imagePreview.hidden = false;
     formEls.removeImage.hidden = false;
+    if (title) title.textContent = "Change photo";
   } else {
     formEls.imagePreview.hidden = true;
     formEls.removeImage.hidden = true;
+    if (title) title.textContent = "Vehicle photo";
   }
 }
 
@@ -75,7 +80,7 @@ function initForm() {
       window.location.href = "./vehicles.html";
       return;
     }
-    document.title = `Edit ${vehicle.name || "vehicle"} | Logbook`;
+    document.title = `Edit ${vehicle.name || "vehicle"} | Buku Rekod`;
     formEls.formEyebrow.textContent = "Edit";
     formEls.formHeading.textContent = "Edit vehicle";
     formEls.formSubtitle.textContent = "Update this vehicle's details. Changes save to its logbook.";

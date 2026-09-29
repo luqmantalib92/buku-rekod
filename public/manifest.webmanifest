@@ -1,7 +1,7 @@
 {
-  "name": "Logbook",
-  "short_name": "Logbook",
-  "description": "Personal logbook: vehicle service history, upcoming maintenance and a movie watchlist.",
+  "name": "Buku Rekod",
+  "short_name": "Buku Rekod",
+  "description": "Personal record book: vehicle service history, upcoming maintenance and a movie watchlist.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

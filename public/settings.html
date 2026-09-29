@@ -3,67 +3,90 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Settings | Logbook</title>
+    <title>Settings | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
     <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="brand" aria-label="Settings"></section>
+      <section class="topbar" data-shell="brand" data-title="Settings" aria-label="Settings"></section>
 
-      <section class="panel" aria-label="Profile">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Account</p>
-            <h2>Settings</h2>
-            <p class="panel-subtitle">Your account and app preferences.</p>
-          </div>
-        </div>
+      <section class="card profile-card" aria-label="Account">
         <div class="profile-row">
           <span class="profile-avatar" id="profileAvatar" aria-hidden="true">&middot;</span>
           <div class="profile-info">
             <p class="account-email" id="accountEmail">Local mode</p>
-            <p class="account-status" id="accountStatus">Saved on this device</p>
+            <p class="account-status"><span class="status-dot" aria-hidden="true"></span><span id="accountStatus">Saved on this device</span></p>
           </div>
         </div>
-        <button type="button" id="signOutButton" class="ghost-action danger-action profile-signout" hidden>Sign out</button>
+        <button type="button" id="signOutButton" class="danger-action btn-block" hidden><i data-icon="logout"></i>Sign out</button>
       </section>
 
-      <section class="panel" aria-label="Manage">
-        <nav class="settings-menu">
-          <a href="./categories.html" class="settings-link">
-            <span>Manage categories</span>
-            <span class="settings-link-sub">Edit service categories and their items</span>
-          </a>
-          <a href="./reminders.html" class="settings-link">
-            <span>Reminder settings</span>
-            <span class="settings-link-sub">Lead time before a service is due</span>
-          </a>
-          <a href="./backup.html" class="settings-link">
-            <span>Backup &amp; restore</span>
-            <span class="settings-link-sub">Export your data to a file, or load it back</span>
-          </a>
-          <a href="./changelog.html" class="settings-link">
-            <span>What's new</span>
-            <span class="settings-link-sub">Recent updates to the app</span>
-          </a>
-          <div class="settings-link settings-version">
-            <span>Version</span>
-            <span class="settings-link-sub app-version"></span>
-          </div>
-        </nav>
-      </section>
+      <p class="group-label">Vehicles</p>
+      <nav class="card list-card card-flush" aria-label="Vehicle settings">
+        <a href="./categories.html" class="list-row">
+          <span class="icon-tile icon-tile-sm"><i data-icon="wrench"></i></span>
+          <span class="list-row-text">
+            <span class="list-row-title">Service categories</span>
+            <span class="list-row-sub">Edit categories and their quick-pick items</span>
+          </span>
+          <span class="list-row-end"><i data-icon="chevron-right"></i></span>
+        </a>
+        <a href="./reminders.html" class="list-row">
+          <span class="icon-tile icon-tile-sm"><i data-icon="bell"></i></span>
+          <span class="list-row-text">
+            <span class="list-row-title">Reminder settings</span>
+            <span class="list-row-sub">Lead time before a service is due</span>
+          </span>
+          <span class="list-row-end"><i data-icon="chevron-right"></i></span>
+        </a>
+      </nav>
+
+      <p class="group-label">Data</p>
+      <nav class="card list-card card-flush" aria-label="Data">
+        <a href="./backup.html" class="list-row">
+          <span class="icon-tile icon-tile-sm"><i data-icon="download"></i></span>
+          <span class="list-row-text">
+            <span class="list-row-title">Backup &amp; restore</span>
+            <span class="list-row-sub">Export everything to a file, or load it back</span>
+          </span>
+          <span class="list-row-end"><i data-icon="chevron-right"></i></span>
+        </a>
+      </nav>
+
+      <p class="group-label">About</p>
+      <nav class="card list-card card-flush" aria-label="About">
+        <a href="./changelog.html" class="list-row">
+          <span class="icon-tile icon-tile-sm"><i data-icon="sparkle"></i></span>
+          <span class="list-row-text">
+            <span class="list-row-title">What's new</span>
+            <span class="list-row-sub">Recent updates to the app</span>
+          </span>
+          <span class="list-row-end"><span class="count-badge app-version"></span><i data-icon="chevron-right"></i></span>
+        </a>
+        <div class="list-row">
+          <span class="icon-tile icon-tile-sm"><i data-icon="check-circle"></i></span>
+          <span class="list-row-text">
+            <span class="list-row-title">Buku Rekod</span>
+            <span class="list-row-sub">Version <span class="app-version"></span></span>
+          </span>
+        </div>
+      </nav>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>

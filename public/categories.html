@@ -3,70 +3,73 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Categories | Logbook</title>
+    <title>Categories | Buku Rekod</title>
     <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" />
     <link rel="stylesheet" href="./css/styles.css" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
-    <meta name="theme-color" content="#1689df" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Logbook" />
+    <meta name="apple-mobile-web-app-title" content="Buku Rekod" />
   </head>
   <body>
     <div id="appLoading" class="app-loading" role="status" aria-label="Loading">
       <span class="app-loading-spinner"></span>
     </div>
-    <main class="app-shell" id="appContent" hidden>
-      <section class="topbar" data-shell="back" aria-label="Categories"></section>
+    <main class="app-shell has-action-bar" id="appContent" hidden>
+      <section class="topbar" data-shell="back" data-title="Service categories" aria-label="Categories"></section>
 
-      <div class="detail-head actions-only">
-        <button type="button" id="resetCategories" class="ghost-action danger-action">Reset to defaults</button>
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Categories</h1>
+          <p class="page-sub">Rename categories and edit the quick-pick items inside each.</p>
+        </div>
+        <button type="button" id="resetCategories" class="ghost-action danger-action btn-sm">Reset</button>
       </div>
 
-      <section class="panel" aria-label="Service categories">
-        <div class="panel-heading">
-          <div>
-            <p class="eyebrow">Customize</p>
-            <h2>Service categories</h2>
-            <p class="panel-subtitle">
-              Rename categories and edit the items inside each. Existing records keep their
-              category; deleting a category shows its past records as "Other".
-            </p>
+      <div class="info-card">
+        <i data-icon="info"></i>
+        <p>Existing records keep their category. Deleting a category shows its past records as "Other".</p>
+      </div>
+
+      <form id="categoryForm" class="form-stack">
+        <div id="categoryEditor" class="category-editor"></div>
+        <button type="button" id="addCategory" class="secondary-line"><i data-icon="plus"></i>Add category</button>
+        <div class="action-bar">
+          <div class="action-bar-inner">
+            <span id="categoriesSaved" class="saved-flash" role="status" hidden>Saved &check;</span>
+            <button type="submit" class="primary-action">Save categories</button>
           </div>
         </div>
-
-        <form id="categoryForm">
-          <div id="categoryEditor" class="category-editor"></div>
-          <button type="button" id="addCategory" class="secondary-line">+ Add category</button>
-          <div class="edit-actions">
-            <button type="submit" class="primary-action">Save categories</button>
-            <span id="categoriesSaved" class="settings-saved" role="status" hidden>Saved &check;</span>
-          </div>
-        </form>
-      </section>
+      </form>
     </main>
 
     <template id="categoryEditorTemplate">
-      <div class="category-edit-card">
+      <div class="card category-edit-card">
         <div class="category-edit-head">
           <label class="category-name-label">
             Category name
             <input class="category-name" type="text" autocomplete="off" />
           </label>
-          <button type="button" class="ghost-action danger-action category-remove">Remove</button>
+          <button type="button" class="icon-button category-remove" aria-label="Remove category" title="Remove category"><i data-icon="trash"></i></button>
         </div>
+        <span class="field-label">Quick-pick items</span>
         <div class="category-items"></div>
-        <button type="button" class="secondary-line category-add-item">+ Add item</button>
+        <button type="button" class="secondary-line category-add-item"><i data-icon="plus"></i>Add item</button>
       </div>
     </template>
 
     <template id="categoryItemTemplate">
       <div class="category-item-row">
-        <input class="category-item-input" type="text" autocomplete="off" placeholder="Item name" />
-        <button type="button" class="icon-button category-item-remove" aria-label="Remove item">Remove</button>
+        <input class="category-item-input" type="text" autocomplete="off" placeholder="Item name" aria-label="Item name" />
+        <button type="button" class="icon-button category-item-remove" aria-label="Remove item" title="Remove item"><i data-icon="close"></i></button>
       </div>
     </template>
 

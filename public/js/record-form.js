@@ -10,6 +10,13 @@ const recordEls = {
   serviceDate: document.querySelector("#serviceDate"),
   odometerHint: document.querySelector("#odometerHint"),
   serviceCategory: document.querySelector("#serviceCategory"),
+  categoryChips: document.querySelector("#categoryChips"),
+  categoryError: document.querySelector("#categoryError"),
+  itemCount: document.querySelector("#itemCount"),
+  formVehicleName: document.querySelector("#formVehicleName"),
+  formVehiclePlate: document.querySelector("#formVehiclePlate"),
+  recentWorkshops: document.querySelector("#recentWorkshops"),
+  recentWorkshopChips: document.querySelector("#recentWorkshopChips"),
   itemChips: document.querySelector("#serviceItemChips"),
   chipsHint: document.querySelector("#chipsHint"),
   workshopSuggestions: document.querySelector("#workshopSuggestions"),
@@ -49,19 +56,58 @@ async function tryLeave() {
   goBack(vehicleId ? returnHref : "./vehicles.html");
 }
 
+// Categories live in a (visually hidden) <select> so the form data and
+// required-validation stay native; the chip row is the control you touch and
+// just drives the select.
 function populateCategories() {
   for (const category of getCategories()) {
     const option = document.createElement("option");
     option.value = category.key;
     option.textContent = category.label;
     recordEls.serviceCategory.append(option);
+
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.dataset.value = category.key;
+    chip.setAttribute("role", "radio");
+    chip.setAttribute("aria-checked", "false");
+    chip.append(iconNode(category.key), category.label);
+    chip.addEventListener("click", () => {
+      if (recordEls.serviceCategory.value === category.key) return;
+      recordEls.serviceCategory.value = category.key;
+      recordEls.serviceCategory.dispatchEvent(new Event("change"));
+    });
+    recordEls.categoryChips.append(chip);
   }
+}
+
+function syncCategoryChips() {
+  const value = recordEls.serviceCategory.value;
+  for (const chip of recordEls.categoryChips.querySelectorAll(".chip")) {
+    chip.setAttribute("aria-checked", String(chip.dataset.value === value));
+  }
+  if (value) recordEls.categoryError.hidden = true;
+}
+
+// The hidden select can't show its own validation bubble, so say it inline.
+recordEls.serviceCategory.addEventListener("invalid", () => {
+  recordEls.categoryError.hidden = false;
+  recordEls.categoryChips.scrollIntoView({ block: "center", behavior: "smooth" });
+});
+
+function updateItemCount() {
+  const count = selectedItems.size;
+  recordEls.itemCount.hidden = count === 0;
+  recordEls.itemCount.textContent = `${count} selected`;
 }
 
 function renderItemChips() {
   const category = getCategories().find((entry) => entry.key === recordEls.serviceCategory.value);
   recordEls.itemChips.replaceChildren();
   selectedItems.clear();
+  updateItemCount();
+  syncCategoryChips();
 
   if (!category) {
     recordEls.itemChips.hidden = true;
@@ -82,7 +128,7 @@ function renderItemChips() {
   for (const item of category.items) {
     const chip = document.createElement("button");
     chip.type = "button";
-    chip.className = "chip";
+    chip.className = "chip chip-soft chip-sm";
     chip.textContent = item;
     chip.setAttribute("aria-pressed", "false");
     chip.addEventListener("click", () => {
@@ -91,6 +137,7 @@ function renderItemChips() {
       chip.classList.toggle("chip-on", !on);
       if (on) selectedItems.delete(item);
       else selectedItems.add(item);
+      updateItemCount();
       dirty = true;
       if (!on) maybeAutoSuggest();
     });
@@ -107,6 +154,31 @@ function populateWorkshopSuggestions() {
   }
 }
 
+// One-tap chips for the workshops used most recently, across all vehicles.
+function renderRecentWorkshops() {
+  const latest = new Map();
+  for (const vehicle of state.vehicles) {
+    for (const record of vehicle.records) {
+      const name = (record.workshop || "").trim();
+      if (name && (record.date || "") > (latest.get(name) || "")) latest.set(name, record.date || "");
+    }
+  }
+  const recent = [...latest.entries()].sort((a, b) => b[1].localeCompare(a[1])).slice(0, 4).map(([name]) => name);
+  recordEls.recentWorkshops.hidden = !recent.length;
+  recordEls.recentWorkshopChips.replaceChildren();
+  for (const name of recent) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip chip-sm";
+    chip.textContent = name;
+    chip.addEventListener("click", () => {
+      recordEls.serviceForm.workshop.value = name;
+      dirty = true;
+    });
+    recordEls.recentWorkshopChips.append(chip);
+  }
+}
+
 function initForm() {
   const vehicle = getVehicle(vehicleId);
   if (!vehicle) {
@@ -115,9 +187,13 @@ function initForm() {
     return;
   }
 
-  recordEls.formSubtitle.textContent = `Log a service for ${vehicle.name || "this vehicle"}.`;
+  recordEls.formSubtitle.textContent = "Log what was done, where and for how much.";
+  recordEls.formVehicleName.textContent = vehicle.name || "Unnamed vehicle";
+  recordEls.formVehiclePlate.textContent = vehicle.plate || "";
+  recordEls.formVehiclePlate.hidden = !vehicle.plate;
   populateCategories();
   populateWorkshopSuggestions();
+  renderRecentWorkshops();
 
   const record = recordId ? vehicle.records.find((entry) => entry.id === recordId) : null;
   if (recordId && !record) {
@@ -127,9 +203,9 @@ function initForm() {
   }
 
   if (record) {
-    document.title = "Edit service record | Logbook";
+    document.title = "Edit service record | Buku Rekod";
     recordEls.formHeading.textContent = "Edit service record";
-    recordEls.formSubtitle.textContent = `Update this service record for ${vehicle.name || "this vehicle"}.`;
+    recordEls.formSubtitle.textContent = "Update what was done, where and for how much.";
     recordEls.submit.textContent = "Save changes";
     recordEls.serviceCategory.value = record.category || "other";
     renderItemChips();
@@ -149,7 +225,7 @@ function initForm() {
     const lastOdo = latestOdometer(vehicle);
     if (lastOdo > 0) {
       recordEls.serviceForm.odometer.placeholder = String(lastOdo);
-      recordEls.odometerHint.textContent = `Last saved: ${formatKm(lastOdo)}.`;
+      recordEls.odometerHint.textContent = `Last recorded: ${formatKm(lastOdo)}`;
       recordEls.odometerHint.hidden = false;
     }
     // Date is prefilled to today, so start the cursor on the odometer.

@@ -6,7 +6,8 @@
    builder. */
 
 const moviesEls = {
-  addTitle: document.querySelector("#addTitle"),
+  watchCount: document.querySelector("#watchCount"),
+  watchSub: document.querySelector("#watchSub"),
   emptyAddTitle: document.querySelector("#emptyAddTitle"),
   fabAddTitle: document.querySelector("#fabAddTitle"),
   controls: document.querySelector("#watchlistControls"),
@@ -25,15 +26,15 @@ function openSearch() {
   window.location.href = "./movie-search.html";
 }
 
-moviesEls.addTitle.addEventListener("click", openSearch);
 moviesEls.emptyAddTitle.addEventListener("click", openSearch);
 moviesEls.fabAddTitle.addEventListener("click", openSearch);
 
-for (const chip of moviesEls.controls.querySelectorAll(".chip")) {
-  chip.addEventListener("click", () => {
-    watchFilter = chip.dataset.filter;
-    for (const other of moviesEls.controls.querySelectorAll(".chip")) {
-      other.classList.toggle("chip-on", other === chip);
+for (const btn of moviesEls.controls.querySelectorAll(".segmented-btn")) {
+  btn.addEventListener("click", () => {
+    watchFilter = btn.dataset.filter;
+    for (const other of moviesEls.controls.querySelectorAll(".segmented-btn")) {
+      other.classList.toggle("is-active", other === btn);
+      other.setAttribute("aria-pressed", String(other === btn));
     }
     renderWatchlist();
   });
@@ -50,6 +51,7 @@ function applyFilter(items) {
 function buildPosterCard(item) {
   const card = moviesEls.cardTemplate.content.firstElementChild.cloneNode(true);
   card.classList.toggle("is-watched", item.watched);
+  card.dataset.type = item.mediaType || "movie";
 
   // Poster: swap in the remote image only once it actually decodes, so a
   // dead/blocked URL leaves the fallback tile in place instead of a broken
@@ -75,7 +77,6 @@ function buildPosterCard(item) {
   flag.hidden = !item.watched;
 
   const watchBtn = card.querySelector(".poster-watch");
-  watchBtn.textContent = item.watched ? "Watched" : "Mark watched";
   watchBtn.setAttribute("aria-pressed", String(item.watched));
   watchBtn.setAttribute("aria-label", item.watched
     ? `Mark "${item.title}" as not watched`
@@ -103,14 +104,31 @@ function buildPosterCard(item) {
 function buildGroup(label, items) {
   const group = moviesEls.groupTemplate.content.firstElementChild.cloneNode(true);
   group.querySelector(".watchlist-group-label").textContent = label;
+  group.querySelector(".watchlist-group-count").textContent = `${items.length} ${items.length === 1 ? "title" : "titles"}`;
   const grid = group.querySelector(".watchlist-grid");
   for (const item of items) grid.append(buildPosterCard(item));
   return group;
 }
 
+// Header badge, "N to watch" subtitle and the per-filter counts.
+function renderCounts(all) {
+  const watched = all.filter((item) => item.watched).length;
+  const unwatched = all.length - watched;
+  moviesEls.watchCount.hidden = !all.length;
+  moviesEls.watchCount.textContent = `${all.length} ${all.length === 1 ? "title" : "titles"}`;
+  moviesEls.watchSub.textContent = all.length
+    ? `${unwatched} to watch · ${watched} watched`
+    : "Titles you've saved to watch later.";
+  const counts = { all: all.length, unwatched, watched };
+  for (const el of moviesEls.controls.querySelectorAll("[data-count]")) {
+    el.textContent = `(${counts[el.dataset.count]})`;
+  }
+}
+
 function renderWatchlist() {
   const all = bookmarksByAdded();
   const items = applyFilter(all);
+  renderCounts(all);
 
   moviesEls.controls.hidden = all.length === 0;
   moviesEls.list.replaceChildren();
