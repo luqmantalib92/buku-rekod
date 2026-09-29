@@ -1,7 +1,7 @@
 # Buku Rekod
 
 Live at <https://buku-rekod.web.app> (Firebase project `buku-rekod`).
-Formerly **Logbook** at `my-personal-log.web.app`, which now redirects here.
+Formerly **Logbook** (Firebase project `my-personal-log`, deleted September 2026).
 
 A personal super app: a set of small single-purpose mini apps behind one
 install. Currently **Vehicles** (service history and reminders) and
@@ -127,20 +127,9 @@ implicit:
 under a second alias (`firebase use --add`) until you're sure the move is
 complete — the 2026 migration off `vehicle-service-logs` did exactly that, and
 the alias was dropped once that project was deleted. The Buku Rekod rename
-(September 2026) moved from `my-personal-log` to `buku-rekod` the same way;
-`my-personal-log` stays as the `legacy` alias while it serves the redirect.
-
-### The old URL
-
-`my-personal-log.web.app` serves only `legacy-redirect/`: a page that forwards
-every path (and query) to the same path on `buku-rekod.web.app`, plus a
-kill-switch `sw.js` that clears the old app's caches and unregisters its
-service worker, so an installed copy stops opening the stale version.
-Redeploy it with:
-
-```sh
-firebase deploy --config firebase.legacy.json --project legacy --only hosting
-```
+(September 2026) moved from `my-personal-log` to `buku-rekod` the same way,
+and `my-personal-log` was deleted once the data was confirmed in the new
+project.
 
 Two things that don't move on their own:
 
