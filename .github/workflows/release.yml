@@ -41,11 +41,11 @@ jobs:
       - name: Write web config
         env:
           FIREBASE_CONFIG_JS: ${{ vars.FIREBASE_CONFIG_JS }}
-          TMDB_CONFIG_JS: ${{ secrets.TMDB_CONFIG_JS }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
         run: |
-          test -n "$FIREBASE_CONFIG_JS" && test -n "$TMDB_CONFIG_JS"
+          test -n "$FIREBASE_CONFIG_JS" && test -n "$TMDB_API_KEY"
           printf '%s\n' "$FIREBASE_CONFIG_JS" > public/js/firebase-config.js
-          printf '%s\n' "$TMDB_CONFIG_JS" > public/js/tmdb-config.js
+          printf 'const tmdbConfig = {\n  apiKey: "%s"\n};\n' "$TMDB_API_KEY" > public/js/tmdb-config.js
       - name: Check every script parses
         run: for f in public/js/*.js public/sw.js; do node --check "$f"; done
       - uses: google-github-actions/auth@v2

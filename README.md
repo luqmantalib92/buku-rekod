@@ -187,11 +187,11 @@ Repo **secrets**:
 
 | Secret | What it is |
 | --- | --- |
-| `TMDB_CONFIG_JS` | the whole `public/js/tmdb-config.js`. It is a secret, not a variable, because it holds a real API key |
+| `TMDB_API_KEY` | just the TMDb v3 API key; CI writes `public/js/tmdb-config.js` around it. It is a secret, not a variable, because it is a real API key. Only the key is stored: GitHub masks every line of a multi-line secret, so storing the whole file would mask `//` and `};` throughout the logs |
 | `FIREBASE_SERVICE_ACCOUNT` | JSON key of the `github-deploy` service account |
 
 ```sh
-gh secret set TMDB_CONFIG_JS < public/js/tmdb-config.js
+gh secret set TMDB_API_KEY   # paste the key when prompted
 ```
 
 The `github-deploy` service account (Google Cloud Console → IAM and admin →
