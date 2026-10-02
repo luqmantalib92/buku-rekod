@@ -91,11 +91,7 @@ poke at it.
    Firestore rules to protect data.)
 3. Enable Authentication with the Email/Password provider, and add your user under Authentication → Users.
 4. Enable Firestore Database.
-5. Deploy:
-
-```sh
-firebase deploy --only hosting,firestore:rules
-```
+5. Deploy through CI, not by hand: see [Development and releases](#development-and-releases).
 
 Data is stored per user, one document per mini app:
 
@@ -107,6 +103,117 @@ Data is stored per user, one document per mini app:
 `firestore.rules` scopes `users/{userId}/{document=**}` to its owner, so every
 mini app is covered by that one rule. Neither store is queried — both are
 fetched by path — so no Firestore indexes are needed.
+
+## Development and releases
+
+Work lands on `develop`; `main` only moves when something is released. Live
+changes only through a GitHub release. Nobody runs `firebase deploy` to live
+by hand.
+
+| Branch | Environment | URL | Deployed by |
+| --- | --- | --- | --- |
+| `feature/<name>` | none (local only) | `http://localhost:5173` | you, with `python3 -m http.server` |
+| `develop` | Firebase Hosting preview channel `develop` | the channel URL printed in the Preview run log (`https://buku-rekod--develop-<hash>.web.app`) | [`preview.yml`](.github/workflows/preview.yml) on every push |
+| `main` | live | <https://buku-rekod.web.app> | [`release.yml`](.github/workflows/release.yml) on a published GitHub release |
+
+The preview channel is named, so its URL never changes and only had to be
+added to Authentication → Settings → Authorised domains once. It expires
+30 days after the last deploy to it; the next push to `develop` brings it back
+at the same URL.
+
+### Developing a feature
+
+```sh
+git switch develop && git pull
+git switch -c feature/<name>
+# ...work, then bump APP_VERSION in public/js/version.js
+git push -u origin feature/<name>
+gh pr create --base develop
+```
+
+Bump `APP_VERSION` in every user-facing PR. The service worker's cache name
+comes from it, so without a bump, installed copies (the preview included) keep
+serving the old cached files. When the PR is merged, the push to `develop`
+deploys the preview channel.
+
+### Releasing to live
+
+```sh
+git switch main && git pull
+git merge --ff-only origin/develop
+git push origin main
+gh release create vX.Y.Z --target main --generate-notes
+```
+
+`vX.Y.Z` must equal `APP_VERSION` in `public/js/version.js`. The release
+workflow refuses a tag that isn't on `main` or doesn't match the version.
+Otherwise it deploys hosting and Firestore rules to live, then comments on the
+open **Live releases** issue.
+
+### Rolling back
+
+Run the release workflow by hand with an older tag. It redeploys that tag's
+files and rules:
+
+```sh
+gh workflow run release.yml -f tag=vX.Y.Z
+```
+
+The tag still has to be on `main`, which every past release is.
+
+### Getting the "it's live" email
+
+Each live deploy comments "**vX.Y.Z is live**" on the open issue labelled
+`release-log` ("Live releases"). GitHub emails everyone subscribed to that
+issue, including whoever opened it. To get the email, subscribe to the issue.
+Preview deploys don't comment there, so they stay quiet. A failed run emails
+whoever triggered it through GitHub's default Actions notifications.
+
+### CI setup
+
+Repo **variables** (Settings → Secrets and variables → Actions → Variables) hold
+the gitignored web config. Each one is the whole file:
+
+| Variable | Written to |
+| --- | --- |
+| `FIREBASE_CONFIG_JS` | `public/js/firebase-config.js` (public identifiers only) |
+
+```sh
+gh variable set FIREBASE_CONFIG_JS < public/js/firebase-config.js
+```
+
+Repo **secrets**:
+
+| Secret | What it is |
+| --- | --- |
+| `TMDB_CONFIG_JS` | the whole `public/js/tmdb-config.js`. It is a secret, not a variable, because it holds a real API key |
+| `FIREBASE_SERVICE_ACCOUNT` | JSON key of the `github-deploy` service account |
+
+```sh
+gh secret set TMDB_CONFIG_JS < public/js/tmdb-config.js
+```
+
+The `github-deploy` service account (Google Cloud Console → IAM and admin →
+Service accounts, project `buku-rekod`) has exactly these roles:
+
+- Firebase Hosting Admin
+- Firebase Rules Admin
+- Service Account User
+- API Keys Viewer
+- Service Usage Consumer (without it, deploying rules fails with
+  `403 Permission denied to get service [firestore.googleapis.com]`)
+
+Don't use the `firebase-adminsdk` account for CI. It has far broader access.
+
+**Rotating the key:** open the service account → Keys → Add key → JSON, then:
+
+```sh
+gh secret set FIREBASE_SERVICE_ACCOUNT < ~/Downloads/buku-rekod-<id>.json
+rm ~/Downloads/buku-rekod-<id>.json
+```
+
+Delete the old key on the same Keys tab. `buku-rekod-*.json` is gitignored, so a
+key downloaded into the repo folder can't be committed by accident.
 
 ## Moving to another Firebase project
 

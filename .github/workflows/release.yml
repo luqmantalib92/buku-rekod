@@ -1,0 +1,68 @@
+name: Release (live)
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to deploy, e.g. v2.0.0"
+        required: true
+concurrency:
+  group: deploy-live
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check the tag is on main and matches APP_VERSION
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "::error::$TAG is not on main. Merge develop into main before releasing."
+            exit 1
+          fi
+          version=$(sed -n 's/^const APP_VERSION = "\(.*\)";/\1/p' public/js/version.js)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::Tag $TAG does not match APP_VERSION $version in public/js/version.js."
+            exit 1
+          fi
+      - name: Write web config
+        env:
+          FIREBASE_CONFIG_JS: ${{ vars.FIREBASE_CONFIG_JS }}
+          TMDB_CONFIG_JS: ${{ secrets.TMDB_CONFIG_JS }}
+        run: |
+          test -n "$FIREBASE_CONFIG_JS" && test -n "$TMDB_CONFIG_JS"
+          printf '%s\n' "$FIREBASE_CONFIG_JS" > public/js/firebase-config.js
+          printf '%s\n' "$TMDB_CONFIG_JS" > public/js/tmdb-config.js
+      - name: Check every script parses
+        run: for f in public/js/*.js public/sw.js; do node --check "$f"; done
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      - name: Deploy hosting and Firestore rules
+        run: npx --yes firebase-tools@15 deploy --only hosting,firestore:rules --project buku-rekod --non-interactive --message "$TAG"
+      - name: Post to the Live releases issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          issue=$(gh issue list --repo "$GITHUB_REPOSITORY" --label release-log --state open --json number -q '.[0].number')
+          if [ -z "$issue" ]; then
+            echo "::warning::No open issue labelled release-log, so no email was sent."
+            exit 0
+          fi
+          gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "**$TAG is live** at https://buku-rekod.web.app
+
+          Release notes: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG
+          Deploy run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
