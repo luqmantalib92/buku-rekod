@@ -48,9 +48,35 @@ jobs:
           printf 'const tmdbConfig = {\n  apiKey: "%s"\n};\n' "$TMDB_API_KEY" > public/js/tmdb-config.js
       - name: Check every script parses
         run: for f in public/js/*.js public/sw.js; do node --check "$f"; done
-      - uses: google-github-actions/auth@v2
-        with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      # The key goes in the runner's temp directory, never the workspace.
+      # google-github-actions/auth writes gha-creds-*.json into the checkout;
+      # that is harmless only while hosting deploys public/ and nothing copies
+      # the root into it. salasilah-keluarga hosts "." and published its key
+      # that way, so no project keeps the key in the checkout.
+      - name: Authenticate
+        env:
+          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$SERVICE_ACCOUNT" ]; then
+            echo "::error::Secret FIREBASE_SERVICE_ACCOUNT is not set."
+            exit 1
+          fi
+          printf '%s' "$SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/service-account.json" >> "$GITHUB_ENV"
+
+      # Only the commit plus the config files written above may be published.
+      - name: Check nothing else will be deployed
+        run: |
+          extra="$(git ls-files --others public/ | grep -vxF -e public/js/firebase-config.js -e public/js/tmdb-config.js || true)"
+          if [ -n "$extra" ]; then
+            echo "::error::public/ has files that are not in the commit, and hosting would publish them:"
+            echo "$extra"
+            exit 1
+          fi
+          if grep -rlI '"private_key"' public/; then
+            echo "::error::A file in public/ holds a private key."
+            exit 1
+          fi
       - name: Deploy hosting and Firestore rules
         run: npx --yes firebase-tools@15 deploy --only hosting,firestore:rules --project buku-rekod --non-interactive --message "$TAG"
       - name: Post to the Live releases issue
