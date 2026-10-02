@@ -1,6 +1,7 @@
 # Buku Rekod
 
 Live at <https://buku-rekod.web.app> (Firebase project `buku-rekod`).
+The latest `develop` build is on the Firebase Hosting preview channel `develop`.
 Formerly **Logbook** (Firebase project `my-personal-log`, deleted September 2026).
 
 A personal super app: a set of small single-purpose mini apps behind one
