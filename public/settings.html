@@ -14,6 +14,7 @@
     <link rel="icon" href="./assets/icon-192.png" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#171c24" media="(prefers-color-scheme: dark)" />
+    <script src="./js/theme.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -35,6 +36,16 @@
           </div>
         </div>
         <button type="button" id="signOutButton" class="danger-action btn-block" hidden><i data-icon="logout"></i>Sign out</button>
+      </section>
+
+      <p class="group-label" id="themeLabel">Appearance</p>
+      <section class="card theme-card" aria-labelledby="themeLabel">
+        <div class="segmented" id="themeChoice" role="group" aria-label="Theme">
+          <button type="button" class="segmented-btn" data-theme-choice="system" aria-pressed="false">System</button>
+          <button type="button" class="segmented-btn" data-theme-choice="light" aria-pressed="false">Light</button>
+          <button type="button" class="segmented-btn" data-theme-choice="dark" aria-pressed="false">Dark</button>
+        </div>
+        <p class="theme-hint" id="themeHint"></p>
       </section>
 
       <p class="group-label">Vehicles</p>

@@ -39,6 +39,7 @@ const SHELL = [
   "./manifest.webmanifest",
   "./css/styles.css",
   "./js/version.js",
+  "./js/theme.js",
   "./js/shell.js",
   "./js/firebase-config.js",
   "./js/core.js",

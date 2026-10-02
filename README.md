@@ -35,6 +35,7 @@ straight on the vehicle service calendar.
 
 - **Installable**: PWA manifest + iOS home-screen icon; "Add to Home Screen" launches full-screen.
 - **Offline**: a service worker (`sw.js`) precaches the app shell, so the app opens instantly and works offline. Movie posters are cached separately in `tmdb-posters-v2`, which survives version bumps so releases don't force a re-download. Only successful responses are cached, so a failed image can't get stuck.
+- **Theme**: Settings → Appearance picks System (follows `prefers-color-scheme`), Light or Dark. `js/theme.js` loads in every page's `<head>` so the choice applies before first paint; it's stored per device in `localStorage` key `theme:v1`.
 - Login on a separate page (`login.html`) via Firebase Authentication.
 - Data lives in `localStorage` and syncs to Firestore once configured.
 - **Backup & restore** (Settings): export every mini app's data to one JSON file and load it back. Restoring writes to whichever account is signed in, so it doubles as the way to move between devices or Firebase projects.
@@ -56,6 +57,7 @@ public/                  # everything served by Firebase Hosting (the web app)
     tmdb.js              # TMDb search adapter (the only file that knows TMDb)
     <page>.js            # one script per page
     version.js           # single source of truth for APP_VERSION
+    theme.js             # System / Light / Dark choice, applied in <head>
   assets/                # PWA / home-screen icons
 firebase.json            # hosting points at public/
 firestore.rules
