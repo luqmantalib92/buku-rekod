@@ -115,6 +115,41 @@
   }
 }
 
+/* Dark chosen in Settings → Appearance, whatever the phone is set to. Keep
+   these tokens identical to the prefers-color-scheme block above. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0f141c;
+  --surface: #171c24;
+  --surface-2: #1f2530;
+  --surface-3: #2a313c;
+  --tint: rgba(46, 149, 236, 0.16);
+  --tint-strong: rgba(46, 149, 236, 0.28);
+  --line: #262d38;
+  --line-strong: #353d4a;
+  --ink: #e6e9f2;
+  --muted: #9aa4b5;
+  --subtle: #6b7587;
+  --primary: #1a73bf;
+  --primary-hover: #2582d3;
+  --primary-bright: #2e95ec;
+  --primary-ink: #9ecaff;
+  --danger: #fca5a5;
+  --danger-fill: rgba(239, 68, 68, 0.14);
+  --danger-edge: rgba(239, 68, 68, 0.35);
+  --warn: #fcd34d;
+  --warn-fill: rgba(245, 158, 11, 0.14);
+  --warn-edge: rgba(245, 158, 11, 0.35);
+  --ok: #6ee7b7;
+  --ok-fill: rgba(16, 185, 129, 0.14);
+  --ok-edge: rgba(16, 185, 129, 0.35);
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 6px 16px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 -8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-pop: 0 14px 36px rgba(0, 0, 0, 0.5);
+  --scrim: rgba(0, 0, 0, 0.55);
+}
+
 /* ---- Base ---- */
 
 * {
@@ -2822,6 +2857,17 @@ input[type="checkbox"] {
 .profile-card {
   display: grid;
   gap: 16px;
+}
+
+.theme-card {
+  display: grid;
+  gap: 10px;
+}
+
+.theme-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .profile-row {

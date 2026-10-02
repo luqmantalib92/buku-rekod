@@ -3,6 +3,13 @@
 
 const CHANGELOG = [
   {
+    version: "2.1.0",
+    date: "2026-10-02",
+    notes: [
+      "Choose a theme in Settings → Appearance: System (follows your phone, as before), Light or Dark. The choice is saved on each device."
+    ]
+  },
+  {
     version: "2.0.0",
     date: "2026-09-29",
     notes: [
