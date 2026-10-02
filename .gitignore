@@ -10,5 +10,9 @@ public/js/firebase-config.js
 # Read-only and rate-limited, but keep it out of the repo all the same.
 public/js/tmdb-config.js
 
+# Downloaded service account keys (e.g. the github-deploy key before it is
+# uploaded as a GitHub secret). Never commit one.
+buku-rekod-*.json
+
 # Stitch design exports (reference only, ~4 MB of screenshots).
 stitch/

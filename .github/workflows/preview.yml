@@ -1,0 +1,33 @@
+name: Preview (develop)
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+concurrency:
+  group: preview-develop
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Write web config
+        env:
+          FIREBASE_CONFIG_JS: ${{ vars.FIREBASE_CONFIG_JS }}
+          TMDB_CONFIG_JS: ${{ secrets.TMDB_CONFIG_JS }}
+        run: |
+          test -n "$FIREBASE_CONFIG_JS" && test -n "$TMDB_CONFIG_JS"
+          printf '%s\n' "$FIREBASE_CONFIG_JS" > public/js/firebase-config.js
+          printf '%s\n' "$TMDB_CONFIG_JS" > public/js/tmdb-config.js
+      - name: Check every script parses
+        run: for f in public/js/*.js public/sw.js; do node --check "$f"; done
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      - name: Deploy to the develop channel
+        run: npx --yes firebase-tools@15 hosting:channel:deploy develop --expires 30d --project buku-rekod --non-interactive
