@@ -136,7 +136,9 @@ gh pr create --base develop
 
 Bump `APP_VERSION` in every user-facing PR. The service worker's cache name
 comes from it, so without a bump, installed copies (the preview included) keep
-serving the old cached files. When the PR is merged, the push to `develop`
+serving the old cached files. Add a matching entry at the top of `CHANGELOG`
+in `public/js/changelog.js`: it is the What's new page and the body of the
+"it's live" email, and a release without one is refused. When the PR is merged, the push to `develop`
 deploys the preview channel.
 
 ### Releasing to live
@@ -149,9 +151,10 @@ gh release create vX.Y.Z --target main --generate-notes
 ```
 
 `vX.Y.Z` must equal `APP_VERSION` in `public/js/version.js`. The release
-workflow refuses a tag that isn't on `main` or doesn't match the version.
-Otherwise it deploys hosting and Firestore rules to live, then comments on the
-open **Live releases** issue.
+workflow refuses a tag that isn't on `main`, doesn't match the version, or has
+no What's new entry. Otherwise it deploys hosting and Firestore rules to live,
+then comments on the open **Live releases** issue with that version's What's
+new notes.
 
 ### Rolling back
 

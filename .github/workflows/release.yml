@@ -38,6 +38,12 @@ jobs:
             echo "::error::Tag $TAG does not match APP_VERSION $version in public/js/version.js."
             exit 1
           fi
+      # The What's new entry is also the "it's live" email, so a release without
+      # one stops here. A rollback by hand skips this: an older tag predates the
+      # rule, and its email simply goes out without notes.
+      - name: Check What's new has an entry for this version
+        if: github.event_name == 'release'
+        run: node .github/scripts/release-notes.mjs "${TAG#v}" > /dev/null
       - name: Write web config
         env:
           FIREBASE_CONFIG_JS: ${{ vars.FIREBASE_CONFIG_JS }}
@@ -79,6 +85,9 @@ jobs:
           fi
       - name: Deploy hosting and Firestore rules
         run: npx --yes firebase-tools@15 deploy --only hosting,firestore:rules --project buku-rekod --non-interactive --message "$TAG"
+      # A comment on the open release-log issue is the "it's live" email: the
+      # issue's author is notified of every comment. It carries this version's
+      # What's new entry, the same words the app shows on its What's new page.
       - name: Post to the Live releases issue
         env:
           GH_TOKEN: ${{ github.token }}
@@ -88,7 +97,11 @@ jobs:
             echo "::warning::No open issue labelled release-log, so no email was sent."
             exit 0
           fi
-          gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body "**$TAG is live** at https://buku-rekod.web.app
-
-          Release notes: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG
-          Deploy run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          notes="$(node .github/scripts/release-notes.mjs "${TAG#v}" || true)"
+          {
+            printf '**%s is live** at https://buku-rekod.web.app\n\n' "$TAG"
+            if [ -n "$notes" ]; then printf '%s\n\n' "$notes"; fi
+            printf 'Release notes: %s/%s/releases/tag/%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$TAG"
+            printf 'Deploy run: %s/%s/actions/runs/%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
+          } > "$RUNNER_TEMP/comment.md"
+          gh issue comment "$issue" --repo "$GITHUB_REPOSITORY" --body-file "$RUNNER_TEMP/comment.md"
