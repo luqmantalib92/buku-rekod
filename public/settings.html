@@ -48,7 +48,20 @@
         <p class="theme-hint" id="themeHint"></p>
       </section>
 
-      <p class="group-label">Vehicles</p>
+      <p class="group-label" id="vehiclesLabel">My vehicles</p>
+      <nav class="card list-card card-flush" aria-labelledby="vehiclesLabel">
+        <div id="settingsVehicleList" class="list-rows"></div>
+        <a href="./vehicle-form.html" class="list-row">
+          <span class="icon-tile icon-tile-sm"><i data-icon="plus"></i></span>
+          <span class="list-row-text">
+            <span class="list-row-title">Add vehicle</span>
+            <span class="list-row-sub">Name, plate, odometer and a photo</span>
+          </span>
+          <span class="list-row-end"><i data-icon="chevron-right"></i></span>
+        </a>
+      </nav>
+
+      <p class="group-label">Vehicle settings</p>
       <nav class="card list-card card-flush" aria-label="Vehicle settings">
         <a href="./categories.html" class="list-row">
           <span class="icon-tile icon-tile-sm"><i data-icon="wrench"></i></span>

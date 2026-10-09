@@ -27,24 +27,27 @@
     <main class="app-shell has-fab" id="appContent" hidden>
       <section class="topbar" data-shell="brand" data-title="Home" aria-label="Home"></section>
 
-      <div id="vehicleFilter" class="chips chips-scroll" role="group" aria-label="Filter by vehicle" hidden></div>
+      <div id="homeEmpty" class="empty-state" hidden>
+        <span class="icon-tile"><i data-icon="car"></i></span>
+        <p>Add your first vehicle to start building service logs.</p>
+        <button type="button" id="homeEmptyAction" class="primary-action"><i data-icon="plus"></i>Add vehicle</button>
+      </div>
 
-      <section class="stat-tiles" aria-label="Status summary">
-        <div class="stat-tile is-overdue">
-          <span class="icon-tile"><i data-icon="alert"></i></span>
-          <div><strong id="statOverdue">0</strong><span>Overdue</span></div>
-        </div>
-        <div class="stat-tile is-due-soon">
-          <span class="icon-tile"><i data-icon="clock"></i></span>
-          <div><strong id="statDueSoon">0</strong><span>Due soon</span></div>
-        </div>
-        <div class="stat-tile is-ok">
-          <span class="icon-tile"><i data-icon="check-circle"></i></span>
-          <div><strong id="statUpcoming">0</strong><span>Upcoming</span></div>
-        </div>
-      </section>
+      <div class="menu-wrap vehicle-picker" id="vehiclePicker" hidden>
+        <button type="button" id="vehiclePickerButton" class="vehicle-picker-btn" aria-haspopup="true" aria-expanded="false">
+          <span class="vehicle-picker-icon" aria-hidden="true"><i data-icon="car"></i></span>
+          <span class="vehicle-picker-text">
+            <span class="vehicle-picker-label">Vehicle</span>
+            <span class="vehicle-picker-name"><span id="vehiclePickerName"></span><span class="tag" id="vehiclePickerPlate" hidden></span></span>
+          </span>
+          <i data-icon="chevron-down" class="vehicle-picker-chevron"></i>
+        </button>
+        <div id="vehiclePickerMenu" class="menu vehicle-picker-menu" role="menu" aria-label="Choose vehicle" hidden></div>
+      </div>
 
-      <section class="card" aria-label="Service calendar">
+      <div id="vehicleSlot" aria-live="polite"></div>
+
+      <section class="card" id="calendarSection" aria-label="Service calendar">
         <div class="cal-head">
           <div class="cal-head-title">
             <h2 id="calTitle" class="cal-title" aria-live="polite">Month</h2>
@@ -68,23 +71,67 @@
         </div>
       </section>
 
-      <section class="section" aria-labelledby="scheduleHeading">
+      <section class="section" id="scheduleSection" aria-labelledby="scheduleHeading">
         <div class="section-head">
           <div>
             <h2 class="section-title" id="scheduleHeading">Upcoming &amp; due</h2>
-            <p class="section-sub" id="scheduleSub">What's coming up across your garage, most urgent first.</p>
+            <p class="section-sub" id="scheduleSub">What's coming up for this vehicle, most urgent first.</p>
           </div>
         </div>
         <div id="scheduleEmpty" class="empty-state" hidden>
           <span class="icon-tile"><i data-icon="calendar"></i></span>
-          <p id="scheduleEmptyText">Nothing scheduled. Add a next-service date to a record to start tracking what's next.</p>
-          <button type="button" id="scheduleEmptyAction" class="primary-action">Go to garage</button>
+          <p>Nothing scheduled. Add a next-service date to a record to start tracking what's next.</p>
         </div>
         <div id="scheduleList" class="due-list" aria-live="polite"></div>
       </section>
 
       <button type="button" id="fabAddRecord" class="fab"><i data-icon="plus"></i>Add record</button>
     </main>
+
+    <template id="vehicleCardTemplate">
+      <article class="card vehicle-card">
+        <div class="vehicle-card-top">
+          <button type="button" class="vehicle-open">
+            <span class="vehicle-thumb-wrap">
+              <i data-icon="car"></i>
+              <img class="vehicle-thumb" alt="" hidden />
+            </span>
+            <span class="vehicle-card-id">
+              <span class="vehicle-name"></span>
+              <span class="vehicle-idline">
+                <span class="tag vehicle-plate"></span>
+                <span class="vehicle-model"></span>
+              </span>
+              <span class="pill vehicle-due" hidden></span>
+            </span>
+          </button>
+          <div class="menu-wrap vehicle-actions">
+            <button type="button" class="menu-btn vehicle-menu-btn" aria-label="Vehicle actions" aria-haspopup="true" aria-expanded="false"><i data-icon="more"></i></button>
+            <div class="menu vehicle-menu" role="menu" hidden>
+              <button type="button" class="vehicle-odometer-update" role="menuitem"><i data-icon="gauge"></i>Update odometer</button>
+              <button type="button" class="vehicle-edit" role="menuitem"><i data-icon="pencil"></i>Edit details</button>
+              <button type="button" class="vehicle-delete is-danger" role="menuitem"><i data-icon="trash"></i>Delete vehicle</button>
+            </div>
+          </div>
+        </div>
+        <div class="vehicle-card-stats">
+          <div>
+            <span class="label-caps">Odometer</span>
+            <strong class="metric vehicle-odometer"></strong>
+          </div>
+          <div class="vehicle-last-wrap">
+            <span class="label-caps">Last service</span>
+            <strong class="vehicle-last"></strong>
+            <span class="vehicle-last-km"></span>
+          </div>
+        </div>
+        <p class="vehicle-card-foot vehicle-expiry" hidden><i data-icon="shield"></i><span class="vehicle-expiry-text"></span></p>
+        <div class="vehicle-card-actions">
+          <button type="button" class="tonal-action vehicle-log"><i data-icon="wrench"></i>Log service</button>
+          <button type="button" class="primary-action vehicle-view">Details<i data-icon="arrow-right"></i></button>
+        </div>
+      </article>
+    </template>
 
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>

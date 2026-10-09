@@ -1799,62 +1799,114 @@ input[type="checkbox"] {
 }
 
 /* ==========================================================================
-   Vehicles — Home (calendar + upcoming & due)
+   Vehicles — Home (vehicle picker, card, calendar + upcoming & due)
    ========================================================================== */
 
-.stat-tiles {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
+/* Dropdown that picks which vehicle Home shows. Reuses the ⋮ menu styles,
+   stretched to the button's width. */
+.vehicle-picker-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 8px 14px 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-1);
+  color: var(--ink);
+  text-align: left;
+  touch-action: manipulation;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
 }
 
-.stat-tile {
+.vehicle-picker-btn:hover,
+.vehicle-picker-btn[aria-expanded="true"] {
+  border-color: var(--line-strong);
+}
+
+.vehicle-picker-btn:focus-visible {
+  outline: 2px solid var(--primary-bright);
+  outline-offset: 2px;
+}
+
+.vehicle-picker-icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--tint);
+  color: var(--primary-ink);
+}
+
+.vehicle-picker-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.vehicle-picker-text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.vehicle-picker-label {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.vehicle-picker-name {
   display: flex;
   align-items: center;
   gap: 8px;
   min-width: 0;
-  padding: 10px;
-  border-radius: 12px;
-  background: var(--surface-2);
-}
-
-.stat-tile .icon-tile {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-}
-
-.stat-tile .icon-tile svg {
-  width: 16px;
-  height: 16px;
-}
-
-.stat-tile strong {
-  display: block;
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
-  line-height: 1.05;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-.stat-tile span {
-  display: block;
+.vehicle-picker-name > span:first-child,
+.vehicle-picker-item-name {
   overflow: hidden;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.stat-tile.is-overdue { background: var(--danger-fill); }
-.stat-tile.is-overdue .icon-tile { background: var(--danger-solid); color: #fff; }
-.stat-tile.is-overdue strong, .stat-tile.is-overdue span { color: var(--danger); }
-.stat-tile.is-due-soon .icon-tile { background: var(--warn-solid); color: #fff; }
-.stat-tile.is-ok .icon-tile { background: var(--ok-solid); color: #fff; }
+.vehicle-picker-chevron {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
+  transition: transform var(--dur) var(--ease);
+}
+
+.vehicle-picker-btn[aria-expanded="true"] .vehicle-picker-chevron {
+  transform: rotate(180deg);
+}
+
+.vehicle-picker-menu {
+  left: 0;
+  right: 0;
+  max-height: min(60vh, 360px);
+  overflow-y: auto;
+}
+
+.menu .vehicle-picker-item-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.menu button[aria-checked="true"],
+.menu button[aria-checked="true"] svg {
+  color: var(--primary-ink);
+}
 
 .cal-head {
   display: flex;
@@ -2073,23 +2125,8 @@ input[type="checkbox"] {
   gap: 8px;
 }
 
-.due-card-vehicle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 0;
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.due-card-vehicle > span:first-child {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .due-card-title {
+  min-width: 0;
   font-size: 17px;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -2114,46 +2151,8 @@ input[type="checkbox"] {
 }
 
 /* ==========================================================================
-   Vehicles — Garage
+   Vehicles — vehicle card (Home)
    ========================================================================== */
-
-.stat-pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-  padding: 14px;
-}
-
-.stat-card-label {
-  display: block;
-  color: var(--muted);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.stat-card strong {
-  display: block;
-  font-family: var(--font-display);
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-.vehicle-list {
-  display: grid;
-  gap: 16px;
-}
 
 .vehicle-card {
   padding: 0;
@@ -2930,7 +2929,8 @@ input[type="checkbox"] {
   transition: background var(--dur) var(--ease);
 }
 
-.list-row + .list-row {
+.list-row + .list-row,
+.list-rows:not(:empty) + .list-row {
   border-top: 1px solid var(--line);
 }
 
@@ -3542,11 +3542,6 @@ button.list-row {
   .vehicle-thumb-wrap {
     width: 76px;
     height: 64px;
-  }
-
-  .stat-tile {
-    flex-direction: column;
-    align-items: flex-start;
   }
 }
 

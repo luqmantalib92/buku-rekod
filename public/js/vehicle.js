@@ -37,8 +37,8 @@ function currentVehicleId() {
   return new URLSearchParams(window.location.search).get("id");
 }
 
-function goGarage() {
-  window.location.href = "./vehicles.html";
+function goHome() {
+  window.location.href = "./index.html";
 }
 
 function openRecordForm(recordId) {
@@ -316,10 +316,15 @@ async function toggleServiced(recordId) {
 function renderVehicle() {
   const vehicle = getVehicle(currentVehicleId());
   if (!vehicle) {
-    // Unknown / deleted vehicle — send the user back to the garage.
-    goGarage();
+    // Not in the offline copy — it may still be in the fresh data.
+    if (appState.useFirestore && !appState.synced) return;
+    // Unknown / deleted vehicle — send the user back Home.
+    goHome();
     return;
   }
+
+  // Opening a vehicle makes it the one Home shows.
+  selectVehicle(vehicle.id);
 
   document.title = `${vehicle.name || "Vehicle"} | Buku Rekod`;
   updateSummary(vehicle);
@@ -350,7 +355,7 @@ vehicleEls.updateOdometer.addEventListener("click", async () => {
 vehicleEls.emptyAddRecord.addEventListener("click", () => openRecordForm(null));
 vehicleEls.fabAddRecord.addEventListener("click", () => openRecordForm(null));
 
-setupBackButton("./vehicles.html");
+setupBackButton("./index.html");
 
 window.onPullRefresh = async () => {
   await refreshData();
@@ -358,4 +363,4 @@ window.onPullRefresh = async () => {
 };
 
 renderSkeletonCards(vehicleEls.recordList, 3);
-bootWithFallback(renderVehicle);
+bootWithFallback(renderVehicle, { cached: true });

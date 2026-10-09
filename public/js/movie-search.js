@@ -161,4 +161,4 @@ bootWithFallback(() => {
     setStatus("No TMDb API key set — add one in js/tmdb-config.js to search.", "error");
   }
   searchEls.input.focus();
-});
+}, { cached: true });

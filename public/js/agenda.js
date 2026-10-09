@@ -1,16 +1,23 @@
-/* Home page (index.html): status counts, a compact month calendar — today
-   marked and a status-coloured dot on each day that has something scheduled
-   (a record's next service, or road-tax / insurance expiry) — and the
-   "Upcoming & due" list below. With more than one vehicle a chip row filters
-   all three to a single vehicle. Reuses the reminder logic (vehicleReminders /
+/* Home page (index.html): one vehicle at a time. A dropdown at the top picks
+   the vehicle (remembered per device); under it sit that vehicle's card —
+   odometer, last service, most urgent item, ⋮ menu — a compact month
+   calendar with a status-coloured dot on each day that has something
+   scheduled (a record's next service, or road-tax / insurance expiry), and
+   the "Upcoming & due" list. Reuses the reminder logic (vehicleReminders /
    vehicleExpiries) from garage.store.js so the dots match the statuses shown
-   elsewhere. */
+   elsewhere. Adding a vehicle lives in Settings. */
 
 const homeEls = {
-  vehicleFilter: document.querySelector("#vehicleFilter"),
-  statOverdue: document.querySelector("#statOverdue"),
-  statDueSoon: document.querySelector("#statDueSoon"),
-  statUpcoming: document.querySelector("#statUpcoming"),
+  homeEmpty: document.querySelector("#homeEmpty"),
+  homeEmptyAction: document.querySelector("#homeEmptyAction"),
+  vehiclePicker: document.querySelector("#vehiclePicker"),
+  vehiclePickerButton: document.querySelector("#vehiclePickerButton"),
+  vehiclePickerName: document.querySelector("#vehiclePickerName"),
+  vehiclePickerPlate: document.querySelector("#vehiclePickerPlate"),
+  vehiclePickerMenu: document.querySelector("#vehiclePickerMenu"),
+  vehicleSlot: document.querySelector("#vehicleSlot"),
+  vehicleCardTemplate: document.querySelector("#vehicleCardTemplate"),
+  calendarSection: document.querySelector("#calendarSection"),
   calTitle: document.querySelector("#calTitle"),
   calToday: document.querySelector("#calToday"),
   calGrid: document.querySelector("#calGrid"),
@@ -19,11 +26,10 @@ const homeEls = {
   calDayDetail: document.querySelector("#calDayDetail"),
   calDayTitle: document.querySelector("#calDayTitle"),
   calDayList: document.querySelector("#calDayList"),
+  scheduleSection: document.querySelector("#scheduleSection"),
   scheduleList: document.querySelector("#scheduleList"),
   scheduleSub: document.querySelector("#scheduleSub"),
   scheduleEmpty: document.querySelector("#scheduleEmpty"),
-  scheduleEmptyText: document.querySelector("#scheduleEmptyText"),
-  scheduleEmptyAction: document.querySelector("#scheduleEmptyAction"),
   fabAddRecord: document.querySelector("#fabAddRecord")
 };
 
@@ -37,13 +43,10 @@ let viewYear;
 let viewMonth;
 let selectedKey = null;
 
-// Vehicle id the page is filtered to, or null for the whole garage. View
-// state only — never persisted.
-let filterVehicleId = null;
-
+// The selected vehicle as a list, so the collectors below stay generic.
 function visibleVehicles() {
-  if (!filterVehicleId) return state.vehicles;
-  return state.vehicles.filter((vehicle) => vehicle.id === filterVehicleId);
+  const vehicle = selectedVehicle();
+  return vehicle ? [vehicle] : [];
 }
 
 function pad2(n) {
@@ -65,17 +68,26 @@ function longDate(key) {
   return d.toLocaleDateString("en-MY", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
 }
 
-homeEls.scheduleEmptyAction.addEventListener("click", () => {
-  window.location.href = state.vehicles.length ? "./vehicles.html" : "./vehicle-form.html";
-});
+function openVehicle(id) {
+  window.location.href = `./vehicle.html?id=${encodeURIComponent(id)}`;
+}
 
-// Add record: straight to the form when it's clear which vehicle (one in the
-// garage, or the filter picked one); otherwise the garage to choose.
+function openRecordForm(id) {
+  window.location.href = `./record-form.html?vehicle=${encodeURIComponent(id)}`;
+}
+
+function openVehicleForm(id) {
+  const suffix = id ? `?id=${encodeURIComponent(id)}` : "";
+  window.location.href = `./vehicle-form.html${suffix}`;
+}
+
+homeEls.homeEmptyAction.addEventListener("click", () => openVehicleForm());
+
+// Add record for the vehicle on screen; with none yet, add a vehicle first.
 homeEls.fabAddRecord.addEventListener("click", () => {
-  const target = filterVehicleId ? getVehicle(filterVehicleId) : (state.vehicles.length === 1 ? state.vehicles[0] : null);
-  window.location.href = target
-    ? `./record-form.html?vehicle=${encodeURIComponent(target.id)}`
-    : (state.vehicles.length ? "./vehicles.html" : "./vehicle-form.html");
+  const vehicle = selectedVehicle();
+  if (vehicle) openRecordForm(vehicle.id);
+  else openVehicleForm();
 });
 
 // "in 12 day(s)" / "due today" / "3 day(s) overdue".
@@ -147,41 +159,29 @@ const STATUS_PILLS = {
   ok: { label: "On track", icon: "check-circle" }
 };
 
-// One "Upcoming & due" card: vehicle + plate, status pill, what's due, and
-// when. Links to the vehicle's logbook.
-function buildEventRow({ vehicleId, vehicleName, plate, title, meta, status = "ok" }) {
+// One "Upcoming & due" card: what's due, status pill, and when. Links to the
+// vehicle's logbook. Home shows one vehicle, so the card doesn't name it.
+function buildEventRow({ vehicleId, title, meta, status = "ok" }) {
   const link = document.createElement("a");
   link.className = `due-card is-${status}`;
   link.href = `./vehicle.html?id=${encodeURIComponent(vehicleId)}`;
 
   const top = document.createElement("div");
   top.className = "due-card-top";
-  const who = document.createElement("span");
-  who.className = "due-card-vehicle";
-  const name = document.createElement("span");
-  name.textContent = vehicleName;
-  who.append(name);
-  if (plate) {
-    const tag = document.createElement("span");
-    tag.className = "tag";
-    tag.textContent = plate;
-    who.append(tag);
-  }
+  const heading = document.createElement("h3");
+  heading.className = "due-card-title";
+  heading.textContent = title;
   const pillInfo = STATUS_PILLS[status] || STATUS_PILLS.ok;
   const pill = document.createElement("span");
   pill.className = `pill pill-${status}`;
   pill.append(iconNode(pillInfo.icon), pillInfo.label);
-  top.append(who, pill);
-
-  const heading = document.createElement("h3");
-  heading.className = "due-card-title";
-  heading.textContent = title;
+  top.append(heading, pill);
 
   const metaEl = document.createElement("p");
   metaEl.className = "due-card-meta";
   metaEl.append(iconNode(status === "ok" ? "calendar" : "alert"), meta || "");
 
-  link.append(top, heading, metaEl);
+  link.append(top, metaEl);
   return link;
 }
 
@@ -277,7 +277,7 @@ homeEls.calToday.addEventListener("click", () => {
   shiftMonth((today.getFullYear() - viewYear) * 12 + today.getMonth() - viewMonth);
 });
 
-// Every tracked service reminder + expiry across the garage, with status and
+// Every tracked service reminder + expiry for the vehicle, with status and
 // human meta. Unlike the calendar dots this also includes odometer-only
 // reminders that have no date to plot.
 function collectDue() {
@@ -313,68 +313,208 @@ function collectDue() {
 }
 
 // Upcoming & due: overdue first, then due soon, then upcoming — soonest first
-// within each. The same items feed the three status counters on top.
+// within each.
 function renderSchedule() {
   homeEls.scheduleList.replaceChildren();
   const items = collectDue().sort((a, b) =>
     STATUS_WEIGHT[b.status] - STATUS_WEIGHT[a.status] || urgency(a) - urgency(b));
 
-  const count = (status) => items.filter((item) => item.status === status).length;
-  homeEls.statOverdue.textContent = String(count("overdue"));
-  homeEls.statDueSoon.textContent = String(count("due-soon"));
-  homeEls.statUpcoming.textContent = String(count("ok"));
-
-  const urgent = count("overdue") + count("due-soon");
+  const urgent = items.filter((item) => item.status !== "ok").length;
   homeEls.scheduleSub.textContent = items.length
     ? (urgent ? `${urgent} item${urgent === 1 ? "" : "s"} need${urgent === 1 ? "s" : ""} attention, most urgent first.` : "All on track, soonest first.")
-    : "What's coming up across your garage, most urgent first.";
+    : "What's coming up for this vehicle, most urgent first.";
 
   for (const item of items) homeEls.scheduleList.append(buildEventRow(item));
-
   homeEls.scheduleEmpty.hidden = items.length > 0;
-  homeEls.scheduleEmptyText.textContent = state.vehicles.length
-    ? "Nothing scheduled. Add a next-service date to a record to start tracking what's next."
-    : "Add your first vehicle to start building service logs.";
-  homeEls.scheduleEmptyAction.textContent = state.vehicles.length ? "View garage" : "Add a vehicle";
 }
 
-// Vehicle filter chips — only worth showing with two or more vehicles.
-function renderVehicleFilter() {
-  const vehicles = [...state.vehicles].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-  if (filterVehicleId && !getVehicle(filterVehicleId)) filterVehicleId = null;
-  homeEls.vehicleFilter.hidden = vehicles.length < 2;
-  homeEls.vehicleFilter.replaceChildren();
-  if (vehicles.length < 2) return;
+/* ---- Vehicle picker ---- */
 
-  const makeChip = (id, children) => {
-    const chip = document.createElement("button");
-    chip.type = "button";
-    chip.className = "chip chip-sm";
-    chip.setAttribute("aria-pressed", String(filterVehicleId === id));
-    chip.append(...children);
-    chip.addEventListener("click", () => {
-      filterVehicleId = id;
-      selectedKey = null;
-      renderHome();
-    });
-    return chip;
-  };
+function closePicker() {
+  homeEls.vehiclePickerMenu.hidden = true;
+  homeEls.vehiclePickerButton.setAttribute("aria-expanded", "false");
+}
 
-  homeEls.vehicleFilter.append(makeChip(null, [iconNode("car"), `All vehicles (${vehicles.length})`]));
-  for (const vehicle of vehicles) {
-    const parts = [vehicle.name || "Unnamed vehicle"];
+function closeAllMenus() {
+  closePicker();
+  for (const menu of document.querySelectorAll(".vehicle-menu")) menu.hidden = true;
+  for (const btn of document.querySelectorAll(".vehicle-menu-btn")) btn.setAttribute("aria-expanded", "false");
+}
+
+homeEls.vehiclePickerButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  const willOpen = homeEls.vehiclePickerMenu.hidden;
+  closeAllMenus();
+  if (!willOpen) return;
+  homeEls.vehiclePickerMenu.hidden = false;
+  homeEls.vehiclePickerButton.setAttribute("aria-expanded", "true");
+  const current = homeEls.vehiclePickerMenu.querySelector('[aria-checked="true"]');
+  if (current) current.focus();
+});
+
+// Close any open menu on an outside click or Escape (registered once).
+document.addEventListener("click", closeAllMenus);
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") closeAllMenus();
+});
+
+function renderPicker(selected) {
+  homeEls.vehiclePickerName.textContent = selected.name || "Unnamed vehicle";
+  homeEls.vehiclePickerPlate.textContent = selected.plate || "";
+  homeEls.vehiclePickerPlate.hidden = !selected.plate;
+
+  homeEls.vehiclePickerMenu.replaceChildren();
+  for (const vehicle of sortedVehicles()) {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.setAttribute("role", "menuitemradio");
+    const on = vehicle.id === selected.id;
+    item.setAttribute("aria-checked", String(on));
+    const name = document.createElement("span");
+    name.className = "vehicle-picker-item-name";
+    name.textContent = vehicle.name || "Unnamed vehicle";
+    item.append(iconNode(on ? "check" : "car"), name);
     if (vehicle.plate) {
       const tag = document.createElement("span");
       tag.className = "tag";
       tag.textContent = vehicle.plate;
-      parts.push(tag);
+      item.append(tag);
     }
-    homeEls.vehicleFilter.append(makeChip(vehicle.id, parts));
+    item.addEventListener("click", () => {
+      selectVehicle(vehicle.id);
+      selectedKey = null;
+      closePicker();
+      renderHome();
+      homeEls.vehiclePickerButton.focus();
+    });
+    homeEls.vehiclePickerMenu.append(item);
   }
 }
 
+/* ---- Vehicle card ---- */
+
+async function deleteVehicle(id) {
+  const vehicle = getVehicle(id);
+  if (!vehicle) return;
+  const ok = await confirmDialog({
+    title: `Delete "${vehicle.name || "this vehicle"}"?`,
+    message: "The vehicle and all its service logs will be deleted. This can't be undone.",
+    confirmLabel: "Delete",
+    danger: true
+  });
+  if (!ok) return;
+  state.vehicles = state.vehicles.filter((item) => item.id !== id);
+  await persist();
+  renderHome();
+}
+
+// Short "when" for the card's status pill: "in 12 days", "820 km overdue"…
+function alertWhen(item) {
+  if (item.days !== null && item.days !== undefined) {
+    if (item.days < 0) return `${Math.abs(item.days)} day(s) overdue`;
+    if (item.days === 0) return "due today";
+    return `in ${item.days} day(s)`;
+  }
+  if (item.kmLeft !== null && item.kmLeft !== undefined) {
+    const km = Math.abs(item.kmLeft).toLocaleString("en-MY");
+    return item.kmLeft < 0 ? `${km} km overdue` : `in ${km} km`;
+  }
+  return "";
+}
+
+// The card's status pill: the most urgent thing, plus how many more.
+function fillDuePill(el, vehicle) {
+  const alerts = vehicleAlerts(vehicle);
+  const urgent = alerts.filter((item) => item.status !== "ok");
+  el.hidden = false;
+  if (!urgent.length) {
+    el.className = alerts.length ? "pill pill-ok vehicle-due" : "pill vehicle-due";
+    el.replaceChildren(iconNode("check-circle"), alerts.length ? "All on track" : "Nothing scheduled");
+    return;
+  }
+  const top = urgent[0];
+  const more = urgent.length > 1 ? ` +${urgent.length - 1}` : "";
+  el.className = `pill pill-${top.status} vehicle-due`;
+  el.replaceChildren(iconNode(top.status === "overdue" ? "alert" : "clock"), `${top.label} ${alertWhen(top)}${more}`);
+}
+
+// Footer line: the sooner of road tax / insurance, or hidden if neither set.
+function fillExpiryFoot(card, vehicle) {
+  const foot = card.querySelector(".vehicle-expiry");
+  const next = vehicleExpiries(vehicle).sort((a, b) => a.days - b.days)[0];
+  if (!next) return;
+  let when;
+  if (next.days < 0) when = `expired ${Math.abs(next.days)} day(s) ago`;
+  else if (next.days === 0) when = "expires today";
+  else when = `expires ${formatDate(next.date)} (${next.days} day(s))`;
+  foot.hidden = false;
+  foot.classList.add(`is-${next.status}`);
+  foot.querySelector(".vehicle-expiry-text").textContent = `${next.label} ${when}`;
+}
+
+function buildVehicleCard(vehicle) {
+  const card = homeEls.vehicleCardTemplate.content.firstElementChild.cloneNode(true);
+  const lastRecord = [...vehicle.records].sort((a, b) => b.date.localeCompare(a.date))[0];
+  const odometer = latestOdometer(vehicle);
+
+  const thumb = card.querySelector(".vehicle-thumb");
+  if (vehicle.image) {
+    thumb.src = vehicle.image;
+    thumb.hidden = false;
+  }
+
+  card.querySelector(".vehicle-name").textContent = vehicle.name || "Unnamed vehicle";
+  card.querySelector(".vehicle-plate").textContent = vehicle.plate || "No plate";
+  card.querySelector(".vehicle-model").textContent = vehicle.model || "";
+  renderKmMetric(card.querySelector(".vehicle-odometer"), odometer);
+  card.querySelector(".vehicle-last").textContent = lastRecord ? formatDate(lastRecord.date) : "No records";
+  card.querySelector(".vehicle-last-km").textContent = lastRecord && lastRecord.odometer ? `at ${formatKm(lastRecord.odometer)}` : "";
+
+  fillDuePill(card.querySelector(".vehicle-due"), vehicle);
+  fillExpiryFoot(card, vehicle);
+  const dueCount = vehicleDueCount(vehicle);
+
+  const dueSuffix = dueCount > 0 ? `, ${dueCount} service(s) due` : "";
+  const openBtn = card.querySelector(".vehicle-open");
+  openBtn.setAttribute("aria-label", `${vehicle.name || "Unnamed vehicle"}, view logs${dueSuffix}`);
+  openBtn.addEventListener("click", () => openVehicle(vehicle.id));
+  card.querySelector(".vehicle-view").addEventListener("click", () => openVehicle(vehicle.id));
+  card.querySelector(".vehicle-log").addEventListener("click", () => openRecordForm(vehicle.id));
+
+  // ⋮ menu: odometer / edit / delete.
+  const menuBtn = card.querySelector(".vehicle-menu-btn");
+  const menu = card.querySelector(".vehicle-menu");
+  menuBtn.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const willOpen = menu.hidden;
+    closeAllMenus();
+    if (willOpen) {
+      menu.hidden = false;
+      menuBtn.setAttribute("aria-expanded", "true");
+    }
+  });
+  card.querySelector(".vehicle-odometer-update").addEventListener("click", async () => {
+    const saved = await promptOdometerUpdate(vehicle.id);
+    if (saved) renderHome();
+  });
+  card.querySelector(".vehicle-edit").addEventListener("click", () => openVehicleForm(vehicle.id));
+  card.querySelector(".vehicle-delete").addEventListener("click", () => deleteVehicle(vehicle.id));
+
+  return card;
+}
+
 function renderHome() {
-  renderVehicleFilter();
+  const vehicle = selectedVehicle();
+  homeEls.homeEmpty.hidden = Boolean(vehicle);
+  homeEls.vehiclePicker.hidden = !vehicle;
+  homeEls.calendarSection.hidden = !vehicle;
+  homeEls.scheduleSection.hidden = !vehicle;
+  homeEls.fabAddRecord.hidden = !vehicle;
+  homeEls.vehicleSlot.replaceChildren();
+  if (!vehicle) return;
+
+  renderPicker(vehicle);
+  homeEls.vehicleSlot.append(buildVehicleCard(vehicle));
   renderCalendar();
   renderSchedule();
 }
@@ -385,19 +525,19 @@ window.onPullRefresh = async () => {
 };
 
 // App-shortcut deep links (manifest shortcuts land on index.html?action=…).
-// With a single vehicle the action runs directly; otherwise the home screen
-// shows as usual. The param is stripped so a reload doesn't repeat the action.
+// The action runs on the selected vehicle. The param is stripped so a reload
+// (or the second render once fresh data lands) doesn't repeat it.
 async function handleShortcutAction() {
   const action = new URLSearchParams(window.location.search).get("action");
   if (!action) return;
   window.history.replaceState(null, "", window.location.pathname);
-  if (state.vehicles.length !== 1) {
-    if (action === "add-record") window.location.href = "./vehicles.html";
+  const vehicle = selectedVehicle();
+  if (!vehicle) {
+    if (action === "add-record") openVehicleForm();
     return;
   }
-  const vehicle = state.vehicles[0];
   if (action === "add-record") {
-    window.location.href = `./record-form.html?vehicle=${encodeURIComponent(vehicle.id)}`;
+    openRecordForm(vehicle.id);
   } else if (action === "update-odometer") {
     const saved = await promptOdometerUpdate(vehicle.id);
     if (saved) renderHome();
@@ -408,7 +548,8 @@ const now = new Date();
 viewYear = now.getFullYear();
 viewMonth = now.getMonth();
 
+renderSkeletonCards(homeEls.vehicleSlot, 1);
 bootWithFallback(() => {
   renderHome();
   handleShortcutAction();
-});
+}, { cached: true });

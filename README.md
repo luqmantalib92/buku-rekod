@@ -16,12 +16,12 @@ straight on the vehicle service calendar.
 
 ### Vehicles
 
-- **Home** (`index.html`): a month calendar of what's scheduled — a dot per day, red for overdue, amber for due soon — with an "Upcoming & due" list underneath.
-- **Garage** (`vehicles.html`): add and list vehicles; each card shows odometer, last service, and a "due" badge.
+- **Home** (`index.html`): one vehicle at a time, picked from a dropdown at the top (remembered per device in `localStorage` key `buku-rekod:selected-vehicle`). Under it: the vehicle's card (odometer, last service, most urgent item, ⋮ menu), a month calendar of what's scheduled — a dot per day, red for overdue, amber for due soon — and an "Upcoming & due" list.
+- **Settings → My vehicles**: every vehicle (each opens its logbook) and **Add vehicle**. The bottom bar is just Home and Settings; `vehicles.html` redirects to Home.
 - **Vehicle logbook** (`vehicle.html?id=<id>`): add/edit/delete a vehicle and its service records.
 - **Categorized services**: each record is tagged to a category (Engine & oil, Brakes & fluids, Electrical & wear, Tyres & alignment, Other) with quick-pick item chips.
 - **Reminders**: per-category due dates with overdue / due-soon status, and a configurable lead time per category (its own Reminder settings page). Reminders also watch the odometer — a record's next-service km can make it due, not just the date.
-- **Quick odometer update**: log your current km from the vehicle page or the garage card's ⋮ menu, no service record needed.
+- **Quick odometer update**: log your current km from the vehicle page or the Home card's ⋮ menu, no service record needed.
 - **Road tax & insurance**: per-vehicle expiry dates with a warning 30 days before they lapse.
 
 ### Movies
@@ -38,6 +38,7 @@ straight on the vehicle service calendar.
 - **Theme**: Settings → Appearance picks System (follows `prefers-color-scheme`), Light or Dark. `js/theme.js` loads in every page's `<head>` so the choice applies before first paint; it's stored per device in `localStorage` key `theme:v1`.
 - Login on a separate page (`login.html`) via Firebase Authentication.
 - Data lives in `localStorage` and syncs to Firestore once configured.
+- **Cache-first loading**: when signed in, the last synced copy of each store is kept in `localStorage` (`<localKey>:cache`, tagged with the uid, cleared on sign out). View pages boot with `bootWithFallback(render, { cached: true })`, render that copy immediately, then render again once Firestore answers; forms wait for fresh data but fall back to the copy offline. A save made before the fresh data lands wins over it. Page navigations fall back to the cached HTML after 2.5 s on a slow network.
 - **Backup & restore** (Settings): export every mini app's data to one JSON file and load it back. Restoring writes to whichever account is signed in, so it doubles as the way to move between devices or Firebase projects.
 
 ## Project structure

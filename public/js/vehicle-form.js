@@ -1,5 +1,5 @@
 /* Vehicle create / edit page.
-   - vehicle-form.html            → create a new vehicle (returns to garage)
+   - vehicle-form.html            → create a new vehicle (returns Home, showing it)
    - vehicle-form.html?id=<id>    → edit that vehicle (returns to its logbook) */
 
 const formEls = {
@@ -24,7 +24,7 @@ const formEls = {
 const IMAGE_HINT_DEFAULT = "JPG or PNG, up to 15 MB. It's auto-compressed before saving.";
 
 const editId = new URLSearchParams(window.location.search).get("id");
-const returnHref = editId ? `./vehicle.html?id=${encodeURIComponent(editId)}` : "./vehicles.html";
+const returnHref = editId ? `./vehicle.html?id=${encodeURIComponent(editId)}` : "./index.html";
 
 let imageData = "";   // data URL of the chosen/existing photo ("" = none)
 let dirty = false;    // unsaved changes present?
@@ -50,7 +50,7 @@ function showImage() {
   }
 }
 
-// After a successful save: go to the vehicle/garage and replace the form in
+// After a successful save: go to the vehicle / Home and replace the form in
 // history so pressing back doesn't return into the form we just submitted.
 function leave() {
   dirty = false;
@@ -76,8 +76,8 @@ function initForm() {
   if (editId) {
     const vehicle = getVehicle(editId);
     if (!vehicle) {
-      // Unknown / deleted vehicle — bounce back to the garage.
-      window.location.href = "./vehicles.html";
+      // Unknown / deleted vehicle — bounce back Home.
+      window.location.href = "./index.html";
       return;
     }
     document.title = `Edit ${vehicle.name || "vehicle"} | Buku Rekod`;
@@ -142,7 +142,7 @@ formEls.vehicleForm.addEventListener("submit", async (event) => {
   if (editId) {
     const vehicle = getVehicle(editId);
     if (!vehicle) {
-      window.location.href = "./vehicles.html";
+      window.location.href = "./index.html";
       return;
     }
     vehicle.name = name;
@@ -153,8 +153,10 @@ formEls.vehicleForm.addEventListener("submit", async (event) => {
     vehicle.insuranceExpiry = insuranceExpiry;
     vehicle.image = imageData;
   } else {
+    const id = makeId();
+    selectVehicle(id);
     state.vehicles.push(normalizeVehicle({
-      id: makeId(),
+      id,
       name,
       plate,
       odometer,

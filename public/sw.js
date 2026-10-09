@@ -3,7 +3,8 @@
    localStorage — only static files are cached here.
 
    Strategy:
-   - page navigations  → network first, cached page as offline fallback
+   - page navigations  → network first, but the cached page if the network
+                         takes longer than NAV_TIMEOUT_MS (or is offline)
    - same-origin files → stale-while-revalidate (serve cache, refresh behind)
    - Firebase SDK (gstatic, versioned URLs) → cache first
    - TMDb posters     → cache first, in a cache that survives version bumps
@@ -24,7 +25,6 @@ const POSTER_CACHE_MAX = 300;
 const SHELL = [
   "./",
   "./index.html",
-  "./vehicles.html",
   "./vehicle.html",
   "./vehicle-form.html",
   "./record-form.html",
@@ -50,7 +50,6 @@ const SHELL = [
   "./js/movie-search.js",
   "./js/backup.js",
   "./js/auth.js",
-  "./js/garage.js",
   "./js/agenda.js",
   "./js/vehicle.js",
   "./js/vehicle-form.js",
@@ -87,15 +86,38 @@ self.addEventListener("activate", (event) => {
   })());
 });
 
-async function networkFirst(request) {
+// On a slow connection, waiting the full round trip for a page is what makes
+// the app feel stuck — after this long the cached copy is served instead,
+// and the network response still refreshes the cache for next time.
+const NAV_TIMEOUT_MS = 2500;
+
+async function networkFirst(event) {
+  const { request } = event;
   const cache = await caches.open(CACHE_NAME);
-  try {
-    const response = await fetch(request);
-    if (response.ok) cache.put(request, response.clone());
+  const network = fetch(request).then((response) => {
+    // Pages don't vary by query string (vehicle.html?id=…), so store them
+    // without it and one cached copy serves every id.
+    if (response.ok) return cache.put(stripSearch(request.url), response.clone()).then(() => response);
     return response;
-  } catch {
-    return (await cache.match(request)) || (await cache.match("./index.html")) || Response.error();
+  });
+  event.waitUntil(network.catch(() => {}));
+
+  const cached = await cache.match(request, { ignoreSearch: true });
+  if (!cached) {
+    try {
+      return await network;
+    } catch {
+      return (await cache.match("./index.html")) || Response.error();
+    }
   }
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(cached), NAV_TIMEOUT_MS));
+  return Promise.race([network.catch(() => cached), timeout]);
+}
+
+function stripSearch(url) {
+  const clean = new URL(url);
+  clean.search = "";
+  return clean.href;
 }
 
 async function staleWhileRevalidate(request) {
@@ -181,7 +203,7 @@ self.addEventListener("fetch", (event) => {
   if (url.origin !== location.origin) return;
 
   if (request.mode === "navigate") {
-    event.respondWith(networkFirst(request));
+    event.respondWith(networkFirst(event));
   } else {
     event.respondWith(staleWhileRevalidate(request));
   }
