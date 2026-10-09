@@ -38,7 +38,7 @@ let dirty = false;
 // history so pressing back doesn't return into the form we just submitted.
 function leave() {
   dirty = false;
-  window.location.replace(vehicleId ? returnHref : "./vehicles.html");
+  window.location.replace(vehicleId ? returnHref : "./index.html");
 }
 
 // Cancel / discard: return to wherever we came from.
@@ -53,7 +53,7 @@ async function tryLeave() {
     if (!ok) return;
   }
   dirty = false;
-  goBack(vehicleId ? returnHref : "./vehicles.html");
+  goBack(vehicleId ? returnHref : "./index.html");
 }
 
 // Categories live in a (visually hidden) <select> so the form data and
@@ -183,7 +183,7 @@ function initForm() {
   const vehicle = getVehicle(vehicleId);
   if (!vehicle) {
     // Unknown / missing vehicle — nothing to log against.
-    window.location.href = "./vehicles.html";
+    window.location.href = "./index.html";
     return;
   }
 
@@ -318,7 +318,7 @@ recordEls.serviceForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const vehicle = getVehicle(vehicleId);
   if (!vehicle) {
-    window.location.href = "./vehicles.html";
+    window.location.href = "./index.html";
     return;
   }
 
@@ -351,7 +351,7 @@ recordEls.serviceForm.addEventListener("submit", async (event) => {
 });
 
 recordEls.cancel.addEventListener("click", tryLeave);
-setupBackButton(() => (vehicleId ? returnHref : "./vehicles.html"), () => dirty);
+setupBackButton(() => (vehicleId ? returnHref : "./index.html"), () => dirty);
 
 window.addEventListener("beforeunload", (event) => {
   if (dirty) {

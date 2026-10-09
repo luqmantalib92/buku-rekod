@@ -1,9 +1,10 @@
-/* Settings page: profile (email + sign out), the theme picker, and links to
-   the manage pages. Sign out is wired in core.js; email/status are filled by
+/* Settings page: profile (email + sign out), the theme picker, your vehicles
+   (each opens its logbook) with Add vehicle, and links to the manage pages. Sign out is wired in core.js; email/status are filled by
    revealShell; the theme itself lives in theme.js. */
 
 const settingsEls = {
   profileAvatar: document.querySelector("#profileAvatar"),
+  vehicleList: document.querySelector("#settingsVehicleList"),
   themeChoice: document.querySelector("#themeChoice"),
   themeHint: document.querySelector("#themeHint")
 };
@@ -36,11 +37,43 @@ window.addEventListener("storage", renderThemeChoice);
 
 renderThemeChoice();
 
+// One row per vehicle, linking to its logbook.
+function renderVehicleRows() {
+  settingsEls.vehicleList.replaceChildren();
+  for (const vehicle of sortedVehicles()) {
+    const row = document.createElement("a");
+    row.className = "list-row";
+    row.href = `./vehicle.html?id=${encodeURIComponent(vehicle.id)}`;
+
+    const tile = document.createElement("span");
+    tile.className = "icon-tile icon-tile-sm";
+    tile.append(iconNode("car"));
+
+    const text = document.createElement("span");
+    text.className = "list-row-text";
+    const title = document.createElement("span");
+    title.className = "list-row-title";
+    title.textContent = vehicle.name || "Unnamed vehicle";
+    const sub = document.createElement("span");
+    sub.className = "list-row-sub";
+    sub.textContent = [vehicle.plate, vehicle.model].filter(Boolean).join(" · ") || "No plate";
+    text.append(title, sub);
+
+    const end = document.createElement("span");
+    end.className = "list-row-end";
+    end.append(iconNode("chevron-right"));
+
+    row.append(tile, text, end);
+    settingsEls.vehicleList.append(row);
+  }
+}
+
 function initSettings() {
   const email = (appState.user && appState.user.email) || "";
   if (settingsEls.profileAvatar) {
     settingsEls.profileAvatar.textContent = email ? email.trim().charAt(0).toUpperCase() : "·";
   }
+  renderVehicleRows();
 }
 
 // Settings is a top-level tab (bottom nav), so there's no back button — the
@@ -51,4 +84,4 @@ window.onPullRefresh = async () => {
   initSettings();
 };
 
-bootWithFallback(initSettings);
+bootWithFallback(initSettings, { cached: true });

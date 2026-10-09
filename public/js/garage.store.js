@@ -157,6 +157,26 @@ function getVehicle(id) {
   return state.vehicles.find((vehicle) => vehicle.id === id) || null;
 }
 
+// Vehicles in display order (by name).
+function sortedVehicles() {
+  return [...state.vehicles].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+}
+
+/* The vehicle Home is showing. Remembered per device (it's a view choice,
+   not data), falling back to the first vehicle when unset or deleted. */
+
+const SELECTED_VEHICLE_KEY = "buku-rekod:selected-vehicle";
+
+function selectedVehicle() {
+  let id = null;
+  try { id = localStorage.getItem(SELECTED_VEHICLE_KEY); } catch { /* not critical */ }
+  return (id && getVehicle(id)) || sortedVehicles()[0] || null;
+}
+
+function selectVehicle(id) {
+  try { localStorage.setItem(SELECTED_VEHICLE_KEY, id); } catch { /* not critical */ }
+}
+
 function latestOdometer(vehicle) {
   return Math.max(
     Number(vehicle.odometer || 0),

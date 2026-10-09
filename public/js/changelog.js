@@ -3,6 +3,17 @@
 
 const CHANGELOG = [
   {
+    version: "2.2.0",
+    date: "2026-10-09",
+    notes: [
+      "Home now shows one vehicle at a time. Pick which one from the dropdown at the top; the app remembers your choice on each device.",
+      "The vehicle's card (odometer, last service, what's due next, Log service and Details) now sits on Home, above the calendar, which only shows that vehicle's dates.",
+      "The Vehicles tab is gone, so the bottom bar is just Home and Settings. Add a vehicle, or open any of your vehicles, from Settings → My vehicles.",
+      "The overdue / due soon / upcoming counts at the top of Home have been removed.",
+      "The app opens faster: it shows your data from last time straight away and updates it once the latest copy has loaded. It also keeps working with that data when you're offline."
+    ]
+  },
+  {
     version: "2.1.0",
     date: "2026-10-02",
     notes: [

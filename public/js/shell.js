@@ -107,6 +107,9 @@ hydrateIcons();
 // so they light this tab rather than Home.
 const SETTINGS_TAB = { key: "settings", label: "Settings", href: "./settings.html", icon: "gear", pages: ["categories.html", "reminders.html"] };
 
+// Vehicles has just Home + Settings: Home shows one vehicle at a time, and
+// adding a vehicle lives in Settings.
+
 const APPS = [
   {
     key: "garage",
@@ -114,10 +117,9 @@ const APPS = [
     tagline: "Service log & reminders",
     href: "./index.html",
     icon: "car",
-    pages: ["index.html", "", "vehicles.html", "vehicle.html", "vehicle-form.html", "record-form.html", "categories.html", "reminders.html"],
+    pages: ["index.html", "", "vehicle.html", "vehicle-form.html", "record-form.html", "categories.html", "reminders.html"],
     tabs: [
-      { key: "home", label: "Home", href: "./index.html", pages: ["index.html", ""], icon: "home" },
-      { key: "vehicles", label: "Vehicles", href: "./vehicles.html", pages: ["vehicles.html", "vehicle.html", "vehicle-form.html", "record-form.html"], icon: "car" },
+      { key: "home", label: "Home", href: "./index.html", pages: ["index.html", "", "vehicle.html", "vehicle-form.html", "record-form.html"], icon: "home" },
       SETTINGS_TAB
     ]
   },
@@ -290,7 +292,7 @@ function buildLauncher() {
 /* ---- Bottom tab bar ----
    Built once and appended inside the app shell so it hides with #appContent
    while loading. Tabs come from the current mini app; detail/sub pages light
-   up their parent tab (e.g. a vehicle's logbook highlights Vehicles). */
+   up their parent tab (e.g. a vehicle's logbook highlights Home). */
 
 (function buildBottomNav() {
   const shell = document.querySelector(".app-shell");

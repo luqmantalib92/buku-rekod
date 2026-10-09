@@ -165,4 +165,4 @@ window.onPullRefresh = async () => {
 };
 
 renderSkeletonCards(moviesEls.list, 3);
-bootWithFallback(renderWatchlist);
+bootWithFallback(renderWatchlist, { cached: true });

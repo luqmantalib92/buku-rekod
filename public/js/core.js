@@ -13,7 +13,9 @@ const appState = {
   auth: null,
   db: null,
   dataRef: null,
-  useFirestore: false
+  useFirestore: false,
+  localEdits: false,  // saved since boot — see persist()
+  synced: false       // fresh data has landed (false while showing the offline copy)
 };
 
 function hasFirebaseConfig() {
@@ -120,6 +122,7 @@ async function writeStoreData(store, data) {
     const ref = storeDocRef(store);
     if (!ref) throw new Error("Not signed in.");
     await ref.set({ ...data, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    writeCache(store, data);
     return;
   }
   localStorage.setItem(store.localKey, JSON.stringify(data));
@@ -144,10 +147,65 @@ function saveLocal() {
   localStorage.setItem(store.localKey, JSON.stringify(store.serialize()));
 }
 
+/* ---- Offline copy of synced data ----
+
+   When signed in, the last data this device saw for each store is kept in
+   localStorage under "<localKey>:cache", tagged with the uid it belongs to.
+   Pages render from it straight away instead of waiting for auth + Firestore,
+   then re-render once the fresh copy lands. It's also the fallback when the
+   Firestore fetch fails (offline). Cleared on sign out. */
+
+const CACHE_SUFFIX = ":cache";
+
+function cacheKey(store) {
+  return `${store.localKey}${CACHE_SUFFIX}`;
+}
+
+function writeCache(store, data) {
+  if (!appState.user) return;
+  try {
+    localStorage.setItem(cacheKey(store), JSON.stringify({
+      uid: appState.user.uid,
+      email: appState.user.email || "",
+      data
+    }));
+  } catch { /* storage full or blocked — the cache is only a speed-up */ }
+}
+
+// { uid, email, data } or null.
+function readCache(store) {
+  try {
+    const cached = JSON.parse(localStorage.getItem(cacheKey(store)) || "null");
+    return cached && cached.uid && cached.data ? cached : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearCaches() {
+  try {
+    for (const key of Object.keys(localStorage)) {
+      if (key.endsWith(CACHE_SUFFIX)) localStorage.removeItem(key);
+    }
+  } catch { /* nothing to clear */ }
+}
+
+// Resolves once the signed-in user's data has been fetched (or the fetch has
+// failed), so a save made while cached data is on screen waits for auth.
+let resolveSynced;
+const synced = new Promise((resolve) => {
+  resolveSynced = () => {
+    appState.synced = true;
+    resolve();
+  };
+});
+
 async function loadRemoteData() {
   if (!appState.dataRef) return;
   const snapshot = await appState.dataRef.get();
-  requireStore().ingest(snapshot.exists ? snapshot.data() : {});
+  const store = requireStore();
+  store.ingest(snapshot.exists ? snapshot.data() : {});
+  writeCache(store, store.serialize());
 }
 
 // Re-pull the latest data (used by pull-to-refresh). The caller re-renders.
@@ -160,11 +218,18 @@ async function refreshData() {
 }
 
 async function persist() {
+  // A change made on top of cached data wins over the fetch still in flight
+  // (initStore won't ingest over it) — same last-write-wins as any save.
+  appState.localEdits = true;
+  if (appState.useFirestore && !appState.dataRef) await synced;
   if (appState.useFirestore && appState.dataRef) {
+    const store = requireStore();
+    const data = store.serialize();
     await appState.dataRef.set({
-      ...requireStore().serialize(),
+      ...data,
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     });
+    writeCache(store, data);
   } else {
     saveLocal();
   }
@@ -363,6 +428,7 @@ async function signOut() {
   });
   if (!ok) return;
   if (appState.auth) await appState.auth.signOut();
+  clearCaches();
   window.location.replace("./login.html");
 }
 
@@ -499,8 +565,13 @@ function renderSkeletonCards(container, count = 3) {
  * Boot the active store, then call onReady() once its data is available.
  * Redirects to the login page when Firebase is configured but no user is
  * signed in. Falls back to local storage if Firebase is unavailable.
+ *
+ * With { cached: true } a page that's signed in on this device renders from
+ * the offline copy immediately, and onReady() runs a second time when the
+ * fresh data arrives — so only pass it when onReady() is a pure re-render
+ * (not a form that would be refilled under the user's typing).
  */
-async function initStore(onReady) {
+async function initStore(onReady, options = {}) {
   const store = requireStore();
 
   if (!hasFirebaseConfig()) {
@@ -516,14 +587,30 @@ async function initStore(onReady) {
   appState.db = firebase.firestore();
   appState.useFirestore = true;
 
+  const cached = readCache(store);
+  let shownCached = false;
+  if (options.cached && cached) {
+    store.ingest(cached.data);
+    revealShell(true, cached.email || "Signed in");
+    shownCached = true;
+    onReady();
+  }
+
   appState.auth.onAuthStateChanged(async (user) => {
     appState.user = user;
-    store.reset();
 
     if (!user) {
       appState.dataRef = null;
+      clearCaches();
       window.location.replace("./login.html");
       return;
+    }
+
+    // The offline copy belongs to someone else — never show or save over it.
+    const cacheIsMine = cached && cached.uid === user.uid;
+    if (!shownCached || !cacheIsMine) {
+      store.reset();
+      appState.localEdits = false;
     }
 
     appState.dataRef = store.docPath(user.uid).reduce(
@@ -534,19 +621,27 @@ async function initStore(onReady) {
     // can never leave the loading spinner stuck. Data renders when it lands.
     revealShell(true, user.email || "Signed in");
     try {
-      await loadRemoteData();
+      const snapshot = await appState.dataRef.get();
+      if (!appState.localEdits) {
+        store.ingest(snapshot.exists ? snapshot.data() : {});
+        writeCache(store, store.serialize());
+      }
     } catch (error) {
       console.error(error);
+      // Offline: carry on with the last copy this device saw.
+      if (cacheIsMine && !shownCached && !appState.localEdits) store.ingest(cached.data);
     }
+    resolveSynced();
     onReady();
   });
 }
 
 // Local fallback shared by every page when initStore rejects.
-function bootWithFallback(onReady) {
-  initStore(onReady).catch((error) => {
+function bootWithFallback(onReady, options) {
+  initStore(onReady, options).catch((error) => {
     console.error(error);
     appState.useFirestore = false;
+    resolveSynced();
     loadLocal();
     revealShell(false, null);
     onReady();

@@ -10,6 +10,9 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "redirects": [
+      { "source": "/vehicles.html", "destination": "/index.html", "type": 301 }
+    ],
     "headers": [
       {
         "source": "**/*.@(js|css|html)",

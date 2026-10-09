@@ -2,7 +2,7 @@
    injected as plain text into any element with the .app-version class.
    Also imported by the service worker (importScripts) for its cache name,
    so everything below is guarded to only run in pages. */
-const APP_VERSION = "2.1.0";
+const APP_VERSION = "2.2.0";
 
 if (typeof document !== "undefined") {
   for (const el of document.querySelectorAll(".app-version")) {
